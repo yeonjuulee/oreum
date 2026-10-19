@@ -1,0 +1,115 @@
+<!doctype html>
+<html lang="ko">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>oreum · 가볍게 시작해오름</title>
+<meta name="description" content="작은 움직임이, 다시 세상으로. 고립·은둔 청년이 지금의 상태에 맞는 아주 작은 행동부터 시작하도록 돕는 서비스 오름">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Syncopate:wght@400;700&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/orioncactus/pretendard@v1.3.9/dist/web/variable/pretendardvariable-dynamic-subset.min.css">
+<link rel="stylesheet" href="style.css">
+</head>
+<body data-page="home">
+
+<!-- HERO : 스크롤로 한 줄씩 넘어가는 방 안 장면 -->
+<section class="hero" id="top" data-hero>
+  <div class="hero__stick">
+    <div class="aurora">
+      <i class="blob o" style="width:620px;height:620px;right:-8%;top:-10%"></i>
+      <i class="blob a" style="width:420px;height:420px;right:24%;bottom:-16%;animation-delay:-6s"></i>
+      <i class="blob c" style="width:320px;height:320px;left:-6%;bottom:6%;opacity:.35;animation-delay:-3s"></i>
+    </div>
+    <div class="wrap hero__grid">
+      <div class="hero__text" aria-live="polite">
+        <p class="hero__line on" data-line>오늘도,<br>방 안에 있습니다.</p>
+        <p class="hero__line" data-line>밖으로 나가는 것이<br>점점 어려워졌습니다.</p>
+        <p class="hero__line" data-line>괜찮다고 말하기엔 조금 지쳤고,<br>도와달라고 말하기엔 <em>조금 어색해요.</em></p>
+        <p class="hero__line" data-line>그래도 창문 너머에는,<br>여전히 <em>햇살</em>이 있어요.</p>
+      </div>
+
+      <div class="room" id="room" style="--blind:0">
+        <div class="room__glow"></div>
+        <div class="window">
+          <div class="window__sky"></div>
+          <div class="window__sun"></div>
+          <div class="blind" id="blind">
+            <button class="blind__handle" id="blindHandle" aria-label="블라인드 손잡이: 위로 끌어올려 보세요"></button>
+          </div>
+          <div class="window__bars"></div>
+        </div>
+        <div class="bed">
+          <div class="bed__frame"></div>
+          <div class="bed__mattress"></div>
+          <div class="bed__pillow"></div>
+          <img class="room__char" id="roomChar" src="assets/char/rest.png" alt="침대 위에 웅크린 오르미">
+          <div class="bed__blanket"></div>
+        </div>
+      </div>
+    </div>
+    <div class="hero__dots" id="heroDots"><i class="on"></i><i></i><i></i><i></i></div>
+    <div class="hero__hint"><span>스크롤 또는 Enter 로 이야기를 넘겨보세요</span><span>↑ 블라인드 손잡이를 잡고 위로 끌어올려 보세요</span><i></i></div>
+  </div>
+</section>
+
+<div class="marquee sec--dark2" aria-hidden="true">
+  <div class="marquee__track">
+    <span>가볍게 시작해오름</span><span>작은 움직임이, 다시 세상으로</span><span>oreum</span><span>한 계단씩, 하루 1개 미션</span>
+    <span>가볍게 시작해오름</span><span>작은 움직임이, 다시 세상으로</span><span>oreum</span><span>한 계단씩, 하루 1개 미션</span>
+  </div>
+</div>
+
+<!-- 핵심 한 줄 -->
+<section class="sec sec--dark">
+  <div class="aurora">
+    <div class="grainy" style="width:760px;height:760px;left:-14%;top:-10%"><i class="ring" style="--s:100%;width:100%;--t:120px;--a:30deg"></i></div>
+    <i class="blob o" style="width:420px;height:420px;right:-6%;bottom:-10%;opacity:.4"></i>
+  </div>
+  <div class="wrap stat-split">
+    <div>
+      <div class="eyebrow rv">그런데, 꼭 알아주셨으면 하는 것</div>
+      <h2 class="h1 rv d1">방 안에 있는<br>청년의 <span class="hl"><span data-count="80.8" data-dec="1">0</span>%</span>는<br>벗어나고 싶다고<br>말해요</h2>
+    </div>
+    <div class="rv d2">
+      <p class="lead">게을러서가 아니라, 다시 시작할 <b style="color:var(--ink)">첫 계단</b>이 보이지 않았던 거예요. 필요한 도움으로는 혼자 하는 활동(81.7%)과 일상생활 회복(80.7%)을 꼽았어요.</p>
+      <p class="cite">보건복지부·한국보건사회연구원, 「고립·은둔 청년 실태조사 연구」(2023)</p>
+      <div style="margin-top:34px"><a class="btn btn--ghost" href="story.html">이야기 읽어보기
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12h14M13 6l6 6-6 6"/></svg></a></div>
+    </div>
+  </div>
+</section>
+
+<!-- 메뉴 리스트 -->
+<section class="sec sec--dark2">
+  <div class="aurora"><i class="blob p" style="width:460px;height:460px;left:40%;top:10%;opacity:.16"></i></div>
+  <div class="wrap">
+    <div class="eyebrow rv">Explore</div>
+    <div class="link-list rv d1">
+      <a class="link-row" href="story.html"><span class="num">01</span><span class="ttl">STORY</span><span class="dsc">방 안의 하루, 왜 작은 움직임인가</span><img src="assets/char/rest.png" alt=""></a>
+      <a class="link-row" href="service.html"><span class="num">02</span><span class="ttl">SERVICE</span><span class="dsc">오늘의 미션과 오르미의 변화</span><img src="assets/char/hello.png" alt=""></a>
+      <a class="link-row" href="support.html"><span class="num">03</span><span class="ttl">SUPPORT</span><span class="dsc">리워드와 함께 만드는 운영 구조</span><img src="assets/char/cheer.png" alt=""></a>
+      <a class="link-row" href="design.html"><span class="num">04</span><span class="ttl">DESIGN</span><span class="dsc">오르미와 오름의 디자인 시스템</span><img src="assets/char/smile.png" alt=""></a>
+    </div>
+  </div>
+</section>
+
+<!-- CTA : 어둠에서 빛으로 -->
+<section class="sec sec--orange cta-band">
+  <div class="aurora">
+    <i class="blob a" style="width:620px;height:620px;left:-10%;top:-30%;opacity:.8"></i>
+    <i class="blob c" style="width:480px;height:480px;right:-8%;bottom:-30%;opacity:.55"></i>
+    <div class="grainy" style="width:520px;height:520px;right:6%;top:-8%;opacity:.55"><i class="ring" style="width:100%;--t:80px;--a:200deg"></i></div>
+  </div>
+  <div class="wrap">
+    <img class="rv" src="assets/char/peek.png" alt="문을 바라보는 오르미" style="width:130px;margin:0 auto 10px;filter:drop-shadow(0 20px 30px rgba(51,46,42,.35))">
+    <h2 class="h1 rv d1" style="font-size:clamp(34px,6vw,88px)">지금 할 수 있는<br>작은 움직임부터<br>시작해볼까요?</h2>
+    <div class="rv d2" style="margin-top:44px"><a class="btn btn--dark" href="service.html">첫 번째 미션 시작하기
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12h14M13 6l6 6-6 6"/></svg></a></div>
+  </div>
+</section>
+
+<script src="js/common.js"></script>
+<script src="js/index.js"></script>
+</body>
+</html>

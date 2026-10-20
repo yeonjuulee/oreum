@@ -53,63 +53,485 @@
   </div>
 </section>
 
-<div class="marquee sec--dark2" aria-hidden="true">
-  <div class="marquee__track">
-    <span>가볍게 시작해오름</span><span>작은 움직임이, 다시 세상으로</span><span>oreum</span><span>한 계단씩, 하루 1개 미션</span>
-    <span>가볍게 시작해오름</span><span>작은 움직임이, 다시 세상으로</span><span>oreum</span><span>한 계단씩, 하루 1개 미션</span>
-  </div>
-</div>
 
-<!-- 핵심 한 줄 -->
-<section class="sec sec--dark">
-  <div class="aurora">
-    <div class="grainy" style="width:760px;height:760px;left:-14%;top:-10%"><i class="ring" style="--s:100%;width:100%;--t:120px;--a:30deg"></i></div>
-    <i class="blob o" style="width:420px;height:420px;right:-6%;bottom:-10%;opacity:.4"></i>
-  </div>
-  <div class="wrap stat-split">
-    <div>
-      <div class="eyebrow rv">그런데, 꼭 알아주셨으면 하는 것</div>
-      <h2 class="h1 rv d1">방 안에 있는<br>청년의 <span class="hl"><span data-count="80.8" data-dec="1">0</span>%</span>는<br>벗어나고 싶다고<br>말해요</h2>
+<!--<header class="page-hero page-hero&#45;&#45;dark">-->
+<!--  <div class="aurora">-->
+<!--    <div class="grainy" style="width:900px;height:900px;right:-18%;top:-24%"><i class="ring" style="width:100%;&#45;&#45;t:150px;&#45;&#45;a:120deg"></i></div>-->
+<!--    <i class="blob o" style="width:480px;height:480px;left:-10%;bottom:-20%;opacity:.45"></i>-->
+<!--    <i class="blob p" style="width:360px;height:360px;left:34%;top:6%;opacity:.22"></i>-->
+<!--  </div>-->
+<!--  <img class="page-hero__char" src="assets/char/rest.png" alt="웅크린 오르미">-->
+<!--  <div class="wrap">-->
+<!--    <div class="eyebrow">PART 01 · STORY</div>-->
+<!--    <h1 class="en-title">STORY</h1>-->
+<!--    <p class="quote">“방 안에서 시작된 이야기”</p>-->
+<!--  </div>-->
+<!--</header>-->
+
+<!-- 02 · 페이지 단위 스토리텔링 (스크롤 / 이전·다음 버튼 / ← → 키로 한 장씩 넘겨요) -->
+<section class="sec sec--dark" id="s02">
+  <div class="aurora"><i class="blob o" style="width:520px;height:520px;right:-10%;top:6%;opacity:.22"></i><i class="blob p" style="width:420px;height:420px;left:-8%;top:40%;opacity:.14"></i></div>
+
+  <!-- 메인 상단 -->
+  <div class="wrap s02-intro">
+    <div class="part-label"><span>PART 01 · STORY</span></div>
+    <div class="head-block" style="margin-bottom:0">
+      <h2 class="h1 rv">방 안의 하루는<br>생각보다 <span class="hl">길어요</span></h2>
+      <p class="lead rv d1">특별한 일이 있었던 건 아니에요. 일을 잠시 쉬었고, 그 쉼이 조금 길어졌을 뿐이에요. 그런데 그사이 하루의 모양이 조금씩 바뀌었습니다.</p>
     </div>
-    <div class="rv d2">
-      <p class="lead">게을러서가 아니라, 다시 시작할 <b style="color:var(--ink)">첫 계단</b>이 보이지 않았던 거예요. 필요한 도움으로는 혼자 하는 활동(81.7%)과 일상생활 회복(80.7%)을 꼽았어요.</p>
-      <p class="cite">보건복지부·한국보건사회연구원, 「고립·은둔 청년 실태조사 연구」(2023)</p>
-      <div style="margin-top:34px"><a class="btn btn--ghost" href="story.html">이야기 읽어보기
-        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12h14M13 6l6 6-6 6"/></svg></a></div>
+    <p class="s02-hint rv d2"><i></i>스크롤하면 이야기가 한 장씩 이어져요</p>
+  </div>
+
+  <!-- 페이지 1~4 -->
+  <div class="pager" id="pager" style="--n:4">
+    <div class="pager__stick" data-slide="0">
+      <div class="pg-orb" aria-hidden="true"><i class="orb-body"><b class="orb-sun"></b><b class="orb-moon"></b></i></div>
+      <div class="pg-glow" aria-hidden="true"></div>
+
+      <article class="pg-slide is-active" data-i="0">
+        <p class="pg-sub">01 · 혼자 보내는 시간</p>
+        <!-- ▼ 오르미 SVG 슬롯 (독립 컨테이너)
+             커스텀 SVG로 교체할 때는 <g class="ormi"> 안쪽만 바꾸고,
+             부위별로 <g data-part="spikes|face|hands|body"> 로 나누면 아래 story.js의 이벤트가 그대로 연결돼요. -->
+        <div class="svg-slot" data-ormi-slot="page1">
+          <svg viewBox="0 0 400 400" role="img" aria-label="쿠션 위에 웅크리고 앉아 있는 오르미" xmlns="http://www.w3.org/2000/svg">
+            <defs><filter id="soft1" x="-30%" y="-30%" width="160%" height="160%"><feGaussianBlur stdDeviation="7"/></filter></defs>
+            <g class="ormi-bg">
+              <defs><radialGradient id="sky1" cx="50%" cy="50%" r="50%"><stop offset="0" stop-color="#ffe9b8" stop-opacity=".95"/><stop offset=".55" stop-color="#ffb98a" stop-opacity=".7"/><stop offset="1" stop-color="#ff9a6a" stop-opacity="0"/></radialGradient></defs>
+              <circle class="sky-disc" cx="200" cy="205" r="170" fill="url(#sky1)"/>
+              <ellipse cx="200" cy="362" rx="132" ry="11" fill="#000" opacity=".35" filter="url(#soft1)"/>
+            </g>
+            <!-- 쿠션 (뒤판) : 오르미가 이 위에 폭 안겨 있어요 -->
+            <g class="cushion">
+              <defs>
+                <linearGradient id="cu1" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#fff1dc"/><stop offset=".6" stop-color="#ffd9b4"/><stop offset="1" stop-color="#f0b48a"/></linearGradient>
+                <linearGradient id="cl1" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#fff4e4"/><stop offset="1" stop-color="#ffd6ae"/></linearGradient>
+              </defs>
+              <path d="M62 322 C58 288 110 276 200 276 S342 288 338 322 C336 352 290 362 200 362 S64 352 62 322 Z" fill="url(#cu1)"/>
+              <path d="M104 300 Q200 288 296 300" fill="none" stroke="#d99a72" stroke-width="2" stroke-linecap="round" stroke-dasharray="2 6" opacity=".7"/>
+              <circle cx="63" cy="322" r="6" fill="#f0b48a"/><circle cx="337" cy="322" r="6" fill="#f0b48a"/>
+            </g>
+            <g class="ormi" data-part="root">
+              <g data-part="body"><image href="assets/char/rest.png" x="110" y="142" width="180" height="180" preserveAspectRatio="xMidYMid meet"/></g>
+            </g>
+            <!-- 쿠션 (앞자락) : 오르미 아랫부분을 살짝 덮어 폭신하게 묻혀 보이게 -->
+            <g class="cushion-front">
+              <path d="M84 326 C120 304 156 314 200 314 S280 304 316 326 C308 352 262 360 200 360 S92 352 84 326 Z" fill="url(#cl1)"/>
+              <path d="M112 322 C150 310 250 310 288 322" fill="none" stroke="#fffaf0" stroke-width="3" stroke-linecap="round" opacity=".55"/>
+            </g>
+            <g class="ormi-fx"><g class="dust" fill="#fff8f2"><circle cx="80" cy="150" r="2.4"/><circle cx="322" cy="120" r="2"/><circle cx="110" cy="290" r="1.8" style="animation-delay:-2s"/><circle cx="300" cy="280" r="2.6" style="animation-delay:-3.5s"/><circle cx="240" cy="70" r="1.8" style="animation-delay:-1s"/><circle cx="150" cy="86" r="1.6" style="animation-delay:-4s"/></g></g>
+          </svg>
+        </div>
+        <div class="pg-card">
+          <h3 class="pg-title">혼자 보내는 시간이 조금씩 길어졌어요</h3>
+          <p class="pg-body">어느덧 방 안에서 홀로 보내는 시간이 하루 여섯 시간을 넘어서고 있어요.<br>누군가를 만나고 이야기를 나누던 일상은 아득해지고,<br>적막한 방안을 채우는 건 오롯이 혼자만의 깊은 정적뿐입니다.<br></p>
+        </div>
+      </article>
+
+      <article class="pg-slide" data-i="1" aria-hidden="true">
+        <p class="pg-sub">02 · 흐려지는 낮과 밤의 경계</p>
+        <!-- ▼ 오르미 SVG 슬롯 (독립 컨테이너)
+             커스텀 SVG로 교체할 때는 <g class="ormi"> 안쪽만 바꾸고,
+             부위별로 <g data-part="spikes|face|hands|body"> 로 나누면 아래 story.js의 이벤트가 그대로 연결돼요. -->
+        <div class="svg-slot" data-ormi-slot="page2">
+          <svg viewBox="0 0 400 400" role="img" aria-label="어둑해지는 방 안, 쿠션 위에 웅크린 오르미" xmlns="http://www.w3.org/2000/svg">
+            <defs><filter id="soft2" x="-30%" y="-30%" width="160%" height="160%"><feGaussianBlur stdDeviation="7"/></filter></defs>
+            <g class="ormi-bg">
+              <defs><radialGradient id="sky2" cx="50%" cy="50%" r="50%"><stop offset="0" stop-color="#4b3f94" stop-opacity=".95"/><stop offset=".55" stop-color="#241b5a" stop-opacity=".8"/><stop offset="1" stop-color="#0d0a24" stop-opacity="0"/></radialGradient></defs>
+              <circle class="sky-disc" cx="200" cy="205" r="170" fill="url(#sky2)"/>
+              <ellipse cx="200" cy="362" rx="132" ry="11" fill="#000" opacity=".5" filter="url(#soft2)"/>
+            </g>
+            <g class="cushion">
+              <defs>
+                <linearGradient id="cu2" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#c9b8e0"/><stop offset=".6" stop-color="#a592c8"/><stop offset="1" stop-color="#7f6ca6"/></linearGradient>
+                <linearGradient id="cl2" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#d6c7ea"/><stop offset="1" stop-color="#a893cc"/></linearGradient>
+              </defs>
+              <path d="M62 322 C58 288 110 276 200 276 S342 288 338 322 C336 352 290 362 200 362 S64 352 62 322 Z" fill="url(#cu2)"/>
+              <path d="M104 300 Q200 288 296 300" fill="none" stroke="#6d5c94" stroke-width="2" stroke-linecap="round" stroke-dasharray="2 6" opacity=".7"/>
+              <circle cx="63" cy="322" r="6" fill="#7f6ca6"/><circle cx="337" cy="322" r="6" fill="#7f6ca6"/>
+            </g>
+            <g class="ormi" data-part="root">
+              <g data-part="body"><image href="assets/char/rest.png" x="110" y="142" width="180" height="180" preserveAspectRatio="xMidYMid meet"/></g>
+            </g>
+            <g class="cushion-front">
+              <path d="M84 326 C120 304 156 314 200 314 S280 304 316 326 C308 352 262 360 200 360 S92 352 84 326 Z" fill="url(#cl2)"/>
+              <path d="M112 322 C150 310 250 310 288 322" fill="none" stroke="#efe6ff" stroke-width="3" stroke-linecap="round" opacity=".55"/>
+            </g>
+            <g class="ormi-fx"><g class="dust" fill="#fff8f2"><circle cx="86" cy="128" r="2.2"/><circle cx="318" cy="130" r="3" fill="#cfd8ff"/><circle cx="98" cy="268" r="2.6"/><circle cx="312" cy="268" r="2" fill="#cfd8ff" style="animation-delay:-2.5s"/></g></g>
+          </svg>
+        </div>
+        <div class="pg-card">
+          <h3 class="pg-title">경계가 사라진 낮 시간이 점차 흐려져요</h3>
+          <p class="pg-body">무언가를 시작해야 할 낮 시간과 쉬어야 할 밤의 경계가 무너졌습니다.<br>단단하게 하루를 붙잡아주던 일상의 리듬이 느슨해지면서, 어느새 흘러가는 시간들을 그저 바라만 보게 되었어요.</p>
+        </div>
+      </article>
+
+      <article class="pg-slide" data-i="2" aria-hidden="true">
+        <p class="pg-sub">03 · 문 앞의 거리</p>
+        <!-- ▼ 오르미 SVG 슬롯 (독립 컨테이너)
+             커스텀 SVG로 교체할 때는 <g class="ormi"> 안쪽만 바꾸고,
+             부위별로 <g data-part="spikes|face|hands|body"> 로 나누면 아래 story.js의 이벤트가 그대로 연결돼요. -->
+        <div class="svg-slot" data-ormi-slot="page3">
+          <svg viewBox="0 0 400 400" role="img" aria-label="문 앞에서 망설이는 오르미" xmlns="http://www.w3.org/2000/svg">
+            <defs><radialGradient id="g3" cx="50%" cy="50%" r="50%"><stop offset="0" stop-color="#ffb066" stop-opacity=".7"/><stop offset="1" stop-color="#ffb066" stop-opacity="0"/></radialGradient>
+              <filter id="soft3" x="-30%" y="-30%" width="160%" height="160%"><feGaussianBlur stdDeviation="7"/></filter>
+            </defs>
+            <g class="ormi-bg"><ellipse cx="318" cy="296" rx="70" ry="46" fill="url(#g3)"/>
+              <ellipse cx="141.0" cy="324" rx="81.6" ry="11" fill="#000" opacity=".45" filter="url(#soft3)"/>
+            </g>
+            <g class="ormi" data-part="root">
+              <g data-part="body"><image href="assets/char/peek.png" x="56" y="160" width="170" height="170" preserveAspectRatio="xMidYMid meet"/></g>
+            </g>
+            <g class="ormi-fx"><g data-part="door">
+              <rect x="288" y="120" width="66" height="180" rx="10" fill="#2b2420" stroke="#4a3d33" stroke-width="4"/>
+              <circle cx="342" cy="214" r="4" fill="#ffb066"/>
+              <rect x="288" y="294" width="66" height="6" rx="3" fill="#ffd9a8" opacity=".95"/>
+            </g>
+              <path d="M238 286 C 256 296 270 296 284 292" fill="none" stroke="#ffb066" stroke-width="3" stroke-linecap="round" stroke-dasharray="2 10" opacity=".85"/></g>
+          </svg>
+        </div>
+        <div class="pg-card">
+          <p class="pg-quote">“센터는 자신감이 없어서 못 갔어요”</p>
+          <h3 class="pg-title">도움이 필요해도, 대면의 벽은 아직 높아요</h3>
+          <p class="pg-body">누군가를 직접 만나 이야기를 꺼내기엔 여전히 큰 용기가 필요해요.<br>문밖을 나설 자신감이 부족한 오르미에게 대면 중심의 지원은 마음의 문턱을 더 높게 만듭니다.<br>지금 오르미에게 정말 필요한 건 조심스러운 첫걸음을 뗄 수 있는,<br>이 방 안에서 닿을 수 있는 작은 온라인의 연결이에요.</p>
+        </div>
+      </article>
+
+      <article class="pg-slide pg-slide--outro" data-i="3" aria-hidden="true">
+        <p class="pg-sub">그런데, 꼭 알아주셨으면 하는 것</p>
+        <!-- ▼ 오르미 SVG 슬롯 (독립 컨테이너)
+             커스텀 SVG로 교체할 때는 <g class="ormi"> 안쪽만 바꾸고,
+             부위별로 <g data-part="spikes|face|hands|body"> 로 나누면 아래 story.js의 이벤트가 그대로 연결돼요. -->
+        <div class="svg-slot" data-ormi-slot="page4">
+          <svg viewBox="0 0 400 400" role="img" aria-label="햇살 속에서 고개를 든 오르미" xmlns="http://www.w3.org/2000/svg">
+            <defs><radialGradient id="g4" cx="50%" cy="50%" r="50%"><stop offset="0" stop-color="#ffb066" stop-opacity=".85"/><stop offset=".55" stop-color="#ff6a00" stop-opacity=".35"/><stop offset="1" stop-color="#ff6a00" stop-opacity="0"/></radialGradient>
+              <filter id="soft4" x="-30%" y="-30%" width="160%" height="160%"><feGaussianBlur stdDeviation="7"/></filter>
+            </defs>
+            <g class="ormi-bg"><circle class="pulse-glow" cx="200" cy="205" r="178" fill="url(#g4)"/>
+              <ellipse cx="200.0" cy="329" rx="91.2" ry="11" fill="#000" opacity=".45" filter="url(#soft4)"/>
+            </g>
+            <g class="ormi" data-part="root">
+              <g data-part="body"><image href="assets/char/hello.png" x="105" y="145" width="190" height="190" preserveAspectRatio="xMidYMid meet"/></g>
+            </g>
+            <g class="ormi-fx"><g class="fx-spin slow"><line x1="200" y1="30" x2="200" y2="58" stroke="#ffd9a8" stroke-width="4" stroke-linecap="round" transform="rotate(0 200 205)" opacity="0.95"/><line x1="200" y1="30" x2="200" y2="46" stroke="#ffd9a8" stroke-width="3" stroke-linecap="round" transform="rotate(30 200 205)" opacity="0.6"/><line x1="200" y1="30" x2="200" y2="58" stroke="#ffd9a8" stroke-width="4" stroke-linecap="round" transform="rotate(60 200 205)" opacity="0.95"/><line x1="200" y1="30" x2="200" y2="46" stroke="#ffd9a8" stroke-width="3" stroke-linecap="round" transform="rotate(90 200 205)" opacity="0.6"/><line x1="200" y1="30" x2="200" y2="58" stroke="#ffd9a8" stroke-width="4" stroke-linecap="round" transform="rotate(120 200 205)" opacity="0.95"/><line x1="200" y1="30" x2="200" y2="46" stroke="#ffd9a8" stroke-width="3" stroke-linecap="round" transform="rotate(150 200 205)" opacity="0.6"/><line x1="200" y1="30" x2="200" y2="58" stroke="#ffd9a8" stroke-width="4" stroke-linecap="round" transform="rotate(180 200 205)" opacity="0.95"/><line x1="200" y1="30" x2="200" y2="46" stroke="#ffd9a8" stroke-width="3" stroke-linecap="round" transform="rotate(210 200 205)" opacity="0.6"/><line x1="200" y1="30" x2="200" y2="58" stroke="#ffd9a8" stroke-width="4" stroke-linecap="round" transform="rotate(240 200 205)" opacity="0.95"/><line x1="200" y1="30" x2="200" y2="46" stroke="#ffd9a8" stroke-width="3" stroke-linecap="round" transform="rotate(270 200 205)" opacity="0.6"/><line x1="200" y1="30" x2="200" y2="58" stroke="#ffd9a8" stroke-width="4" stroke-linecap="round" transform="rotate(300 200 205)" opacity="0.95"/><line x1="200" y1="30" x2="200" y2="46" stroke="#ffd9a8" stroke-width="3" stroke-linecap="round" transform="rotate(330 200 205)" opacity="0.6"/></g></g>
+          </svg>
+        </div>
+        <div class="pg-card">
+          <h3 class="pg-title">방 안의 청년 10명 중 <span class="count-up hl" data-count="8">8</span>명은, <br>지금에서 벗어나고 싶어 해요</br> </h3>
+          <p class="pg-body">결코 게을러서 머물러 있는 것이 아니에요. 그저 다시 시작할 '첫 계단'이 어디 있는지 보이지 않았을 뿐입니다. 거창한 사회 진출보다 스스로 해내는 작은 활동부터, 무너진 일상을 차근차근 되찾아가는 연습이 먼저 필요해요. <br>방 안에서부터 조심스럽게 디딜 수 있는 그 첫 계단을, 이제 함께 만들어가려 합니다.</br></p>
+        </div>
+      </article>
+
+      <div class="pager__ctrl">
+        <button class="pager__btn" id="pgPrev" aria-label="이전 이야기"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="M19 12H5M11 6l-6 6 6 6"/></svg></button>
+        <div class="pager__dots" role="tablist" aria-label="이야기 페이지">
+          <button class="on" aria-label="1페이지"></button><button aria-label="2페이지"></button><button aria-label="3페이지"></button><button aria-label="4페이지"></button>
+        </div>
+        <span class="pager__count" id="pgCount">1 / 4</span>
+        <button class="pager__btn" id="pgNext" aria-label="다음 이야기"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12h14M13 6l6 6-6 6"/></svg></button>
+      </div>
+    </div>
+    <!-- 스크롤 구간 (페이지 1장 = 화면 1개 높이). IntersectionObserver가 이 구간을 보고 슬라이드를 전환해요 -->
+    <div class="pager__steps" aria-hidden="true"><i class="pg-step"></i><i class="pg-step"></i><i class="pg-step"></i><i class="pg-step"></i></div>
+  </div>
+</section>
+
+<!-- 03 · 도시 속 숨은 오르미 (돋보기 탐색형 연출) -->
+<section class="sec sec--dark2" id="s03">
+  <div class="aurora">
+    <i class="blob a" style="width:420px;height:420px;left:-8%;top:10%;opacity:.14"></i>
+    <i class="blob o" style="width:520px;height:520px;right:-12%;bottom:-8%;opacity:.28"></i>
+  </div>
+  <div class="wrap">
+    <div class="part-label"><span>PART 01 · STORY</span></div>
+    <div class="head-block">
+      <h2 class="h1 rv">겉으로는<br>잘 <span class="hl">보이지 않아요</span></h2>
+      <p class="lead rv d1">바쁘게 흘러가는 도시 속, 멀리서 보면 모두 비슷해 보이는 일상이지만<br>돋보기로 가까이 들여다보면 그 속에 숨어 웅크리고 있는 오르미들이 있어요.</p>
+    </div>
+
+    <div class="city-scroll rv">
+      <div class="city" id="city">
+        <svg class="city__svg" id="citySvg" viewBox="0 0 1200 440" preserveAspectRatio="xMidYMid meet" tabindex="0" role="img"
+             aria-label="빌딩이 빼곡한 도시. 돋보기로 살펴보면 웅크린 오르미 두 마리를 찾을 수 있어요">
+          <defs>
+            <linearGradient id="ctSky" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#f4b0b0"/><stop offset=".6" stop-color="#f8c9b8"/><stop offset="1" stop-color="#fbd9b8"/></linearGradient>
+            <linearGradient id="bN"  x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#4a4bb0"/><stop offset=".45" stop-color="#1b1a5e"/><stop offset="1" stop-color="#0b0827"/></linearGradient>
+            <linearGradient id="bN2" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#2b3d86"/><stop offset=".5" stop-color="#14123f"/><stop offset="1" stop-color="#0b0827"/></linearGradient>
+            <linearGradient id="bR"  x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#ff5230"/><stop offset=".5" stop-color="#e5321b"/><stop offset="1" stop-color="#1a0b27"/></linearGradient>
+            <linearGradient id="bY"  x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#fff3cc"/><stop offset=".5" stop-color="#eaa77c"/><stop offset="1" stop-color="#2a1a3a"/></linearGradient>
+            <linearGradient id="bM"  x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#7a1a24"/><stop offset="1" stop-color="#25091a"/></linearGradient>
+            <linearGradient id="bO"  x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#ff8a3d"/><stop offset=".5" stop-color="#ff4a1c"/><stop offset="1" stop-color="#1b0b2a"/></linearGradient>
+            <linearGradient id="bT"  x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#bfe0dc"/><stop offset=".5" stop-color="#5d82a8"/><stop offset="1" stop-color="#14103a"/></linearGradient>
+            <filter id="ctFarBlur" x="-2%" y="-2%" width="104%" height="104%"><feGaussianBlur stdDeviation="2.6"/><feColorMatrix type="saturate" values=".9"/></filter>
+            <filter id="ctSmear" x="-40%" y="-60%" width="180%" height="220%"><feGaussianBlur stdDeviation="26"/></filter>
+            <filter id="ctGlow" x="-50%" y="-50%" width="200%" height="200%"><feDropShadow dx="0" dy="0" stdDeviation="5" flood-color="#ff6a00" flood-opacity=".95"/></filter>
+            <clipPath id="ctLensClip"><circle id="ctClip" cx="220" cy="170" r="96"/></clipPath>
+          </defs>
+
+          <!-- 멀리서 본 도시 : 살짝 흐릿하게 (오르미 10마리가 모두 비슷해 보여요) -->
+          <g id="ctFar" filter="url(#ctFarBlur)">
+            <rect width="1200" height="440" fill="url(#ctSky)"/>
+            <!-- 흐릿한 색 번짐 -->
+            <g filter="url(#ctSmear)"><ellipse cx="260" cy="330" rx="150" ry="70" fill="#ff3b1f" opacity=".55"/>
+              <ellipse cx="560" cy="300" rx="120" ry="60" fill="#2f6fd6" opacity=".45"/>
+              <ellipse cx="850" cy="320" rx="150" ry="64" fill="#ff7a2a" opacity=".5"/>
+              <ellipse cx="80" cy="300" rx="100" ry="60" fill="#31a8e8" opacity=".45"/>
+              <ellipse cx="1120" cy="300" rx="110" ry="70" fill="#e8213c" opacity=".5"/></g>
+            <!-- 건물 -->
+            <rect x="40" y="210" width="110" height="182" fill="url(#bN)"/>
+            <rect x="170" y="70" width="150" height="322" fill="url(#bR)"/>
+            <rect x="332" y="190" width="92" height="202" fill="url(#bY)"/>
+            <rect x="444" y="120" width="170" height="272" fill="url(#bN2)"/>
+            <rect x="634" y="232" width="120" height="160" fill="url(#bM)"/>
+            <rect x="774" y="92" width="142" height="300" fill="url(#bO)"/>
+            <rect x="936" y="200" width="100" height="192" fill="url(#bT)"/>
+            <rect x="1056" y="140" width="124" height="252" fill="url(#bN)"/>
+            <!-- 창문 · 남색 빌딩(좌) -->
+            <g fill="#cfd2ff">
+              <rect x="58" y="238" width="16" height="20" rx="2" opacity=".45"/><rect x="88" y="238" width="16" height="20" rx="2"/><rect x="118" y="238" width="16" height="20" rx="2"/>
+              <rect x="58" y="272" width="16" height="20" rx="2"/><rect x="88" y="272" width="16" height="20" rx="2" opacity=".45"/><rect x="118" y="272" width="16" height="20" rx="2"/>
+              <rect x="58" y="306" width="16" height="20" rx="2"/><rect x="88" y="306" width="16" height="20" rx="2"/><rect x="118" y="306" width="16" height="20" rx="2" opacity=".45"/>
+              <rect x="58" y="340" width="16" height="20" rx="2"/><rect x="88" y="340" width="16" height="20" rx="2"/><rect x="118" y="340" width="16" height="20" rx="2"/>
+            </g>
+            <!-- 창문 · 남색 빌딩(중앙) — (2행 3열)은 쉬었음 오르미의 방 -->
+            <g fill="#ffe7d0">
+              <rect x="468" y="148" width="22" height="26" rx="2" opacity=".45"/><rect x="506" y="148" width="22" height="26" rx="2"/><rect x="544" y="148" width="22" height="26" rx="2"/><rect x="582" y="148" width="22" height="26" rx="2"/>
+              <rect x="468" y="188" width="22" height="26" rx="2"/><rect x="506" y="188" width="22" height="26" rx="2" opacity=".45"/><rect x="582" y="188" width="22" height="26" rx="2"/>
+              <rect x="468" y="228" width="22" height="26" rx="2"/><rect x="506" y="228" width="22" height="26" rx="2"/><rect x="544" y="228" width="22" height="26" rx="2" opacity=".45"/><rect x="582" y="228" width="22" height="26" rx="2"/>
+            </g>
+            <!-- 쉬었음 오르미(r1)가 있는 창문 : 은은하게 켜진 방 -->
+            <rect x="512" y="188" width="22" height="26" rx="2" fill="#ffe7d0" opacity=".55"/>
+            <!-- 창문 · 남색 빌딩(우) -->
+            <g fill="#ffd2c0">
+              <rect x="1074" y="166" width="14" height="20" rx="2" opacity=".45"/><rect x="1100" y="166" width="14" height="20" rx="2"/><rect x="1126" y="166" width="14" height="20" rx="2"/><rect x="1152" y="166" width="14" height="20" rx="2"/>
+              <rect x="1074" y="200" width="14" height="20" rx="2"/><rect x="1100" y="200" width="14" height="20" rx="2" opacity=".45"/><rect x="1126" y="200" width="14" height="20" rx="2"/><rect x="1152" y="200" width="14" height="20" rx="2"/>
+              <rect x="1074" y="234" width="14" height="20" rx="2"/><rect x="1100" y="234" width="14" height="20" rx="2"/><rect x="1126" y="234" width="14" height="20" rx="2" opacity=".45"/><rect x="1152" y="234" width="14" height="20" rx="2"/>
+              <rect x="1074" y="268" width="14" height="20" rx="2"/><rect x="1100" y="268" width="14" height="20" rx="2"/><rect x="1126" y="268" width="14" height="20" rx="2"/><rect x="1152" y="268" width="14" height="20" rx="2" opacity=".45"/>
+            </g>
+            <!-- 창문 · 주황 빌딩 -->
+            <g fill="#ffe9c9">
+              <rect x="786" y="118" width="16" height="22" rx="2" opacity=".45"/><rect x="816" y="118" width="16" height="22" rx="2"/><rect x="846" y="118" width="16" height="22" rx="2"/>
+              <rect x="786" y="158" width="16" height="22" rx="2"/><rect x="816" y="158" width="16" height="22" rx="2" opacity=".45"/><rect x="846" y="158" width="16" height="22" rx="2"/><rect x="876" y="158" width="16" height="22" rx="2"/>
+              <rect x="786" y="198" width="16" height="22" rx="2"/><rect x="816" y="198" width="16" height="22" rx="2"/><rect x="846" y="198" width="16" height="22" rx="2" opacity=".45"/><rect x="876" y="198" width="16" height="22" rx="2"/>
+            </g>
+            <!-- 창문 · 빨간 빌딩 -->
+            <g fill="#ffd9cc">
+              <rect x="184" y="104" width="22" height="28" rx="2" opacity=".45"/><rect x="228" y="104" width="22" height="28" rx="2"/><rect x="272" y="104" width="22" height="28" rx="2"/>
+              <rect x="184" y="150" width="22" height="28" rx="2"/><rect x="228" y="150" width="22" height="28" rx="2" opacity=".45"/><rect x="272" y="150" width="22" height="28" rx="2"/>
+              <rect x="184" y="196" width="22" height="28" rx="2"/><rect x="228" y="196" width="22" height="28" rx="2"/><rect x="272" y="196" width="22" height="28" rx="2" opacity=".45"/>
+              <rect x="184" y="242" width="22" height="28" rx="2"/><rect x="228" y="242" width="22" height="28" rx="2"/><rect x="272" y="242" width="22" height="28" rx="2"/>
+            </g>
+            <!-- 창문 · 크림 빌딩 -->
+            <g fill="#fff7e2">
+              <rect x="350" y="214" width="20" height="22" rx="2" opacity=".45"/><rect x="386" y="214" width="20" height="22" rx="2"/>
+              <rect x="350" y="250" width="20" height="22" rx="2"/><rect x="386" y="250" width="20" height="22" rx="2" opacity=".45"/>
+              <rect x="350" y="286" width="20" height="22" rx="2"/><rect x="386" y="286" width="20" height="22" rx="2"/>
+              <rect x="350" y="322" width="20" height="22" rx="2"/><rect x="386" y="322" width="20" height="22" rx="2"/>
+            </g>
+            <!-- 창문 · 청록 빌딩 -->
+            <g fill="#e4f4f2">
+              <rect x="956" y="222" width="20" height="20" rx="2" opacity=".45"/><rect x="996" y="222" width="20" height="20" rx="2"/>
+              <rect x="956" y="256" width="20" height="20" rx="2"/><rect x="996" y="256" width="20" height="20" rx="2" opacity=".45"/>
+              <rect x="956" y="290" width="20" height="20" rx="2"/><rect x="996" y="290" width="20" height="20" rx="2"/>
+              <rect x="956" y="324" width="20" height="20" rx="2"/><rect x="996" y="324" width="20" height="20" rx="2"/>
+            </g>
+            <!-- 창문 · 자주 빌딩 -->
+            <g fill="#ffb9a6">
+              <rect x="654" y="262" width="18" height="22" rx="2" opacity=".45"/><rect x="688" y="262" width="18" height="22" rx="2"/><rect x="722" y="262" width="18" height="22" rx="2"/>
+              <rect x="654" y="296" width="18" height="22" rx="2"/><rect x="688" y="296" width="18" height="22" rx="2" opacity=".45"/><rect x="722" y="296" width="18" height="22" rx="2"/>
+            </g>
+            <!-- 지면 -->
+            <rect x="0" y="388" width="1200" height="52" fill="#14103a"/>
+            <rect x="0" y="388" width="1200" height="6" fill="#ffd2c0" opacity=".35"/>
+            <!-- 오르미 10마리 : 바쁜 오르미 8 (b1~b8, 통통 튀거나 오가는 중) + 쉬었음 오르미 2 (r1·r2, 웅크린 채 가만히)
+                 r1·r2 의 data-cx / data-cy 는 "발견" 판정 좌표 -->
+            <g class="oz busy" data-id="b1"><g><animateTransform attributeName="transform" type="translate" values="0 0;0 -4;0 0" dur="1.0s" begin="-0.1s" repeatCount="indefinite"/><image href="assets/char/smile.png" x="72" y="178" width="34" height="34"/></g></g>
+            <g class="oz busy" data-id="b2"><g><animateTransform attributeName="transform" type="translate" values="0 0;0 -5;0 0" dur="1.3s" begin="-0.5s" repeatCount="indefinite"/><image href="assets/char/hello.png" x="238" y="38" width="34" height="34"/></g></g>
+            <g class="oz busy" data-id="b3"><g><animateTransform attributeName="transform" type="translate" values="0 0;0 -4;0 0" dur="0.9s" begin="-0.3s" repeatCount="indefinite"/><image href="assets/char/cheer.png" x="356" y="158" width="34" height="34"/></g></g>
+            <g class="oz busy" data-id="b4"><g><animateTransform attributeName="transform" type="translate" values="0 0;0 -5;0 0" dur="1.2s" begin="-0.8s" repeatCount="indefinite"/><image href="assets/char/smile.png" x="508" y="88" width="34" height="34"/></g></g>
+            <g class="oz busy" data-id="b5"><g><animateTransform attributeName="transform" type="translate" values="0 0;0 -4;0 0" dur="1.0s" begin="-0.2s" repeatCount="indefinite"/><image href="assets/char/hello.png" x="812" y="60" width="34" height="34"/></g></g>
+            <g class="oz busy" data-id="b6"><g><animateTransform attributeName="transform" type="translate" values="0 0;60 0;0 0" dur="9s" begin="-1s" repeatCount="indefinite" calcMode="spline" keySplines=".45 0 .55 1;.45 0 .55 1"/><image href="assets/char/cheer.png" x="150" y="360" width="34" height="34"/></g></g>
+            <g class="oz busy" data-id="b7"><g><animateTransform attributeName="transform" type="translate" values="0 0;-50 0;0 0" dur="8s" begin="-3s" repeatCount="indefinite" calcMode="spline" keySplines=".45 0 .55 1;.45 0 .55 1"/><image href="assets/char/smile.png" x="590" y="360" width="34" height="34"/></g></g>
+            <g class="oz busy" data-id="b8"><g><animateTransform attributeName="transform" type="translate" values="0 0;0 -4;0 0" dur="1.1s" begin="-0.6s" repeatCount="indefinite"/><image href="assets/char/hello.png" x="1090" y="164" width="34" height="34"/></g></g>
+            <g class="oz rest" data-id="r1" data-cx="529" data-cy="203"><g><image href="assets/char/rest.png" x="516" y="190" width="26" height="26"/></g></g>
+            <g class="oz rest" data-id="r2" data-cx="691" data-cy="204"><g><image href="assets/char/peek.png" x="676" y="204" width="30" height="30"/></g></g>
+          </g>
+          <g id="ctMarks"></g>
+
+          <!-- 돋보기 안쪽 : 같은 장면을 선명하게 확대 (JS가 #ctFar 내용을 복제해 채워요) -->
+          <g clip-path="url(#ctLensClip)"><g id="ctNear"></g></g>
+
+          <g id="ctLens" transform="translate(220 170)">
+            <circle r="96" fill="none" stroke="#fff8f2" stroke-opacity=".55" stroke-width="10"/>
+            <circle r="96" fill="none" stroke="#ff6a00" stroke-width="4"/>
+            <line x1="68" y1="68" x2="128" y2="128" stroke="#332E2A" stroke-width="12" stroke-linecap="round"/>
+            <line x1="68" y1="68" x2="128" y2="128" stroke="#ff6a00" stroke-width="5" stroke-linecap="round"/>
+          </g>
+        </svg>
+      </div>
+    </div>
+    <p class="city__note" id="cityNote" aria-live="polite">돋보기를 움직여 도시를 들여다보세요</p>
+
+    <div class="prose-story">
+      <p class="lead-line rv">10명의 청년 중 <span class="hl">2명</span>은 쉬었음을 경험했어요.</p>
+      <p class="rv d1">겉으로는 잘 드러나지 않지만, 이들 중 일부는 사람과의 관계를 잠시 끊고 집 밖으로 나가는 것조차 어려워하고 있습니다. 단순히 일자리를 구하는 문제 이전에, 일상의 리듬과 마음의 관계가 함께 약해졌기 때문이에요.</p>
+      <p class="last rv d2">겉으로 보이지 않는 이 작은 웅크림을 이제 우리가 먼저 들여다보아야 할 때입니다.</p>
     </div>
   </div>
 </section>
 
-<!-- 메뉴 리스트 -->
-<section class="sec sec--dark2">
-  <div class="aurora"><i class="blob p" style="width:460px;height:460px;left:40%;top:10%;opacity:.16"></i></div>
+<!-- 04 -->
+<section class="sec sec--dark" id="s04">
+  <div class="aurora"><i class="blob o" style="width:560px;height:560px;left:30%;top:-20%;opacity:.25"></i></div>
   <div class="wrap">
-    <div class="eyebrow rv">Explore</div>
-    <div class="link-list rv d1">
-      <a class="link-row" href="story.html"><span class="num">01</span><span class="ttl">STORY</span><span class="dsc">방 안의 하루, 왜 작은 움직임인가</span><img src="assets/char/rest.png" alt=""></a>
-      <a class="link-row" href="service.html"><span class="num">02</span><span class="ttl">SERVICE</span><span class="dsc">오늘의 미션과 오르미의 변화</span><img src="assets/char/hello.png" alt=""></a>
-      <a class="link-row" href="support.html"><span class="num">03</span><span class="ttl">SUPPORT</span><span class="dsc">리워드와 함께 만드는 운영 구조</span><img src="assets/char/cheer.png" alt=""></a>
-      <a class="link-row" href="design.html"><span class="num">04</span><span class="ttl">DESIGN</span><span class="dsc">오르미와 오름의 디자인 시스템</span><img src="assets/char/smile.png" alt=""></a>
+    <div class="part-label"><span>PART 01 · STORY</span></div>
+    <div class="head-block">
+      <h2 class="h1 rv">그렇다면 모두에게 똑같이<br><span class="hl">“밖으로 나가세요”</span>라고<br>말하면 될까요?</h2>
+      <p class="lead rv d1" style="color:var(--ink);font-weight:700">아니요.</p>
+      <p class="lead rv d1" style="margin-top:6px">하지만 모두가 같은 곳에서 시작하지 않습니다.</p>
+    </div>
+
+    <div class="program-bar rv"><span class="muted">정부 지원 프로그램</span><b>상담</b>·<b>대면 접촉</b>·<b>구직</b></div>
+    <div class="fork">
+      <div class="branch go rv">
+        <span class="label">GO</span>
+        <h3 class="h3">취준·이직 적극형</h3>
+        <p style="margin-top:10px;opacity:.9">직장 경험이나 구직 계획이 있는 도치들은 직무 탐색·재취업 코칭으로 <b>바로 문을 열고 나가요.</b></p>
+      </div>
+      <div class="branch stuck rv d1">
+        <span class="label">STUCK</span>
+        <h3 class="h3">소극형 · 취약형</h3>
+        <p style="margin-top:10px;color:var(--muted)">하지만 어떤 도치에게는 그 문까지 가는 길이 너무 멀어요. <b style="color:var(--ink)">심리·관계 회복 단계가 먼저</b> 필요해요.</p>
+      </div>
+    </div>
+    <p class="cite">관계부처 합동, 「청년층 노동시장 유입 촉진방안」(2023) · 인천시 ‘쉬었음 청년’ 정책 연구(2026)</p>
+
+    <h2 class="h2 rv" style="margin:clamp(70px,9vw,130px) 0 44px;max-width:900px">누군가에게는 <span class="hl">침대에서 일어나는 것</span>부터,<br>누군가에게는 <span class="hl">집 밖으로 한 걸음</span>부터.</h2>
+    <div class="grid-3 start-cards">
+      <div class="card card--peach rv"><span class="ab">A</span><img class="ch" src="assets/char/rest.png" alt="" ><h3 class="h4">일상의 리듬을<br>되찾는 것부터</h3></div>
+      <div class="card card--peach rv d1"><span class="ab">B</span><img class="ch" src="assets/char/hello.png" alt=""><h3 class="h4">집 밖과 조금씩<br>접촉하는 것부터</h3></div>
+      <div class="card card--orange rv d2"><span class="ab" style="background:#fff;color:var(--orange)">+</span><img class="ch" src="assets/char/cheer.png" alt=""><h3 class="h4">그리고 각자의 속도로<br>다음 계단으로</h3></div>
+    </div>
+
+    <div class="problem rv">
+      <div class="eyebrow">Problem Statement</div>
+      <p>고립·은둔 청년은 변화 의지가 있지만, 기존 지원이 요구하는 ‘대면 접촉’과 ‘구직’ 이전에 혼자서 시작할 수 있는 작은 행동의 경로가 없어 첫걸음을 떼지 못하고 있습니다.</p>
     </div>
   </div>
 </section>
 
-<!-- CTA : 어둠에서 빛으로 -->
-<section class="sec sec--orange cta-band">
+<!-- 05 · 자가진단 (assets/app 이미지 + 클릭 인터랙션) -->
+<section class="sec sec--light" id="s05">
+  <div class="aurora"><i class="blob a" style="width:520px;height:520px;right:-8%;top:-10%;opacity:.5"></i><i class="blob o" style="width:380px;height:380px;left:-6%;bottom:-10%;opacity:.25"></i></div>
+  <div class="wrap">
+    <div class="part-label"><span>PART 01 · STORY</span></div>
+    <div class="check-wrap">
+      <div>
+        <h2 class="h1 rv">먼저, 지금의 나를<br><span class="hl">알아볼게요</span></h2>
+        <p class="lead rv d1" style="margin-top:26px">검사가 아니에요. 지금의 상태에 맞는 <b>첫 번째 움직임</b>을 함께 찾아보는 시간이에요.</p>
+        <div class="check-char rv d2" style="margin-top:34px"><img src="assets/char/peek.png" alt="살펴보는 오르미"></div>
+      </div>
+      <div class="rv d2" style="display:grid;justify-items:center">
+        <!-- #diagShot 안은 js/story.js 가 채워요 (이미지 5장 + 클릭 영역) -->
+        <div class="phone phone--shot" id="diag" aria-label="자가진단 체험 화면">
+          <div class="shot" id="diagShot"></div>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- 06 -->
+<section class="sec sec--dark" id="s06">
+  <div class="aurora"><i class="blob o" style="width:640px;height:640px;left:50%;top:-6%;margin-left:-320px;opacity:.14"></i></div>
+  <div class="wrap">
+    <div class="part-label"><span>PART 01 · STORY</span></div>
+    <div class="center">
+      <p class="cite" style="margin:0 0 14px">줄을 아래로 당겨 보세요</p>
+      <h2 class="h1 rv">큰 변화가 아니어도<br><span class="hl">괜찮습니다</span></h2>
+    </div>
+    <div class="lamp-scene" id="lamp">
+      <div class="shade"></div><div class="cone"></div>
+      <div class="pull" id="pull"><button id="pullBtn" aria-label="램프 줄 당기기"></button></div>
+      <ul class="small-moves">
+        <li><img src="assets/char/hello.png" alt="">오늘 창문을 여는 것.</li>
+        <li><img src="assets/char/peek.png" alt="">5분 동안 밖에 나가는 것.</li>
+        <li><img src="assets/char/cheer.png" alt="">누군가에게 안부를 묻는 것.</li>
+      </ul>
+      <p class="change-line">작은 움직임도 <span class="hl">변화</span>입니다.</p>
+    </div>
+
+    <div class="steps" style="margin-top:clamp(70px,10vw,140px)">
+      <ol class="step-list" id="stepList">
+        <li class="on"><span class="no">01</span><h3 class="h2">미션 수행 · 인증</h3><p>하루 1개 미션. 사진이나 위치처럼 미션에 맞는 방식으로 인증해요.</p></li>
+        <li><span class="no">02</span><h3 class="h2">리워드 획득</h3><p>인증하면 바로 리워드를 받고, 연속 수행 기록이 쌓여요.</p></li>
+        <li><span class="no">03</span><h3 class="h2">다음 챕터로</h3><p>숨고르기 → 둘러보기 → 마주하기 → 도전하기. 네 개의 챕터를 한 계단씩 올라요.</p></li>
+        <li><span class="no">04</span><h3 class="h2">연속 활동</h3><p>하루하루의 작은 실천이 달력에 이어져요. 연속 활동이 쌓일수록 웅크린 오르미의 가시가 햇살처럼 펼쳐져요.</p></li>
+      </ol>
+      <div class="steps__sticky">
+        <!-- 폰은 화면 중앙에 고정, 왼쪽 텍스트를 스크롤하면 이미지가 순서대로 바뀌어요 -->
+        <div class="phone phone--shot" id="stepPhone">
+          <div class="shot">
+            <img class="on" src="assets/app/미션인증.png" alt="미션 인증 화면">
+            <img src="assets/app/미션인증_인증완료.png" alt="인증 완료 화면">
+            <img src="assets/app/챕터%20미리보기.png" alt="챕터 미리보기 화면">
+            <img src="assets/app/연속활동.png" alt="연속 활동 화면">
+          </div>
+        </div>
+        <div class="dots4" id="stepDots" style="gap:6px"><i class="on"></i><i></i><i></i><i></i></div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- 07 · 연속 활동 (service 10 에서 이동) -->
+<section class="sec sec--dark" id="s07">
+  <div class="aurora"><i class="blob o" style="width:680px;height:680px;left:50%;top:6%;margin-left:-100px;opacity:.2"></i></div>
+  <div class="wrap">
+    <div class="part-label"><span>PART 01 · STORY</span></div>
+    <div class="head-block">
+      <h2 class="h1 rv">웅크린 가시가<br><span class="hl">햇살이 될 때까지</span></h2>
+      <p class="lead rv d1">계속할수록 오르미가 변해요. 연속 활동 일수를 움직여 보세요.</p>
+    </div>
+    <div class="grow rv">
+      <div class="grow__stage" id="growStage">
+        <div class="halo"></div>
+        <img src="assets/char/rest.png" alt="웅크린 오르미" class="on">
+        <img src="assets/char/peek.png" alt="빼꼼 내다보는 오르미">
+        <img src="assets/char/hello.png" alt="살며시 인사하는 오르미">
+        <img src="assets/char/cheer.png" alt="가시가 펼쳐진 오르미">
+        <img src="assets/char/smile.png" alt="활짝 웃는 오르미">
+      </div>
+      <div class="grow__meter">
+        <p class="eyebrow">연속 활동</p>
+        <div><b id="gDays">0</b><small>일째 · <span id="gName" class="hl">웅크림</span></small></div>
+        <input class="range" id="gRange" type="range" min="0" max="50" value="0" aria-label="연속 활동 일수">
+        <div class="ticks" id="gTicks">
+          <span class="on"><b>웅크림</b>처음</span><span><b>빼꼼</b>7일</span><span><b>살며시</b>14일</span><span><b>펼침</b>30일</span><span><b>활짝</b>50일</span>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- 08 -->
+<section class="sec sec--orange cta-band" id="s08">
   <div class="aurora">
-    <i class="blob a" style="width:620px;height:620px;left:-10%;top:-30%;opacity:.8"></i>
-    <i class="blob c" style="width:480px;height:480px;right:-8%;bottom:-30%;opacity:.55"></i>
-    <div class="grainy" style="width:520px;height:520px;right:6%;top:-8%;opacity:.55"><i class="ring" style="width:100%;--t:80px;--a:200deg"></i></div>
+    <i class="blob a" style="width:640px;height:640px;left:-12%;top:-34%;opacity:.8"></i>
+    <i class="blob c" style="width:460px;height:460px;right:-8%;bottom:-30%;opacity:.5"></i>
+    <div class="grainy" style="width:560px;height:560px;right:4%;top:-14%;opacity:.5"><i class="ring" style="width:100%;--t:90px;--a:260deg"></i></div>
   </div>
   <div class="wrap">
-    <img class="rv" src="assets/char/peek.png" alt="문을 바라보는 오르미" style="width:130px;margin:0 auto 10px;filter:drop-shadow(0 20px 30px rgba(51,46,42,.35))">
-    <h2 class="h1 rv d1" style="font-size:clamp(34px,6vw,88px)">지금 할 수 있는<br>작은 움직임부터<br>시작해볼까요?</h2>
-    <div class="rv d2" style="margin-top:44px"><a class="btn btn--dark" href="service.html">첫 번째 미션 시작하기
+    <div class="part-label" style="color:#fff"><span>PART 01 · STORY</span></div>
+    <h2 class="h1 rv" style="font-size:clamp(34px,6vw,88px)">지금 할 수 있는<br>작은 움직임부터<br>시작해볼까요?</h2>
+    <div class="rv d1" style="margin-top:44px"><a class="btn btn--dark" href="service.html">첫 번째 미션 시작하기
       <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12h14M13 6l6 6-6 6"/></svg></a></div>
   </div>
 </section>
 
+
 <script src="js/common.js"></script>
 <script src="js/index.js"></script>
+<script src="js/story.js"></script>
 </body>
 </html>

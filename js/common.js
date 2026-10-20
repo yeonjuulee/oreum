@@ -6,7 +6,8 @@
   'use strict';
   var PAGE = document.body.getAttribute('data-page') || '';
   var LINKS = [
-    ['story', 'STORY', 'story.html'],
+    ['home', 'STORY', 'index.html#s02'],
+    ['plan', 'PLAN', 'plan.html'],          // ← 추가
     ['service', 'SERVICE', 'service.html'],
     ['support', 'SUPPORT', 'support.html'],
     ['design', 'DESIGN', 'design.html']
@@ -28,15 +29,15 @@
   var footer = '<footer class="footer"><div class="aurora"><i class="blob o" style="width:520px;height:520px;left:-10%;bottom:-40%;opacity:.35"></i>' +
     '<i class="blob p" style="width:380px;height:380px;right:-6%;bottom:-30%;opacity:.18"></i></div>' +
     '<div class="wrap"><div class="footer__top"><div class="footer__brand"><div class="logo">oreum</div><p>작은 움직임이, 다시 세상으로.</p></div>' +
-    '<nav class="footer__nav"><a href="index.html">HOME</a>' +
-    LINKS.map(function (l) { return '<a href="' + l[2] + '">' + l[1] + '</a>'; }).join('') + '</nav>' +
-    '<div class="footer__src"><h6>자료 출처</h6><ul>' +
-    '<li>국가데이터처 경제활동인구조사, 한국경영자총협회 재분석</li>' +
-    '<li>한국직업능력연구원, 「쉬는 청년의 하루」</li>' +
-    '<li>보건복지부·한국보건사회연구원, 「고립·은둔 청년 실태조사 연구」, 2023</li>' +
-    '<li>국회예산정책처, NABO Focus 제85호 「고립·은둔 청년 지원사업 현황과 고려사항」</li>' +
-    '<li>관계부처 합동, 「청년층 노동시장 유입 촉진방안」, 2023.11.15.</li>' +
-    '<li>청년패널 분석 대상 6,022명, 2016~2023년 추적조사</li></ul></div></div>' +
+    // '<nav class="footer__nav"><a href="index.html">HOME</a>' +
+    // LINKS.map(function (l) { return '<a href="' + l[2] + '">' + l[1] + '</a>'; }).join('') + '</nav>' +
+    '<div class="footer__src"><h6>Team</h6><ul>' +
+    '<li>1</li>' +
+    '<li>2</li>' +
+    '<li>3</li>' +
+    '<li>4</li>' +
+    '<li>5</li>' +
+    '<li>6</li></ul></div></div>' +
     '<div class="footer__bot"><span>캡스톤디자인 · 팀 레츠기니</span><span>© oreum 2026</span></div></div></footer>';
 
   document.body.insertAdjacentHTML('afterbegin', nav);

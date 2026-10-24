@@ -252,24 +252,24 @@ html.story-root body { background: var(--night); }
 .scene-step1 { background: radial-gradient(80% 60% at 75% 20%, #2A1C14 0%, #141110 70%); }
 /* big steps: a lit tread on top, a darker riser in front */
 /* pixel-tile steps, same tiles as the wall scene (scaled ×2.14 so the zoom hands over seamlessly) */
-.scene-wall .stage, .scene-step1 .stage { overflow: hidden; }
+.scene-wall .stage, .scene-step1 .stage, .scene-montage .stage { overflow: hidden; }
 .cam { left: 0; top: 0; width: 960px; height: 540px; transform-origin: 0 0; will-change: transform; }
 .cam > * { position: absolute; }
 .bigtiles { left: 0; top: 0; width: 960px; height: 540px; }
 .btile { position: absolute; width: 47px; height: 47px; border-radius: 4px; background: var(--sc); transition: opacity .5s ease; }
 /* solid gradient steps that the tiles dissolve into */
-.solid { position: absolute; box-shadow: inset 0 3px 0 rgba(255, 255, 255, .22); }
-.solid-1 { left: 0; top: 420px; width: 618px; height: 120px; background: linear-gradient(180deg, #D85A12 0%, #A63A08 100%); }
-.solid-2 { left: 620px; top: 266px; width: 340px; height: 274px; background: linear-gradient(180deg, #FF7A1A 0%, #D85A12 100%); }
+.solid { position: absolute; box-shadow: inset 0 2px 0 rgba(255, 255, 255, .28); }   /* colours come from the ramp in story.js */
+.solid-1 { left: 0; top: 420px; width: 620px; height: 120px; }
+.solid-2 { left: 620px; top: 266px; width: 340px; height: 274px; }
 .tile-label { font-size: 14px; font-weight: 900; color: #2A1608; background: rgba(255, 248, 242, .82); padding: 3px 10px; border-radius: 999px; }
 /* montage big steps: solid gradients, same family as the solid steps */
-.tiles { background: linear-gradient(180deg, var(--tone-top) 0%, var(--tone) 100%); box-shadow: inset 0 3px 0 rgba(255, 255, 255, .25); }
+.tiles { box-shadow: inset 0 2px 0 rgba(255, 255, 255, .28); }   /* colours come from the ramp in story.js */
 .slabs { left: 0; top: 0; width: 960px; height: 540px; }
 /* each mission = one solid step, stacked flush against the next riser */
 /* thin layers: flat bands, darkest at the bottom → lightest at the top (one orange ramp) */
 .slab {
   position: absolute; height: 22px; border-radius: 0; background: var(--c, #FF6A00);
-  box-shadow: inset 0 1px 0 rgba(255, 255, 255, .16);
+  box-shadow: inset 0 2px 0 rgba(255, 255, 255, .28), 0 1px 0 rgba(60, 20, 0, .18);
   font-size: 12px; font-weight: 900; color: var(--tc, #2A1608); padding-left: 12px; line-height: 22px; white-space: nowrap; overflow: hidden;
   transition: transform .45s cubic-bezier(.2, .8, .2, 1), opacity .45s;
 }
@@ -296,10 +296,10 @@ html.story-root body { background: var(--night); }
 /* ----- scene: montage ----- */
 .scene-montage { background: #5A4436; }
 .scene-montage.light { --fg: var(--ink); --sub: #5C4A3E; --kicker: var(--orange-ink); }
-.m-s2 { left: 0; top: 430px; width: 360px; height: 110px; --tone-top: #FF7A1A; --tone: #D85A12; }
-.m-s3 { left: 360px; top: 320px; width: 300px; height: 220px; --tone-top: #FFA766; --tone: #F07A2E; }
-.m-s4 { left: 660px; top: 210px; width: 300px; height: 330px; --tone-top: #FFE2C8; --tone: #FFB27A; }
-.m-door { left: 836px; top: 110px; width: 64px; height: 100px; }
+.m-s2 { left: 0; top: 430px; width: 360px; height: 110px; }
+.m-s3 { left: 360px; top: 320px; width: 300px; height: 220px; }
+.m-s4 { left: 660px; top: 210px; width: 300px; height: 330px; }
+.m-door { left: 840px; top: 110px; width: 56px; height: 100px; }   /* ×2.3 = the next scene's door (130×230) */
 
 /* ===== 청년 지원 프로그램 door (all scenes): bright doorway, leaf swung inward, light fanning over the floor ===== */
 .lightdoor { --open: 1; --floor: 60px; }

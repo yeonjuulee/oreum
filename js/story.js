@@ -312,7 +312,7 @@
 
   var HIT = { x: 410, y: 300 };                 // where the symbol strikes the wall
   var FLY_FROM = { x: -120, y: 40 };
-  var DOOR_X = X0 + 18 * B - 32;                 // centre of the landing step (cols 16–19)
+  var DOOR_X = X0 + 18 * B - 22;                 // door (44px wide) centred on the landing step (cols 16–19)
 
   // camera move at the end: 1·2단계 grow until they match the step-1 scene (scale ×2.14)
   var ZOOM = { s: 2.14, tx: 620 - 456 * 2.14, ty: 420 - 428 * 2.14 };
@@ -397,7 +397,9 @@
      ====================================================== */
   var MISSIONS = ['창문 열고 환기', '양치하기', '8시 기상', '샤워하기', '방 정리', '간단한 요리', '가족과 사진'];
   var S1 = { ground: 420, riser: 620, pitch: 22, left0: 140, dx: 62 };
-  var SLAB_TONES = ['#C9500F', '#E85D04', '#FF6A00', '#FF7F2A', '#FF9A52', '#FFB27A', '#FFC294'];
+  // one ramp, darkest at the bottom → lightest at the top (like light rising)
+  var SLAB_TONES = ['#8E3406', '#AD4108', '#CC500C', '#E86012', '#FF7A24', '#FF9A55', '#FFBE8C'];
+  var SLAB_TEXT = ['#FFF1E6', '#FFF1E6', '#FFF1E6', '#2A1608', '#2A1608', '#2A1608', '#2A1608'];
   var slabsEl = $('#slabs');
   MISSIONS.forEach(function (m, k) {
     var d = document.createElement('div');
@@ -406,6 +408,7 @@
     d.style.width = (S1.riser - S1.left0 - k * S1.dx) + 'px';
     d.style.top = (S1.ground - (k + 1) * S1.pitch) + 'px';
     d.style.setProperty('--c', SLAB_TONES[k]);
+    d.style.setProperty('--tc', SLAB_TEXT[k]);
     d.innerHTML = '<span class="habit">' + m + '</span>';
     slabsEl.appendChild(d);
   });
@@ -425,6 +428,7 @@
         t.style.left = x.toFixed(1) + 'px';
         t.style.top = (ground - P * (r + 1)).toFixed(1) + 'px';
         t.style.setProperty('--sc', STEP_TONES[step][(seed * 7) % 4]);
+        t.dataset.fade = (0.02 + ((seed * 13 + Math.abs(k) * 5) % 23) / 23 * 0.12).toFixed(3);   // each tile dissolves at its own moment
         box.appendChild(t);
       }
     }
@@ -438,7 +442,11 @@
     return Math.min(7, 5 + Math.floor(seg(p, 0.58, 0.78) * 3));
   }
 
+  var bTiles = null;
   function updateStep1(scene, p) {
+    // tiles dissolve one by one into the solid gradient steps
+    if (!bTiles) bTiles = $$('.btile', scene);
+    bTiles.forEach(function (t) { t.style.opacity = (1 - seg(p, +t.dataset.fade, +t.dataset.fade + 0.03)).toFixed(3); });
     var n = step1Count(p);
     var resting = p >= 0.42 && p < 0.58;
     var top = p >= 0.8;
@@ -486,20 +494,22 @@
       d.style.width = (g.riser - g.left0 - k * 54) + 'px';
       d.style.top = (g.ground - (k + 1) * 22) + 'px';
       d.style.setProperty('--c', SLAB_TONES[k + 1]);
+      d.style.setProperty('--tc', SLAB_TEXT[k + 1]);
       mSlabsEl.appendChild(d);
     }
   });
   var mSlabEls = $$('.slab', mSlabsEl);
   var mOru = $('#mOru');
   var lastMImg = 2, lastName = '';
-  var BG = [[0x5A, 0x44, 0x36], [0xC2, 0x58, 0x1A], [0xFF, 0xE9, 0xD9]];
+  // dusk → evening: the room darkens so the door's light stands out
+  var BG = [[0x5A, 0x44, 0x36], [0xA8, 0x4A, 0x15], [0x2A, 0x1C, 0x14]];
   function mixBg(t) {
     var a = t < 0.5 ? BG[0] : BG[1], b = t < 0.5 ? BG[1] : BG[2], u = t < 0.5 ? t * 2 : (t - 0.5) * 2;
     return 'rgb(' + a.map(function (v, i) { return Math.round(lerp(v, b[i], u)); }).join(',') + ')';
   }
   function updateMontage(scene, p) {
+    $('#mDoor').style.setProperty('--open', (0.35 + 0.65 * ease(seg(p, 0.6, 1))).toFixed(3));
     scene.style.background = mixBg(seg(p, 0.1, 0.95));
-    scene.classList.toggle('light', p > 0.78);
 
     var nA = p < 0.2 ? 0 : Math.min(5, 1 + Math.floor(seg(p, 0.2, 0.46) * 5));
     var nB = p < 0.56 ? 0 : Math.min(5, 1 + Math.floor(seg(p, 0.56, 0.84) * 5));
@@ -528,10 +538,12 @@
   /* ======================================================
      S09 door, S10 epilogue
      ====================================================== */
+  // the door swings open in the dark, then its light floods the room and the programs appear
   function updateDoor(scene, p) {
-    var t = ease(seg(p, 0.05, 0.45));
-    scene.style.setProperty('--open', t.toFixed(3));
-    scene.style.setProperty('--beam', t.toFixed(3));
+    $('#bigDoor').style.setProperty('--open', ease(seg(p, 0.05, 0.4)).toFixed(3));
+    var flood = ease(seg(p, 0.42, 0.7));
+    scene.style.setProperty('--flood', flood.toFixed(3));
+    scene.classList.toggle('flooded', flood > 0.5);
   }
   var town = $('#town');
   [5, 7, 4, 6, 5].forEach(function (rows) {
@@ -590,7 +602,7 @@
     });
     handlers[scene.dataset.scene](scene, p);
 
-    var onLight = scene.dataset.scene === 'door' || (scene.dataset.scene === 'montage' && p > 0.78);
+    var onLight = scene.dataset.scene === 'door' && p > 0.56;
     topbar.classList.toggle('on-light', onLight);
     ui.classList.toggle('on-light', onLight);
     var mode = onLight ? 'orange' : 'white';

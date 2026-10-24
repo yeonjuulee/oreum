@@ -165,7 +165,7 @@
             <img src="assets/oreumi-2.png" alt="" class="oru wall-oru-2" id="wallOru2" style="left:196px;top:500px">
             <img src="assets/oreumi-1.png" alt="" class="oru wall-oru-1" id="wallOru" style="left:262px;top:500px">
             <div class="blocks" id="blocks"></div>
-            <div class="wall-door" id="wallDoor"><span>청년 지원<br>프로그램</span></div>
+            <div class="wall-door lightdoor" id="wallDoor" style="--open:.85;--floor:16px"><span class="ld-glow"></span><span class="ld-floor"></span><span class="ld-open"></span><span class="ld-leaf"><i></i></span><span class="ld-sign">청년 지원 프로그램</span></div>
             <div class="impact" id="impact" aria-hidden="true"></div>
             <img src="assets/symbol-orange.png" alt="" class="wall-symbol" id="wallSymbol">
             <div class="step-labels" id="stepLabels">
@@ -207,6 +207,8 @@
       </div>
       <div class="stage-wrap">
         <div class="stage">
+          <div class="solid solid-1"></div>
+          <div class="solid solid-2"></div>
           <div class="bigtiles" id="bigTiles"></div>
           <span class="tile-label" style="left:22px;top:432px">1단계 숨고르기</span>
           <span class="tile-label" style="left:640px;top:278px">2단계 둘러보기</span>
@@ -252,7 +254,7 @@
           <div class="tiles m-s3"></div>
           <div class="tiles m-s4"></div>
           <div class="slabs" id="mSlabs"></div>
-          <div class="m-door"></div>
+          <div class="m-door lightdoor" id="mDoor" style="--open:.35;--floor:46px" aria-label="청년 지원 프로그램 문"><span class="ld-glow"></span><span class="ld-floor"></span><span class="ld-open"></span><span class="ld-leaf"><i></i></span><span class="ld-sign">청년 지원 프로그램</span></div>
           <img src="assets/oreumi-2.png" alt="" class="oru m-oru" id="mOru">
           <div class="stage-name" id="stageName">2단계 둘러보기</div>
         </div>
@@ -271,12 +273,11 @@
       </div>
       <div class="stage-wrap">
         <div class="stage">
-          <div class="beam"></div>
-          <div class="frame"><div class="door-panel"><span>청년 지원 프로그램</span></div></div>
+          <div class="big-door lightdoor" id="bigDoor" style="--open:0;--floor:170px" aria-label="청년 지원 프로그램 문"><span class="ld-glow"></span><span class="ld-floor"></span><span class="ld-open"></span><span class="ld-leaf"><i></i></span><span class="ld-sign">청년 지원 프로그램</span></div>
           <div class="programs">
-            <div class="program" data-in="0.35">청년도전지원사업</div>
-            <div class="program" data-in="0.42">청년미래센터</div>
-            <div class="program" data-in="0.49">일자리 첫걸음 보장센터</div>
+            <div class="program" data-in="0.55">청년도전지원사업</div>
+            <div class="program" data-in="0.61">청년미래센터</div>
+            <div class="program" data-in="0.67">일자리 첫걸음 보장센터</div>
           </div>
         </div>
       </div>

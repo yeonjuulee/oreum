@@ -238,8 +238,8 @@ html.story-root body { background: var(--night); }
 /* pixel tiles: dark wall tiles; the staircase tiles light up in one orange family per step */
 .blk { position: absolute; left: 0; top: 0; width: 22px; height: 22px; border-radius: 2px; background: var(--wc, #3A302A); will-change: transform, opacity; transition: background .7s ease; }
 .blk.keep.lit { background: var(--sc, #FF6A00); }
-.wall-door { left: 0; top: 0; opacity: 0; width: 64px; height: 64px; border: 2px solid var(--orange); border-bottom: none; border-radius: 6px 6px 0 0; background: #2E2621; display: grid; place-items: center; text-align: center; }
-.wall-door span { font-size: 9px; font-weight: 700; color: #FFB27A; line-height: 1.25; }
+.wall-door { left: 0; top: 0; opacity: 0; width: 44px; height: 64px; }
+.wall-door .ld-sign { font-size: 9px; padding: 2px 8px; }
 .wall-symbol { left: 0; top: 0; width: 70px; opacity: 0; z-index: 3; transform-origin: 35px 35px; filter: drop-shadow(0 0 18px rgba(255, 106, 0, .75)); will-change: transform, opacity; }
 .impact { left: 0; top: 0; width: 80px; height: 80px; border-radius: 50%; opacity: 0; z-index: 2; pointer-events: none; border: 3px solid rgba(255, 178, 122, .9); box-shadow: 0 0 30px rgba(255, 106, 0, .6), inset 0 0 20px rgba(255, 106, 0, .4); }
 .step-labels { left: 0; top: 0; width: 960px; height: 540px; opacity: 0; transition: opacity .5s; }
@@ -256,25 +256,26 @@ html.story-root body { background: var(--night); }
 .cam { left: 0; top: 0; width: 960px; height: 540px; transform-origin: 0 0; will-change: transform; }
 .cam > * { position: absolute; }
 .bigtiles { left: 0; top: 0; width: 960px; height: 540px; }
-.btile { position: absolute; width: 47px; height: 47px; border-radius: 4px; background: var(--sc); }
+.btile { position: absolute; width: 47px; height: 47px; border-radius: 4px; background: var(--sc); transition: opacity .5s ease; }
+/* solid gradient steps that the tiles dissolve into */
+.solid { position: absolute; box-shadow: inset 0 3px 0 rgba(255, 255, 255, .22); }
+.solid-1 { left: 0; top: 420px; width: 618px; height: 120px; background: linear-gradient(180deg, #D85A12 0%, #A63A08 100%); }
+.solid-2 { left: 620px; top: 266px; width: 340px; height: 274px; background: linear-gradient(180deg, #FF7A1A 0%, #D85A12 100%); }
 .tile-label { font-size: 14px; font-weight: 900; color: #2A1608; background: rgba(255, 248, 242, .82); padding: 3px 10px; border-radius: 999px; }
-/* tile grid for big steps drawn with CSS (montage) */
-.tiles {
-    background-color: var(--tone);
-    background-image: repeating-linear-gradient(90deg, transparent 0 47px, rgba(20, 16, 14, .55) 47px 51.4px), repeating-linear-gradient(180deg, transparent 0 47px, rgba(20, 16, 14, .55) 47px 51.4px);
-}
+/* montage big steps: solid gradients, same family as the solid steps */
+.tiles { background: linear-gradient(180deg, var(--tone-top) 0%, var(--tone) 100%); box-shadow: inset 0 3px 0 rgba(255, 255, 255, .25); }
 .slabs { left: 0; top: 0; width: 960px; height: 540px; }
 /* each mission = one solid step, stacked flush against the next riser */
+/* thin layers: flat bands, darkest at the bottom → lightest at the top (one orange ramp) */
 .slab {
-    position: absolute; height: 22px; border-radius: 3px; background-color: var(--c, #FF6A00);
-    background-image: repeating-linear-gradient(90deg, transparent 0 20px, rgba(20, 16, 14, .5) 20px 22px);
-    box-shadow: inset 0 -2px 0 rgba(20, 16, 14, .5);
-    font-size: 12px; font-weight: 900; color: #2A1608; padding-left: 12px; line-height: 23px; white-space: nowrap; overflow: hidden;
-    transition: transform .35s cubic-bezier(.2, .8, .2, 1), opacity .35s, background .3s;
+    position: absolute; height: 22px; border-radius: 0; background: var(--c, #FF6A00);
+    box-shadow: inset 0 1px 0 rgba(255, 255, 255, .16);
+    font-size: 12px; font-weight: 900; color: var(--tc, #2A1608); padding-left: 12px; line-height: 22px; white-space: nowrap; overflow: hidden;
+    transition: transform .45s cubic-bezier(.2, .8, .2, 1), opacity .45s;
 }
 .slab .habit { opacity: 0; transition: opacity .4s; }
 .slab.named .habit { opacity: 1; }
-.slab.pending { background: transparent; box-shadow: none; outline: 1.5px dashed rgba(255, 178, 122, .4); outline-offset: -2px; transform: translateX(24px); }
+.slab.pending { opacity: 0; transform: translateX(40px); }
 .slab.pending .habit { opacity: 0; }
 .step-oru { left: 0; top: 0; width: 76px; transform: translateY(-100%) scaleX(var(--flip, 1)); transition: left .35s ease, top .35s ease; }
 .zz { left: 0; top: 0; font: 700 16px var(--font-display); color: #C9B8AA; opacity: 0; transition: opacity .4s; }
@@ -295,22 +296,50 @@ html.story-root body { background: var(--night); }
 /* ----- scene: montage ----- */
 .scene-montage { background: #5A4436; }
 .scene-montage.light { --fg: var(--ink); --sub: #5C4A3E; --kicker: var(--orange-ink); }
-.m-s2 { left: 0; top: 430px; width: 360px; height: 110px; --tone: #FF6A00; }
-.m-s3 { left: 360px; top: 320px; width: 300px; height: 220px; --tone: #FF9A52; }
-.m-s4 { left: 660px; top: 210px; width: 300px; height: 330px; --tone: #FFC294; }
-.m-door { left: 830px; top: 104px; width: 76px; height: 106px; border: 3px solid var(--orange); border-bottom: none; border-radius: 6px 6px 0 0; background: var(--cream); }
+.m-s2 { left: 0; top: 430px; width: 360px; height: 110px; --tone-top: #FF7A1A; --tone: #D85A12; }
+.m-s3 { left: 360px; top: 320px; width: 300px; height: 220px; --tone-top: #FFA766; --tone: #F07A2E; }
+.m-s4 { left: 660px; top: 210px; width: 300px; height: 330px; --tone-top: #FFE2C8; --tone: #FFB27A; }
+.m-door { left: 836px; top: 110px; width: 64px; height: 100px; }
+
+/* ===== 청년 지원 프로그램 door (all scenes): bright doorway, leaf swung inward, light fanning over the floor ===== */
+.lightdoor { --open: 1; --floor: 60px; }
+.lightdoor > span { position: absolute; pointer-events: none; }
+.ld-glow { left: -90%; right: -90%; top: -45%; bottom: -25%; background: radial-gradient(closest-side, rgba(255, 150, 60, .5), rgba(255, 106, 0, .12) 60%, rgba(255, 106, 0, 0)); opacity: var(--open); }
+.ld-floor {
+    top: 100%; left: -80%; right: -80%; height: var(--floor); opacity: var(--open);
+    clip-path: polygon(30.8% 0, 69.2% 0, 100% 100%, 0 100%);
+    background: linear-gradient(180deg, rgba(255, 244, 228, .95) 0%, rgba(255, 190, 120, .5) 40%, rgba(255, 120, 30, 0) 100%);
+}
+.ld-open {
+    inset: 0; opacity: calc(.18 + var(--open) * .82);
+    background: linear-gradient(180deg, #FFFFFF 0%, #FFF8EC 65%, #FFEBD2 100%);
+    box-shadow: 0 0 4px 1px rgba(255, 236, 210, .95), 0 0 18px 4px rgba(255, 170, 90, .75), 0 0 60px 14px rgba(255, 106, 0, .35);
+}
+.ld-leaf {
+    left: 0; top: 0; bottom: 0; width: 100%; transform-origin: 0 50%;
+    transform: perspective(420px) rotateY(calc(var(--open) * -74deg));
+    background: linear-gradient(90deg, #2A221D 0%, #3E322B 100%);
+    box-shadow: inset -3px 0 0 rgba(255, 220, 180, .6), inset 0 0 0 1px rgba(0, 0, 0, .3);
+}
+.ld-leaf i { position: absolute; right: 12%; top: 52%; width: 9%; min-width: 3px; height: 2%; min-height: 2px; border-radius: 2px; background: #CDBFB3; }
+.ld-sign { left: 50%; bottom: calc(100% + 8px); transform: translateX(-50%); white-space: nowrap; font: 900 11px/1.4 var(--font-body); color: #FFE9D9; background: rgba(20, 16, 14, .8); border: 1px solid rgba(255, 178, 122, .55); padding: 3px 10px; border-radius: 999px; }
+.scene-door.flooded .ld-sign { color: #7A3300; background: var(--cream); }
+.ld-leaf { transition: background .8s ease; }
+.scene-door.flooded .ld-leaf { background: linear-gradient(90deg, #E9D6C5 0%, #F6E9DC 100%); }
 .m-oru { left: 0; top: 0; width: 72px; transform: translateY(-100%); transition: left .3s ease, top .3s ease; }
-.stage-name { right: 24px; top: 20px; font-size: 26px; font-weight: 900; letter-spacing: -0.02em; color: var(--fg); }
+.stage-name { left: 24px; top: 20px; font-size: 26px; font-weight: 900; letter-spacing: -0.02em; color: var(--fg); }
 .stage-name.flash { animation: flash .6s ease; }
 @keyframes flash { from { opacity: 0; transform: translateY(8px); } to { opacity: 1; transform: none; } }
 
 /* ----- scene: door ----- */
-.scene-door { background: var(--cream); --fg: var(--ink); --sub: #5C4A3E; --kicker: var(--orange-ink); }
-.beam { left: 330px; top: 0; width: 300px; height: 540px; opacity: var(--beam, 0); background: radial-gradient(50% 60% at 50% 40%, rgba(255, 194, 77, .75), rgba(255, 194, 77, 0) 75%); }
-.frame { left: 400px; top: 40px; width: 160px; height: 250px; border: 4px solid var(--orange); border-bottom: none; border-radius: 10px 10px 0 0; perspective: 900px; background: #FFF3D6; }
-.door-panel { position: absolute; inset: 0; background: #F4D7C2; border-radius: 6px 6px 0 0; transform-origin: 0 50%; transform: rotateY(calc(var(--open, 0) * -82deg)); display: grid; place-items: start center; padding-top: 18px; box-shadow: inset 0 0 0 2px #E8BFA0; }
-.door-panel span { font-size: 12px; font-weight: 700; color: #7A3300; background: var(--cream); padding: 4px 8px; border-radius: 4px; }
-.programs { left: 150px; top: 330px; width: 660px; display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 14px; }
+/* door scene: a dark room, the door opens, its light floods the room, then the programs appear */
+.scene-door { background: radial-gradient(70% 80% at 65% 40%, #241B16 0%, #100D0C 75%); }
+.scene-door::before { content: ""; position: absolute; inset: 0; z-index: 0; pointer-events: none; opacity: var(--flood, 0); background: radial-gradient(80% 90% at 65% 40%, #FFFDF8 0%, #FFF3E6 55%, #FFE2C8 100%); }
+.scene-door > * { position: relative; z-index: 1; }
+.scene-door.flooded { --fg: var(--ink); --sub: #5C4A3E; --kicker: var(--orange-ink); }
+.scene-door .line h2, .scene-door .kicker { transition: color .6s; }
+.big-door { left: 415px; top: 40px; width: 130px; height: 230px; }
+.programs { z-index: 2; left: 150px; top: 330px; width: 660px; display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 14px; }
 .program { padding: 18px; border-radius: 12px; background: #fff; box-shadow: 0 1px 0 var(--line), 0 10px 30px -18px rgba(51, 46, 42, .35); text-align: center; font-size: 17px; font-weight: 900; color: var(--ink); opacity: 0; transform: translateY(10px); transition: opacity .45s, transform .45s; }
 .program.on { opacity: 1; transform: none; }
 

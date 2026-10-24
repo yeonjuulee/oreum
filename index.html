@@ -55,28 +55,24 @@
         </section>
 
         <!-- S00–S02 : 두 개의 방 -->
-        <section class="scene scene-building" data-scene="building" data-chapter="두 개의 방" data-len="4.2">
+        <section class="scene scene-building" data-scene="building" data-chapter="두 개의 방" data-len="5">
             <div class="copy">
                 <div class="lines">
                     <div class="line" data-in="0" data-out="0.3">
-                        <p class="kicker">이 건물 안에,</p>
-                        <h2>두 명의 청년이 있습니다.</h2>
+                        <p class="kicker">이 건물 안에도,</p>
+                        <h2>방 밖으로 나오지 못한 청년들이 있어요.</h2>
                     </div>
-                    <div class="line" data-in="0.3" data-out="0.65">
+                    <div class="line" data-in="0.3" data-out="0.62">
                         <p class="kicker">1층의 방 · 일상 붕괴형</p>
                         <h2>하루가 언제 시작되고 끝나는지 모르는 방.</h2>
-                        <ul class="rules">
-                            <li>1시간 이상 외출한 날 <b>주 0~1일</b></li>
-                            <li>누군가와 대화한 날 <b>주 0~1일</b></li>
-                        </ul>
+                        <p class="desc">밤과 낮이 뒤바뀌고, 씻고 먹는 일도 자꾸 미뤄져요. 일주일 내내 현관 밖으로 나가지 않고, 누구와도 말하지 않는 날이 이어집니다.</p>
+                        <p class="need"><span>먼저 필요한 것</span>무너진 생활 습관을 되찾는 일</p>
                     </div>
-                    <div class="line" data-in="0.65" data-out="1.01">
+                    <div class="line" data-in="0.62" data-out="1.01">
                         <p class="kicker">2층의 방 · 외출 장벽형</p>
-                        <h2>하루는 돌아가지만, 문 앞에서 멈추는 방.</h2>
-                        <ul class="rules">
-                            <li>외출한 날 <b>주 2~3일</b></li>
-                            <li>대화한 날 <b>주 2일 이상</b></li>
-                        </ul>
+                        <h2>하루는 돌아가지만, 현관 앞에서 멈추는 방.</h2>
+                        <p class="desc">제때 일어나 불을 켜고 끼니도 챙겨요. 그런데 사람을 마주해야 하는 곳에 가려고 하면, 신발을 신다가도 한숨과 함께 돌아서게 됩니다.</p>
+                        <p class="need"><span>먼저 필요한 것</span>사람을 다시 만나는 연습</p>
                     </div>
                 </div>
             </div>
@@ -90,6 +86,12 @@
                         <div class="tank"></div>
                         <div class="parapet"></div>
                         <div class="facade"></div>
+                        <!-- terraces on the right side of the building (the characters step out here in the next scene) -->
+                        <div class="terrace" style="left:656px;top:118px"><i></i></div>
+                        <div class="terrace" style="left:656px;top:206px"><i></i></div>
+                        <div class="terrace" style="left:656px;top:294px"><i></i></div>
+                        <div class="terrace" style="left:656px;top:382px"><i></i></div>
+                        <div class="terrace" style="left:656px;top:470px"><i></i></div>
                         <!-- 5F -->
                         <div class="unit" style="left:300px;top:60px"><div class="w"></div><div class="rail"></div></div>
                         <div class="unit" style="left:420px;top:60px"><div class="w"></div><div class="rail"></div></div>
@@ -104,51 +106,98 @@
                         <div class="unit" style="left:540px;top:236px"><div class="w warm"></div><div class="rail"></div></div>
                         <!-- 2F : 외출 장벽형 -->
                         <div class="unit" style="left:300px;top:324px"><div class="w"></div><div class="rail"></div></div>
-                        <div class="unit u-b" style="left:420px;top:324px"><div class="w"><span class="curtain l"></span><span class="curtain r"></span><img class="who" src="assets/oreumi-2.png" alt="2층 방의 오르미"></div><div class="rail"></div></div>
+                        <div class="unit u-b" style="left:420px;top:324px"><div class="w"><span class="curtain l"></span><span class="curtain r"></span></div><div class="rail"></div></div>
                         <div class="unit" style="left:540px;top:324px"><div class="w dim"></div><div class="rail"></div></div>
                         <!-- 1F : 입구 + 일상 붕괴형 -->
                         <div class="unit entry" style="left:300px;top:412px"><div class="canopy"></div><div class="door"></div></div>
-                        <div class="unit u-a" style="left:420px;top:412px"><div class="w"><span class="curtain l"></span><span class="curtain r"></span><img class="who" src="assets/oreumi-1.png" alt="1층 방의 오르미"></div></div>
+                        <div class="unit u-a" style="left:420px;top:412px"><div class="w"><span class="curtain l"></span><span class="curtain r"></span></div></div>
                         <div class="unit" style="left:540px;top:412px"><div class="w"></div></div>
+                    </div>
+
+                    <!-- 1층 방 : 어둡고, 치우지 못한 것들이 쌓인 방 -->
+                    <div class="room room-a" aria-label="불 꺼진 1층 방. 커튼이 닫혀 있고 바닥에 컵라면 용기와 페트병이 흩어져 있다.">
+                        <div class="r-wall"></div>
+                        <div class="r-floor"></div>
+                        <div class="r-window"><span class="r-curtain l"></span><span class="r-curtain r"></span><span class="r-leak"></span></div>
+                        <div class="r-clock"><i class="h"></i><i class="m"></i></div>
+                        <div class="r-bed"><span class="frame"></span><span class="mattress"></span><span class="pillow"></span><span class="blanket"></span></div>
+                        <div class="r-box" style="left:470px;top:376px"></div>
+                        <div class="r-box sm" style="left:520px;top:400px"></div>
+                        <span class="trash cup" style="left:262px;top:452px"></span>
+                        <span class="trash cup tip" style="left:318px;top:476px"></span>
+                        <span class="trash cup" style="left:612px;top:470px"></span>
+                        <span class="trash bottle" style="left:200px;top:486px"></span>
+                        <span class="trash bottle b2" style="left:552px;top:494px"></span>
+                        <span class="trash bag" style="left:150px;top:448px"></span>
+                        <span class="trash bag b2" style="left:690px;top:480px"></span>
+                        <div class="r-phone"></div>
+                        <img class="r-oru" src="assets/oreumi-1.png" alt="바닥에 누워 휴대폰을 보는 오르미">
+                        <div class="r-shade"></div>
+                    </div>
+
+                    <!-- 2층 방 : 불이 켜진 방, 현관 앞에서 돌아서는 오르미 -->
+                    <div class="room room-b" id="roomB" aria-label="불이 켜진 2층 방. 오르미가 현관 앞까지 갔다가 한숨을 쉬고 돌아선다.">
+                        <div class="r-wall"></div>
+                        <div class="r-floor"></div>
+                        <div class="r-lamp"><span class="cord"></span><span class="shade"></span><span class="cone"></span></div>
+                        <div class="r-window open"><span class="r-curtain l"></span><span class="r-curtain r"></span></div>
+                        <div class="r-bed made"><span class="frame"></span><span class="mattress"></span><span class="pillow"></span><span class="blanket"></span></div>
+                        <div class="r-table"><span class="top"></span><span class="leg l"></span><span class="leg r"></span><span class="mug"></span><span class="plant"></span></div>
+                        <div class="r-door"><span class="leaf"><i class="knob"></i><i class="hole"></i></span></div>
+                        <div class="r-mat"></div>
+                        <span class="r-shoe" style="left:736px"></span><span class="r-shoe" style="left:766px"></span>
+                        <img class="r-oru" id="roomOru" src="assets/oreumi-2.png" alt="현관 앞에서 멈춰 선 오르미">
+                        <div class="sigh" id="sigh"><span>하아…</span><i></i><i></i></div>
                     </div>
                 </div>
             </div>
         </section>
 
         <!-- S03–S04 : 벽, 그리고 네 계단 -->
-        <section class="scene scene-wall" data-scene="wall" data-chapter="문 밖의 벽" data-len="7.2">
+        <section class="scene scene-wall" data-scene="wall" data-chapter="문 밖의 벽" data-len="10">
             <div class="copy">
                 <div class="lines">
-                    <div class="line" data-in="0" data-out="0.176">
-                        <p class="kicker">문을 열고 나왔지만,</p>
-                        <h2>그 앞엔 벽이 있었어요.</h2>
+                    <div class="line" data-in="0" data-out="0.12">
+                        <p class="kicker">방 밖으로 나와 보면,</p>
+                        <h2>눈앞에 높은 벽이 서 있어요.</h2>
                     </div>
-                    <div class="line" data-in="0.176" data-out="0.317">
+                    <div class="line" data-in="0.12" data-out="0.26">
                         <p class="kicker">청년 지원 프로그램</p>
-                        <h2>도움은 분명 있습니다. 다만, 저 위에 있습니다.</h2>
+                        <h2>도움의 문은 분명 있고, 계속 늘고 있어요.</h2>
+                        <div class="budget" aria-label="고용노동부 청년 지원 예산 2025년 716억 원, 2026년 758억 원, 2027년 903억 원">
+                            <div class="bg-bar" style="--v:716"><b>716억</b><i></i><span>2025</span></div>
+                            <div class="bg-bar" style="--v:758"><b>758억</b><i></i><span>2026</span></div>
+                            <div class="bg-bar hi" style="--v:903"><b>903억</b><i></i><span>2027</span></div>
+                            <p class="bg-note">고용노동부 청년 지원 예산 · <b>2년 새 26%</b> 증가</p>
+                        </div>
+                        <p class="source">출처: 고용노동부 「2026년 고용노동부 청년고용 관련 예산안」, 「청년의 도전/성장을 고용노동부가 지원하겠습니다」</p>
                     </div>
-                    <div class="line" data-in="0.317" data-out="0.44">
-                        <p class="kicker">그래도</p>
-                        <h2><em>80.8%</em>는 여기서 벗어나고 싶다고 말합니다.</h2>
+                    <div class="line" data-in="0.26" data-out="0.38">
+                        <p class="kicker">그런데</p>
+                        <h2>모든 문의 첫 칸은 <em>사람을 직접 만나는 일</em>이에요.</h2>
+                        <p class="desc">센터에 찾아가고, 전화로 상담을 신청하고, 처음 보는 사람과 마주 앉아야 시작돼요.</p>
+                        <blockquote class="quote">“고용노동센터나 일자리센터는 자신감이 없어서 못 갔어요”</blockquote>
+                        <p class="source">출처: 보건복지부 「고립·은둔 청년, 이제 국가가 돕겠습니다」 2023.12.13. 심층조사 결과</p>
                     </div>
-                    <div class="line" data-in="0.44" data-out="0.54">
-                        <p class="kicker">oreum</p>
-                        <h2>오르지 못한 게 아니라, 한 칸이 너무 높았던 거예요.</h2>
+                    <div class="line" data-in="0.38" data-out="0.48">
+                        <p class="kicker">누군가에게는</p>
+                        <h2>한 번에 뛰어오를 수 있는 높이지만,</h2>
                     </div>
-                    <div class="line" data-in="0.54" data-out="0.757">
-                        <p class="kicker">그 높은 한 칸,</p>
+                    <div class="line" data-in="0.48" data-out="0.6">
+                        <p class="kicker">누군가에게는</p>
+                        <h2>아무리 뛰어도 닿지 않는 높이예요.</h2>
+                        <p class="desc">고립·은둔 청년의 <b>80.8%</b>는 지금에서 벗어나고 싶다고 말해요. 마음이 없는 게 아니라, 첫 칸이 너무 높은 거예요.</p>
+                        <p class="source">출처: 보건복지부·한국보건사회연구원 「고립·은둔 청년 실태조사 연구」, 2023</p>
+                    </div>
+                    <div class="line" data-in="0.6" data-out="0.76">
+                        <p class="kicker">그 높은 첫 칸,</p>
                         <h2>이제 <em>오름</em>이 도와줄게요!</h2>
                     </div>
-                    <div class="line" data-in="0.757" data-out="1.01">
+                    <div class="line" data-in="0.76" data-out="1.01">
                         <p class="kicker">벽을,</p>
                         <h2>오를 수 있는 네 개의 계단으로.</h2>
+                        <p class="desc">생활 습관부터 사람 만나기까지. 각자 멈춰 선 칸에서 시작해, 지원의 문 앞까지 스스로 올라가요.</p>
                     </div>
-                </div>
-                <div class="stats" id="stats">
-                    <div class="stat"><b><span id="statMin">282</span>분</b><span>하루 중 혼자인 시간</span></div>
-                    <div class="stat"><b>+90분</b><span>5년 전보다 늘어난 시간</span></div>
-                    <div class="stat"><b>71.7만</b><span>이렇게 하루를 보내는 청년</span></div>
-                    <p class="source">통계 출처: [출처 표기]</p>
                 </div>
             </div>
             <div class="stage-wrap">
@@ -160,19 +209,31 @@
                             <span class="cw lit" style="left:24px;top:22px"></span><span class="cw" style="left:106px;top:22px"></span>
                             <span class="cw" style="left:24px;top:110px"></span><span class="cw lit" style="left:106px;top:110px"></span>
                             <span class="cw lit" style="left:24px;top:198px"></span><span class="cw" style="left:106px;top:198px"></span>
-                            <span class="entry-door"></span>
+                            <span class="cw" style="left:24px;top:286px"></span><span class="cw" style="left:106px;top:286px"></span>
                         </div>
-                        <img src="assets/oreumi-2.png" alt="" class="oru wall-oru-2" id="wallOru2" style="left:196px;top:500px">
-                        <img src="assets/oreumi-1.png" alt="" class="oru wall-oru-1" id="wallOru" style="left:262px;top:500px">
+                        <span class="t-door" style="top:270px"></span>
+                        <span class="t-door" style="top:358px"></span>
+                        <span class="t-door" style="top:446px"></span>
+                        <img src="assets/oreumi-4.png" alt="" class="oru wall-oru w3" id="wallOru3">
+                        <img src="assets/oreumi-2.png" alt="" class="oru wall-oru w2" id="wallOru2">
+                        <img src="assets/oreumi-1.png" alt="" class="oru wall-oru w1" id="wallOru">
+                        <div class="terrace" style="left:186px;top:294px"><i></i></div>
+                        <div class="terrace" style="left:186px;top:382px"><i></i></div>
+                        <div class="terrace" style="left:186px;top:470px"><i></i></div>
                         <div class="blocks" id="blocks"></div>
-                        <div class="wall-door lightdoor" id="wallDoor" style="--open:.85;--floor:16px"><span class="ld-glow"></span><span class="ld-floor"></span><span class="ld-open"></span><span class="ld-leaf"><i></i></span><span class="ld-sign">청년 지원 프로그램</span></div>
+                        <div class="wall-doors" id="wallDoors">
+                            <div class="wall-door lightdoor" style="left:638px"><span class="ld-glow"></span><span class="ld-floor"></span><span class="ld-open"></span><span class="ld-leaf"><i></i></span><span class="ld-sign">청년성장<br>프로젝트</span></div>
+                            <div class="wall-door lightdoor" style="left:710px"><span class="ld-glow"></span><span class="ld-floor"></span><span class="ld-open"></span><span class="ld-leaf"><i></i></span><span class="ld-sign">청년도전<br>지원사업</span></div>
+                            <div class="wall-door lightdoor" style="left:782px"><span class="ld-glow"></span><span class="ld-floor"></span><span class="ld-open"></span><span class="ld-leaf"><i></i></span><span class="ld-sign">일자리 첫걸음<br>보장센터</span></div>
+                            <div class="wall-door lightdoor" style="left:854px"><span class="ld-glow"></span><span class="ld-floor"></span><span class="ld-open"></span><span class="ld-leaf"><i></i></span><span class="ld-sign">청년<br>미래센터</span></div>
+                        </div>
                         <div class="impact" id="impact" aria-hidden="true"></div>
                         <img src="assets/symbol-orange.png" alt="" class="wall-symbol" id="wallSymbol">
                         <div class="step-labels" id="stepLabels">
-                            <span style="left:362px;top:382px;--sc:#E0601A"><i>1단계</i><b>숨고르기</b></span>
-                            <span style="left:458px;top:310px;--sc:#FF6A00"><i>2단계</i><b>둘러보기</b></span>
-                            <span style="left:554px;top:238px;--sc:#FF9A52"><i>3단계</i><b>마주하기</b></span>
-                            <span style="left:650px;top:166px;--sc:#FFC294"><i>4단계</i><b>도전하기</b></span>
+                            <span style="left:305px;top:457px;--sc:#FF9A52"><i>1단계</i><b>숨고르기</b></span>
+                            <span style="left:385px;top:409px;--sc:#FF9A52"><i>2단계</i><b>둘러보기</b></span>
+                            <span style="left:465px;top:361px;--sc:#FFB27A"><i>3단계</i><b>마주하기</b></span>
+                            <span style="left:545px;top:313px;--sc:#FFC294"><i>4단계</i><b>도전하기</b></span>
                         </div>
                     </div>
                 </div>

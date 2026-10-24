@@ -253,15 +253,16 @@
     }
 
     /* ======================================================
-       S00–S02 apartment: camera moves to each window
+       S00–S02 apartment: the camera dives into each window, then that room fades in
        ====================================================== */
     var CAM = [
         { z: 1, tx: 0, ty: 10 },
-        { z: 2.2, tx: 480 - 480 * 2.2, ty: 290 - 452 * 2.2 },
-        { z: 2.2, tx: 480 - 480 * 2.2, ty: 290 - 364 * 2.2 }
+        { z: 6, tx: 480 - 480 * 6, ty: 270 - 452 * 6 },     // 1F window
+        { z: 6, tx: 480 - 480 * 6, ty: 270 - 364 * 6 }      // 2F window
     ];
+    var roomOru = $('#roomOru'), sigh = $('#sigh');
     function updateBuilding(scene, p) {
-        var ph = p < 0.3 ? 0 : (p < 0.65 ? 1 : 2);
+        var ph = p < 0.3 ? 0 : (p < 0.62 ? 1 : 2);
         if (scene.dataset.phase !== String(ph)) {
             scene.dataset.phase = ph;
             var apt = $('#apt');
@@ -269,15 +270,25 @@
             apt.style.setProperty('--tx', CAM[ph].tx + 'px');
             apt.style.setProperty('--ty', CAM[ph].ty + 'px');
         }
+        // 2층 방: 현관까지 걸어가서 → 멈춰 한숨 → 돌아선다
+        var walk = ease(seg(p, 0.68, 0.8)), back = ease(seg(p, 0.92, 1));
+        var x = lerp(330, 630, walk) - 90 * back;
+        var sighing = p >= 0.8 && p < 0.94;
+        roomOru.style.setProperty('--x', x.toFixed(1) + 'px');
+        roomOru.style.setProperty('--flip', p >= 0.92 ? -1 : 1);
+        roomOru.style.setProperty('--squash', sighing ? 0.93 : 1);
+        sigh.style.setProperty('--x', (x - 40).toFixed(1) + 'px');
+        sigh.classList.toggle('on', sighing);
     }
 
     /* ======================================================
-       S03–S04 wall: the oreum symbol flies in and hits the wall,
-       the wall shakes and collapses, only the staircase stays
+       S03–S04 wall: the youths step out onto their terraces. Support doors stand on top of the wall.
+       3F jumps up easily; 1F · 2F can't reach. The oreum symbol breaks the wall into stairs.
        ====================================================== */
-    /* 20 × 16 pixel tiles (24px). Step s (0–4) = columns 4s–4s+3, 3(s+1) tiles high.
-       Steps 0–3 = 1~4단계, step 4 = the landing where the 청년 지원 프로그램 door stands. */
-    var GROUND = 500, B = 24, COLS = 20, ROWS = 16, X0 = 360;
+    /* 38 × 15 pixel tiles (16px). Columns 0–19 = 1~4단계 (5 columns each, 3(s+1) tiles high);
+       columns 20–37 = the plateau that holds the four 지원 프로그램 doors and never falls. */
+    var GROUND = 500, B = 16, COLS = 38, ROWS = 15, X0 = 300, SW = 5, PLAT = 20;
+    var TOP = GROUND - ROWS * B;                  // 260: top of the wall
     var WALL_TONES = ['#2F2723', '#362D28', '#3D332C', '#2A231F'];
     var STEP_TONES = [
         ['#B8430A', '#C9500F', '#D85A12', '#A63A08'],
@@ -291,8 +302,8 @@
     (function buildBlocks() {
         for (var r = 0; r < ROWS; r++) {
             for (var c = 0; c < COLS; c++) {
-                var stepIdx = Math.floor(c / 4);
-                var keep = r < 3 * (stepIdx + 1);
+                var stepIdx = c < PLAT ? Math.floor(c / SW) : 4;
+                var keep = stepIdx === 4 || r < 3 * (stepIdx + 1);
                 var seed = (r * 31 + c * 17 + r * c) % 23;
                 var d = document.createElement('div');
                 d.className = 'blk' + (keep ? ' keep' : '');
@@ -310,35 +321,45 @@
         }
     })();
 
-    var HIT = { x: 410, y: 300 };                 // where the symbol strikes the wall
+    var HIT = { x: 430, y: 330 };                 // where the symbol strikes the wall (left part, over the future stairs)
     var FLY_FROM = { x: -120, y: 40 };
-    var DOOR_X = X0 + 18 * B - 22;                 // door (44px wide) centred on the landing step (cols 16–19)
+    var doors = $$('.wall-door');
+    var DOOR1 = 656;                              // centre of the first door (3F walks in here)
 
-    // camera move at the end: 1·2단계 grow until they match the step-1 scene (scale ×2.14)
-    var ZOOM = { s: 2.14, tx: 620 - 456 * 2.14, ty: 420 - 428 * 2.14 };
+    // the youths: feet points on their terraces, and where they land on the stairs
+    var TX = 222, FLOOR = [494, 406, 318];        // 1F, 2F, 3F terrace floors
+    var oru1 = $('#wallOru'), oru2 = $('#wallOru2'), oru3 = $('#wallOru3');
+    function put(el, x, y, o, sc) {
+        el.style.transform = 'translate(' + x.toFixed(1) + 'px,' + y.toFixed(1) + 'px) translate(-50%,-100%) scale(' + (sc || 1) + ')';
+        el.style.opacity = o;
+    }
+    function arc(a, b, t, h) { return [lerp(a[0], b[0], t), lerp(a[1], b[1], t) - 4 * h * t * (1 - t)]; }
+    // a jump that hits the wall face and drops back onto the terrace
+    function tryJump(base, t, h) { return [TX + 50 * Math.sin(Math.PI * t), base - h * Math.sin(Math.PI * t)]; }
 
-    function updateWall(scene, pRaw) {
-        var p = clamp(pRaw / 0.88);                  // wall story runs on the first 88%
-        var zoom = ease(seg(pRaw, 0.9, 1));          // last 10%: zoom into 1·2단계
+    // camera move at the end: 1·2단계 grow until they match the step-1 scene (step 1 tread → y 420, riser → x 620)
+    var ZS = 154 / (3 * B);
+    var ZOOM = { s: ZS, tx: 620 - (X0 + SW * B) * ZS, ty: 420 - (GROUND - 3 * B) * ZS };
+
+    function updateWall(scene, p) {
+        var zoom = ease(seg(p, 0.92, 1));            // last 8%: zoom into 1·2단계
         var cam = $('#wallCam');
         cam.style.transform = 'translate(' + (ZOOM.tx * zoom).toFixed(1) + 'px,' + (ZOOM.ty * zoom).toFixed(1) + 'px) scale(' + lerp(1, ZOOM.s, zoom).toFixed(4) + ')';
         var fadeOut = 1 - seg(zoom, 0, 0.5);
-        $('#wallOru').style.opacity = fadeOut;
-        $('#wallOru2').style.opacity = fadeOut;
-        $('.corner', scene).style.opacity = fadeOut;
-        $('#stepLabels').style.opacity = p > 0.92 ? fadeOut : 0;
+        $$('.corner, .terrace, .t-door', scene).forEach(function (el) { el.style.opacity = fadeOut; });
+        $('#stepLabels').style.opacity = (p > 0.86 ? 1 : 0) * fadeOut;
 
-        var built = seg(p, 0.02, 0.3) * blocks.length;
-        var fly = seg(p, 0.5, 0.6);                  // symbol flies in
-        var hit = seg(p, 0.6, 0.68);                 // impact: shake + crack
-        var fallT = seg(p, 0.68, 0.88);              // non-stair tiles fall
-        var shake = (p >= 0.6 && p < 0.68) ? Math.sin(p * 1400) * 7 * (1 - hit) : 0;
+        var built = seg(p, 0.02, 0.12) * blocks.length;
+        var fly = seg(p, 0.62, 0.67);                // symbol flies in
+        var hit = seg(p, 0.67, 0.72);                // impact: shake + crack
+        var fallT = seg(p, 0.72, 0.84);              // non-stair tiles fall
+        var shake = (p >= 0.67 && p < 0.72) ? Math.sin(p * 2200) * 6 * (1 - hit) : 0;
 
         blocks.forEach(function (b, i) {
             var appear = clamp(built - i);
-            var x = b.x + shake, y = b.y - (1 - appear) * 24, r = 0, o = appear;
+            var x = b.x + shake, y = b.y - (1 - appear) * 16, r = 0, o = appear;
             if (!b.keep) {
-                if (hit > 0 && fallT === 0) { x += Math.sin(i * 1.7 + p * 420) * 2.4; y += Math.cos(i * 2.3 + p * 380) * 1.2; }
+                if (hit > 0 && fallT === 0) { x += Math.sin(i * 1.7 + p * 420) * 2; y += Math.cos(i * 2.3 + p * 380) * 1; }
                 var t = clamp((fallT - b.delay * 0.6) / 0.45);
                 if (t > 0) {
                     y = b.y + 520 * t * t;
@@ -349,19 +370,41 @@
             }
             b.el.style.transform = 'translate(' + x + 'px,' + y + 'px) rotate(' + r + 'deg)';
             b.el.style.opacity = o;
-            if (b.keep) b.el.classList.toggle('lit', p > 0.86 + b.step * 0.015);
+            if (b.keep) b.el.classList.toggle('lit', p > 0.84 + b.step * 0.012);
         });
 
-        // door: appears on top of the wall, then settles onto the landing step as the top row falls away
-        var door = $('#wallDoor');
-        var doorIn = seg(p, 0.27, 0.32);
-        var doorY = lerp(52, 76, ease(seg(fallT, 0, 0.35))) - (1 - doorIn) * 24;
-        door.style.opacity = doorIn * fadeOut;
-        door.style.transform = 'translate(' + (DOOR_X + shake) + 'px,' + doorY + 'px)';
+        // the four support doors appear one by one on the plateau; the first opens wider as 3F walks in
+        var enter = seg(p, 0.44, 0.47) * (1 - seg(p, 0.49, 0.53));
+        doors.forEach(function (d, k) {
+            d.style.opacity = (p > 0.13 + k * 0.02 ? 1 : 0) * fadeOut;
+            d.style.transform = 'translateX(' + shake.toFixed(1) + 'px)';
+            d.style.setProperty('--open', (0.55 + (k === 0 ? 0.4 * enter : 0)).toFixed(3));
+        });
+
+        // 3F: steps out, hops onto the wall, walks to the first door and goes in
+        var out = seg(p, 0.02, 0.08), pos3, o3 = out, s3 = 1;
+        if (p < 0.39) pos3 = [lerp(190, TX, out), FLOOR[2]];
+        else if (p < 0.42) pos3 = arc([TX, FLOOR[2]], [322, TOP], ease(seg(p, 0.39, 0.42)), 38);
+        else if (p < 0.46) pos3 = [lerp(322, DOOR1, ease(seg(p, 0.42, 0.46))), TOP];
+        else { var g = seg(p, 0.46, 0.48); pos3 = [DOOR1, TOP]; o3 = 1 - g; s3 = 1 - 0.3 * g; }
+        put(oru3, pos3[0], pos3[1], o3 * fadeOut, s3);
+
+        // 1F · 2F: step out, try twice to jump the wall (and fall short), then hop onto their own stair
+        function youth(el, base, peaks, land, t0) {
+            var o = seg(p, 0.02, 0.08), pos;
+            if (p < 0.49) pos = [lerp(190, TX, o), base];
+            else if (p < 0.535) pos = tryJump(base, seg(p, 0.49, 0.535), peaks[0]);
+            else if (p < 0.585) pos = tryJump(base, seg(p, 0.54, 0.585), peaks[1]);
+            else if (p < t0) pos = [TX, base];
+            else pos = arc([TX, base], land, ease(seg(p, t0, t0 + 0.04)), 46);
+            put(el, pos[0], pos[1], o * fadeOut);
+        }
+        youth(oru1, FLOOR[0], [70, 96], [X0 + 46, GROUND - 3 * B], 0.85);         // → 1단계
+        youth(oru2, FLOOR[1], [56, 84], [X0 + SW * B + 46, GROUND - 6 * B], 0.86);  // → 2단계
 
         // oreum symbol: flies in on an arc, strikes the wall, bounces back and fades
         var sym = $('#wallSymbol');
-        if (p < 0.5 || p > 0.74) {
+        if (p < 0.62 || p > 0.76) {
             sym.style.opacity = 0;
         } else {
             var sx, sy, rot, sc = 1, so = 1;
@@ -371,9 +414,9 @@
                 sy = lerp(FLY_FROM.y, HIT.y, f) - Math.sin(fly * Math.PI) * 90;
                 rot = 720 * fly;
             } else {
-                var bk = ease(seg(p, 0.6, 0.7));
+                var bk = ease(seg(p, 0.67, 0.74));
                 sx = HIT.x - 60 * bk; sy = HIT.y - 50 * bk + 30 * bk * bk;
-                rot = 720 + 40 * bk; sc = 1 + 0.25 * bk; so = 1 - seg(p, 0.66, 0.74);
+                rot = 720 + 40 * bk; sc = 1 + 0.25 * bk; so = 1 - seg(p, 0.71, 0.76);
             }
             sym.style.opacity = so;
             sym.style.transform = 'translate(' + (sx - 35) + 'px,' + (sy - 35) + 'px) rotate(' + rot + 'deg) scale(' + sc + ')';
@@ -387,9 +430,6 @@
         } else {
             ring.style.opacity = 0;
         }
-
-        $('#statMin').textContent = Math.round(282 + 90 * seg(p, 0.06, 0.3));
-        $('#stats').classList.toggle('off', p >= 0.5);
     }
 
     /* ======================================================
@@ -441,6 +481,7 @@
                 var seed = Math.abs((r * 31 + k * 17 + r * k) % 23);
                 var t = document.createElement('span');
                 t.className = 'btile';
+                t.style.width = t.style.height = ((B - 2) * ZOOM.s).toFixed(1) + 'px';
                 t.style.left = x.toFixed(1) + 'px';
                 t.style.top = (ground - P * (r + 1)).toFixed(1) + 'px';
                 t.style.setProperty('--sc', STEP_TONES[step][(seed * 7) % 4]);

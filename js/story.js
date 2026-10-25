@@ -244,6 +244,7 @@
         var txt = fmt(countAt(p));
         if (hookN.textContent !== txt) hookN.textContent = txt;
         hookShownAt = performance.now();
+        if (reduced) drawHook(hookShownAt);
     }
 
     // the canvas only draws while the hook scene is visible (plus its fade-out)
@@ -526,6 +527,9 @@
         if (want !== lastStage1Img) { stepOru.src = 'assets/oreumi-' + want + '.png'; lastStage1Img = want; }
 
         scene.classList.toggle('resting', resting);
+        var restButton = $('#restBtn');
+        restButton.disabled = !resting;
+        restButton.hidden = !resting;
         var zz = $('.zz', scene);
         zz.style.left = (x + 70) + 'px';
         zz.style.top = (y - 70) + 'px';
@@ -721,6 +725,9 @@
     $('#nextBtn').addEventListener('click', function () { go(0.6); });
     $('#prevBtn').addEventListener('click', function () { go(-0.6); });
     $('#homeLink').addEventListener('click', function (e) { e.preventDefault(); go(-END); });
+    $('.skip-link').addEventListener('click', function () {
+        window.setTimeout(function () { $('#story').focus({ preventScroll: true }); }, 0);
+    });
     $('#restBtn').addEventListener('click', function () {
         var i = scenes.indexOf($('.scene-step1'));
         T = starts[i] + parseFloat(scenes[i].dataset.len) * 0.6; kick();
@@ -730,5 +737,5 @@
     fitStages();
     sizeHook();
     render();
-    requestAnimationFrame(hookLoop);
+    if (!reduced) requestAnimationFrame(hookLoop);
 })();

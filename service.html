@@ -11,26 +11,34 @@
 <link rel="stylesheet" href="css/style.css">
 </head>
 <body class="service-page">
+<a class="skip-link" href="#main-content">본문으로 건너뛰기</a>
 
-<header class="topbar">
+<header class="topbar" id="serviceTopbar">
   <a href="./" aria-label="oreum 이야기로 돌아가기"><img class="logo" src="assets/logo-orange.png" alt="oreum"></a>
-  <nav aria-label="주요 메뉴">
-    <a href="./">이야기 보기</a>
-    <a href="#start" class="nav-cta">앱 시작하기</a>
+  <nav class="nav-primary" aria-label="주요 메뉴">
+    <a href="./" class="nav-link">이야기</a>
+    <a href="#overview" class="nav-link nav-current" aria-current="page">서비스</a>
+    <a href="#finder" class="nav-cta"><span class="nav-cta-full">내 시작점 찾기</span><span class="nav-cta-short">시작점</span></a>
   </nav>
 </header>
 
-<main>
+<main id="main-content" tabindex="-1">
   <!-- 01 히어로 -->
-  <section class="hero band">
+  <section class="hero band" id="overview" aria-labelledby="hero-title">
     <div class="wrap hero-grid">
       <div class="hero-copy">
-        <p class="eyebrow">oreum</p>
-        <h1>쉼에서,<br>다시 움직임으로</h1>
+        <p class="hero-kicker"><span>01</span> 오늘의 작은 움직임</p>
+        <h1 id="hero-title">쉼에서,<br>다시 움직임으로</h1>
         <p class="lead">하루 한 칸씩 오르는 사회복귀 앱. 아주 작은 미션 하나로 시작해, 한 단계씩 지원 프로그램의 문 앞까지 함께 갑니다.</p>
         <div class="btn-row">
-          <a class="btn btn-primary" href="#start">시작하기</a>
-          <a class="btn btn-ghost-dark" href="#finder">내 시작점 찾기</a>
+          <a class="btn btn-primary" href="#finder">내 시작점 찾기</a>
+          <a class="btn btn-ghost-dark" href="#roadmap">네 개의 계단 보기</a>
+        </div>
+        <p class="hero-note"><span aria-hidden="true"></span>지금의 상태에 맞는 첫 칸부터 시작해요.</p>
+        <div class="hero-journey" aria-label="오름 서비스 여정">
+          <span><b>01</b>오늘의 미션</span>
+          <span><b>02</b>나만의 속도</span>
+          <span><b>03</b>다음 계단</span>
         </div>
       </div>
       <div class="hero-visual">
@@ -46,7 +54,7 @@
             <span class="ph-name">집 앞 10분 산책</span>
             <span class="ph-point">+1,000P</span>
           </div>
-          <button type="button" class="ph-btn" tabindex="-1">위치로 인증하기</button>
+          <div class="ph-btn" aria-hidden="true">위치로 인증하기</div>
           <img src="assets/oreumi-2.png" alt="" class="ph-oru">
         </div>
         <img src="assets/oreumi-4.png" alt="활짝 핀 오르미" class="hero-oru">
@@ -55,10 +63,11 @@
   </section>
 
   <!-- 02 이런 분께 맞아요 -->
-  <section class="band" id="finder">
+  <section class="band band-finder" id="finder" aria-labelledby="finder-title">
     <div class="wrap">
+      <p class="section-kicker"><span>02</span> 시작점 찾기</p>
       <div class="sec-head">
-        <h2>이런 분께 맞아요</h2>
+        <h2 id="finder-title">이런 분께 맞아요</h2>
         <p>모두가 1단계부터 시작할 필요는 없어요. 최근 4주 동안의 외출과 대화를 기준으로 시작할 계단이 달라져요.</p>
       </div>
       <div class="type-grid">
@@ -83,7 +92,7 @@
       <form class="quiz" id="quiz" novalidate>
         <div class="quiz-head">
           <h3>질문 4개로, 나의 시작점 찾기</h3>
-          <p>답변은 저장되지 않아요.</p>
+          <div class="quiz-meta"><p>답변은 저장되지 않아요.</p><p class="quiz-progress" aria-live="polite"><b id="quizCount">0</b><span>/ 4 답변 완료</span></p></div>
         </div>
         <fieldset>
           <legend>1. 최근 4주, 1시간 이상 외출한 날은 일주일에 며칠인가요?</legend>
@@ -125,35 +134,40 @@
   </section>
 
   <!-- 03 4단계 로드맵 -->
-  <section class="band band-peach">
+  <section class="band band-peach" id="roadmap" aria-labelledby="roadmap-title">
     <div class="wrap">
+      <p class="section-kicker"><span>03</span> 나만의 속도로 오르기</p>
       <div class="sec-head">
-        <h2>네 개의 계단</h2>
+        <h2 id="roadmap-title">네 개의 계단</h2>
         <p>큰 계단 하나가 한 단계예요. 미션을 하나 마칠 때마다 얇은 층이 하나씩 쌓여, 다음 계단까지 이어져요.</p>
       </div>
       <ol class="road">
-        <li class="road-step">
+        <li class="road-step" id="step-1" data-step="1" tabindex="-1">
+          <span class="step-index">01</span>
           <img src="assets/oreumi-1.png" alt="">
           <span class="pill">1단계</span>
           <h3>숨고르기</h3>
           <p class="goal">일상의 리듬을 되찾아요</p>
           <ul class="missions"><li>창문 열고 환기</li><li>양치하기</li><li>8시 기상</li><li>샤워하기</li><li>방 정리</li><li>간단한 요리</li><li>가족과 사진</li></ul>
         </li>
-        <li class="road-step">
+        <li class="road-step" id="step-2" data-step="2" tabindex="-1">
+          <span class="step-index">02</span>
           <img src="assets/oreumi-2.png" alt="">
           <span class="pill">2단계</span>
           <h3>둘러보기</h3>
           <p class="goal">집 밖으로 한 걸음 나가요</p>
           <ul class="missions"><li>우체통 확인</li><li>쓰레기 버리기</li><li>버스정류장 다녀오기</li><li>10분 산책</li><li>20분 산책</li><li>카페 키오스크 주문</li></ul>
         </li>
-        <li class="road-step">
+        <li class="road-step" id="step-3" data-step="3" tabindex="-1">
+          <span class="step-index">03</span>
           <img src="assets/oreumi-3.png" alt="">
           <span class="pill">3단계</span>
           <h3>마주하기</h3>
           <p class="goal">사람과 짧게 마주해요</p>
           <ul class="missions"><li>배달 대면으로 받기</li><li>편의점에서 라면 사기</li><li>직원에게 위치 묻기</li><li>카페에서 직접 주문</li><li>공공기관 전화 문의</li></ul>
         </li>
-        <li class="road-step">
+        <li class="road-step" id="step-4" data-step="4" tabindex="-1">
+          <span class="step-index">04</span>
           <img src="assets/oreumi-4.png" alt="">
           <span class="pill">4단계</span>
           <h3>도전하기</h3>
@@ -161,14 +175,16 @@
           <ul class="missions"><li>지원사업 비대면 전화상담</li><li>담당자 대면하기</li></ul>
         </li>
       </ol>
+      <p class="road-caption"><span aria-hidden="true"></span>하루를 쉬어도 쌓아온 층은 그대로 남아요. 언제든, 지금의 칸에서 다시 이어갈 수 있어요.</p>
     </div>
   </section>
 
   <!-- 04 하루 사용 흐름 -->
-  <section class="band">
+  <section class="band" id="daily-flow" aria-labelledby="flow-title">
     <div class="wrap">
+      <p class="section-kicker"><span>04</span> 하루의 흐름</p>
       <div class="sec-head">
-        <h2>하루는 이렇게 흘러가요</h2>
+        <h2 id="flow-title">하루는 이렇게 흘러가요</h2>
         <p>하루에 미션 하나. 끝내면 사진이나 위치로 인증하고, 리워드와 연속 기록이 쌓여요.</p>
       </div>
       <ol class="flow">
@@ -182,10 +198,11 @@
   </section>
 
   <!-- 05 지속 장치 -->
-  <section class="band band-dark">
+  <section class="band band-dark" id="keep-going" aria-labelledby="keep-title">
     <div class="wrap">
+      <p class="section-kicker"><span>05</span> 멈춰도 이어가기</p>
       <div class="sec-head">
-        <h2>계속할 수 있도록</h2>
+        <h2 id="keep-title">계속할 수 있도록</h2>
         <p>의지에 기대지 않아요. 멈춰도 다시 이어갈 수 있는 장치가 함께 있어요.</p>
       </div>
       <div class="keep">
@@ -198,10 +215,11 @@
   </section>
 
   <!-- 06 재진단과 연계 -->
-  <section class="band">
+  <section class="band" id="programs" aria-labelledby="programs-title">
     <div class="wrap">
+      <p class="section-kicker"><span>06</span> 문 앞까지 함께</p>
       <div class="sec-head">
-        <h2>마지막 계단 너머</h2>
+        <h2 id="programs-title">마지막 계단 너머</h2>
         <p>오름은 지원 프로그램을 대신하지 않아요. 그 문 앞까지 함께 가요.</p>
       </div>
       <ol class="link-flow">
@@ -213,38 +231,43 @@
   </section>
 
   <!-- 07 FAQ -->
-  <section class="band band-peach">
+  <section class="band band-peach" id="faq" aria-labelledby="faq-title">
     <div class="wrap narrow">
-      <div class="sec-head"><h2>자주 묻는 질문</h2></div>
+      <p class="section-kicker"><span>07</span> 더 알아보기</p>
+      <div class="sec-head"><h2 id="faq-title">자주 묻는 질문</h2></div>
       <div class="faq">
-        <details><summary>비용이 드나요?</summary><p class="tbd">[답변 미정: 기획 확정 후 입력]</p></details>
-        <details><summary>인증 사진은 누가 보나요?</summary><p class="tbd">[답변 미정: 개인정보 처리 방식 확정 후 입력]</p></details>
+        <details><summary>모두가 1단계부터 시작하나요?</summary><p>아니에요. 최근 외출과 대화의 빈도를 바탕으로 지금의 상태에 맞는 계단에서 시작해요. 일상이 이어지고 있다면 2단계부터 시작할 수 있어요.</p></details>
+        <details><summary>하루에 얼마나 해야 하나요?</summary><p>하루에 미션 하나면 충분해요. 오늘 할 수 있는 만큼, 부담 없는 작은 행동부터 한 층씩 쌓아 가요.</p></details>
         <details><summary>며칠 쉬면 어떻게 되나요?</summary><p>쌓은 층은 그대로 남아요. 처음으로 돌아가지 않고, 부활 미션으로 다시 이어갈 수 있어요.</p></details>
-        <details><summary>가족이 대신 신청할 수 있나요?</summary><p class="tbd">[답변 미정: 신청 방식 확정 후 입력]</p></details>
+        <details><summary>마지막 계단에서는 무엇을 하나요?</summary><p>오름은 청년 지원 프로그램을 대신하지 않아요. 단계별 미션과 재진단을 거쳐, 청년도전지원사업과 청년미래센터 같은 다음 지원의 문 앞까지 함께 가요.</p></details>
       </div>
     </div>
   </section>
 
   <!-- 08 CTA -->
-  <section class="band band-dark cta-band" id="start">
+  <section class="band band-dark cta-band" id="start" aria-labelledby="cta-title">
     <div class="wrap cta-grid">
       <div>
-        <h2>오늘, 첫 칸부터.</h2>
+        <p class="section-kicker"><span>08</span> 오늘의 첫 칸</p>
+        <h2 id="cta-title">오늘, 첫 칸부터.</h2>
         <p>아주 작은 것부터, 한 층씩.</p>
         <div class="btn-row">
-          <a class="btn btn-primary" href="#start">앱 시작하기</a>
-          <a class="btn btn-ghost-light" href="#start">기관 협력 문의</a>
+          <a class="btn btn-primary" href="#finder">내 시작점 찾기</a>
+          <a class="btn btn-ghost-light" href="./">오름의 이야기 보기</a>
         </div>
+        <p class="cta-note">답변은 저장되지 않으며, 시작점은 언제든 다시 확인할 수 있어요.</p>
       </div>
       <img src="assets/oreumi-1.png" alt="첫 칸 앞의 오르미" class="cta-oru">
     </div>
   </section>
 </main>
 
+<button class="back-to-top" id="backToTop" type="button" aria-label="페이지 맨 위로 이동">↑ <span>맨 위로</span></button>
+
 <footer class="foot">
   <div class="wrap foot-row">
-    <img src="assets/logo-orange.png" alt="oreum">
-    <p>가볍게 시작해오름</p>
+    <div class="foot-brand"><a href="./" aria-label="oreum 이야기 처음으로"><img src="assets/logo-orange.png" alt="oreum"></a><p>가볍게 시작해오름</p></div>
+    <nav class="foot-nav" aria-label="푸터 메뉴"><a href="./">이야기</a><a href="#finder">시작점 찾기</a><a href="#roadmap">네 개의 계단</a></nav>
   </div>
 </footer>
 

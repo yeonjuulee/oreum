@@ -12,15 +12,18 @@
 
 </head>
 <body>
+<a class="skip-link" href="#story">이야기 본문으로 건너뛰기</a>
 <div class="story-page" id="page">
     <header class="topbar" id="topbar">
-        <a href="#" id="homeLink" aria-label="oreum 처음으로"><img class="logo" src="assets/logo-white.png" alt="oreum"></a>
-        <nav aria-label="주요 메뉴">
-            <a href="service.html" class="nav-cta">서비스 소개</a>
+        <a href="./" id="homeLink" aria-label="oreum 이야기 처음으로"><img class="logo" src="assets/logo-white.png" alt="oreum"></a>
+        <nav class="nav-primary" aria-label="주요 메뉴">
+            <a href="./" class="nav-link nav-current" aria-current="page">이야기</a>
+            <a href="service.html" class="nav-link">서비스</a>
+            <a href="service.html#finder" class="nav-cta"><span class="nav-cta-full">내 시작점 찾기</span><span class="nav-cta-short">시작점</span></a>
         </nav>
     </header>
 
-    <main class="story" id="story" aria-live="polite">
+    <main class="story" id="story" tabindex="-1">
 
         <!-- 01 HOOK · 쉬었음 70만 -->
         <section class="scene scene-hook" data-scene="hook" data-chapter="쉬었음 71.7만" data-len="8" aria-label="쉬었음 청년 71.7만 명">
@@ -282,7 +285,7 @@
                         <span class="mc-point" id="mcPoint">+1,000P</span>
                     </div>
                     <div class="dday" id="dday">D+0</div>
-                    <button type="button" class="rest-btn" id="restBtn">다시 한 층 쌓기</button>
+                    <button type="button" class="rest-btn" id="restBtn" disabled hidden>다시 한 층 쌓기</button>
                     <div class="compare" id="compare">
                         <span class="cmp-label">처음 → 지금 (예시)</span>
                         <span class="cmp-val">8시 기상 주 0일 → 5일</span>
@@ -359,8 +362,9 @@
                         <p class="kicker">재촉하지 않아도 괜찮아요</p>
                         <h2>안부 한 마디면, 첫 칸이 됩니다.</h2>
                         <div class="cta-row">
-                            <a class="btn btn-primary" href="service.html">오름 알아보기</a>
-                            <button type="button" class="btn btn-ghost-light" id="shareBtn">이 이야기 전하기</button>
+                            <a class="btn btn-primary" href="service.html#finder">내 시작점 찾기</a>
+                            <a class="btn btn-ghost-light" href="service.html#roadmap">네 개의 계단 보기</a>
+                            <button type="button" class="btn btn-text-light" id="shareBtn">이 이야기 전하기</button>
                         </div>
                         <p class="share-msg" id="shareMsg" role="status"></p>
                     </div>

@@ -224,7 +224,7 @@
     }
 
     // 숫자: 진행도에 맞춰 점 수 × 점 1개가 나타내는 사람 수로
-    var KP = [[0, 0], [.05, 0], [.07, 1], [.17, 1], [.23, 1000], [.35, 1000], [.41, 24000], [.57, 24000], [.65, 670000], [.79, 670000], [.85, 717000], [1, 717000]];
+    var KP = [[0, 0], [.05, 0], [.07, 1], [.17, 1], [.23, 1000], [.35, 1000], [.41, 24000], [.57, 24000], [.65, 670000], [.79, 670000], [.81, 717000], [1, 717000]];
     function countAt(p) {
         for (var i = 1; i < KP.length; i++) if (p <= KP[i][0]) {
             var p0 = KP[i - 1][0], a = KP[i - 1][1], p1 = KP[i][0], b = KP[i][1], f = ease(clamp((p - p0) / (p1 - p0 || 1)));
@@ -244,7 +244,6 @@
         var txt = fmt(countAt(p));
         if (hookN.textContent !== txt) hookN.textContent = txt;
         hookShownAt = performance.now();
-        if (reduced) drawHook(hookShownAt);
     }
 
     // the canvas only draws while the hook scene is visible (plus its fade-out)
@@ -272,7 +271,7 @@
             apt.style.setProperty('--ty', CAM[ph].ty + 'px');
         }
         // 2층 방: 현관까지 걸어가서 → 멈춰 한숨 → 돌아선다
-        var walk = ease(seg(p, 0.68, 0.8)), back = ease(seg(p, 0.92, 1));
+        var walk = ease(seg(p, 0.68, 0.78)), back = ease(seg(p, 0.92, 1));
         var x = lerp(330, 630, walk) - 90 * back;
         var sighing = p >= 0.8 && p < 0.94;
         roomOru.style.setProperty('--x', x.toFixed(1) + 'px');
@@ -350,7 +349,7 @@
         $$('.corner, .terrace, .t-door', scene).forEach(function (el) { el.style.opacity = fadeOut; });
         $('#stepLabels').style.opacity = (p > 0.86 ? 1 : 0) * fadeOut;
 
-        var built = seg(p, 0.02, 0.12) * blocks.length;
+        var built = seg(p, 0.02, 0.09) * blocks.length;
         var fly = seg(p, 0.62, 0.67);                // symbol flies in
         var hit = seg(p, 0.67, 0.72);                // impact: shake + crack
         var fallT = seg(p, 0.72, 0.84);              // non-stair tiles fall
@@ -527,9 +526,6 @@
         if (want !== lastStage1Img) { stepOru.src = 'assets/oreumi-' + want + '.png'; lastStage1Img = want; }
 
         scene.classList.toggle('resting', resting);
-        var restButton = $('#restBtn');
-        restButton.disabled = !resting;
-        restButton.hidden = !resting;
         var zz = $('.zz', scene);
         zz.style.left = (x + 70) + 'px';
         zz.style.top = (y - 70) + 'px';
@@ -657,10 +653,31 @@
     var logo = $('.topbar .logo'), logoMode = 'white';
     var hint = $('#hint');
 
-    function go(delta) {
-        T = clamp(T + delta, 0, END);
+    /* beats: each scene lists its resting points (data-beats, local progress).
+       One scroll gesture / swipe / key press moves to the next beat, and the story plays
+       smoothly from one beat to the next — so a fast trackpad can't skip past a scene. */
+    var beats = [];
+    scenes.forEach(function (s, i) {
+        (s.dataset.beats || '0').split(',').forEach(function (b) {
+            beats.push(Math.min(END, starts[i] + parseFloat(b) * parseFloat(s.dataset.len)));
+        });
+    });
+    beats.sort(function (a, b) { return a - b; });
+
+    var tw = null;                                // { from, to, t0, dur }
+    function tweenTo(target) {
+        target = clamp(target, 0, END);
         hint.classList.add('off');
+        var dist = Math.abs(target - P);
+        T = target;
+        tw = { from: P, to: target, t0: performance.now(), dur: reduced ? 0 : clamp(520 + 380 * dist, 600, 1900) };
         kick();
+    }
+    function step(dir) {
+        var i, target = null;
+        if (dir > 0) { for (i = 0; i < beats.length; i++) if (beats[i] > T + 1e-4) { target = beats[i]; break; } }
+        else { for (i = beats.length - 1; i >= 0; i--) if (beats[i] < T - 1e-4) { target = beats[i]; break; } }
+        if (target !== null) tweenTo(target);
     }
 
     function render() {
@@ -685,57 +702,67 @@
         var mode = onLight ? 'orange' : 'white';
         if (mode !== logoMode) { logo.src = 'assets/logo-' + mode + '.png'; logoMode = mode; }
         bar.style.width = (P / END * 100).toFixed(2) + '%';
-        $('#prevBtn').disabled = T <= 0;
-        $('#nextBtn').disabled = T >= END;
+        $('#prevBtn').disabled = T <= beats[0] + 1e-4;
+        $('#nextBtn').disabled = T >= beats[beats.length - 1] - 1e-4;
     }
 
     var running = false;
-    function tick() {
-        var d = T - P;
-        P = reduced || Math.abs(d) < 0.0005 ? T : P + d * 0.14;
+    function tick(now) {
+        if (tw) {
+            var k = tw.dur ? clamp((now - tw.t0) / tw.dur) : 1;
+            P = lerp(tw.from, tw.to, ease(k));
+            if (k >= 1) { P = tw.to; tw = null; }
+        }
         render();
-        if (P !== T) requestAnimationFrame(tick); else running = false;
+        if (tw) requestAnimationFrame(tick); else running = false;
     }
     function kick() { if (!running) { running = true; requestAnimationFrame(tick); } }
 
     /* inputs */
+    // wheel: one gesture = one beat. A gesture ends after a short pause; trackpad inertia
+    // (a long tail of small deltas) is ignored, a fresh strong flick after 1.1s counts again.
+    var wheelAcc = 0, wheelLast = 0, wheelLockAt = -1e9, locked = false;
     window.addEventListener('wheel', function (e) {
         e.preventDefault();
+        var now = performance.now();
         var dy = e.deltaMode === 1 ? e.deltaY * 33 : e.deltaY;
-        go(clamp(dy, -160, 160) * 0.0022);
+        if (now - wheelLast > 220) { locked = false; wheelAcc = 0; }
+        wheelLast = now;
+        if (locked) {
+            if (now - wheelLockAt > 1100 && Math.abs(dy) > 40) { locked = false; wheelAcc = 0; }
+            else return;
+        }
+        wheelAcc += dy;
+        if (Math.abs(wheelAcc) >= 24) { step(wheelAcc > 0 ? 1 : -1); locked = true; wheelLockAt = now; wheelAcc = 0; }
     }, { passive: false });
 
     var touchY = null;
     window.addEventListener('touchstart', function (e) { touchY = e.touches[0].clientY; }, { passive: true });
-    window.addEventListener('touchmove', function (e) {
+    window.addEventListener('touchend', function (e) {
         if (touchY === null) return;
-        var y = e.touches[0].clientY;
-        go((touchY - y) * 0.006);
-        touchY = y;
-    }, { passive: true });
-    window.addEventListener('touchend', function () { touchY = null; });
+        var dy = touchY - e.changedTouches[0].clientY;
+        if (Math.abs(dy) > 36) step(dy > 0 ? 1 : -1);
+        touchY = null;
+    });
 
     window.addEventListener('keydown', function (e) {
         var k = e.key;
-        if (k === 'ArrowDown' || k === 'PageDown' || (k === ' ' && e.target === document.body)) { e.preventDefault(); go(0.6); }
-        else if (k === 'ArrowUp' || k === 'PageUp') { e.preventDefault(); go(-0.6); }
-        else if (k === 'Home') { e.preventDefault(); go(-END); }
-        else if (k === 'End') { e.preventDefault(); go(END); }
+        if (k === 'ArrowDown' || k === 'PageDown' || (k === ' ' && e.target === document.body)) { e.preventDefault(); step(1); }
+        else if (k === 'ArrowUp' || k === 'PageUp') { e.preventDefault(); step(-1); }
+        else if (k === 'Home') { e.preventDefault(); tweenTo(beats[0]); }
+        else if (k === 'End') { e.preventDefault(); tweenTo(beats[beats.length - 1]); }
     });
-    $('#nextBtn').addEventListener('click', function () { go(0.6); });
-    $('#prevBtn').addEventListener('click', function () { go(-0.6); });
-    $('#homeLink').addEventListener('click', function (e) { e.preventDefault(); go(-END); });
-    $('.skip-link').addEventListener('click', function () {
-        window.setTimeout(function () { $('#story').focus({ preventScroll: true }); }, 0);
-    });
+    $('#nextBtn').addEventListener('click', function () { step(1); });
+    $('#prevBtn').addEventListener('click', function () { step(-1); });
+    $('#homeLink').addEventListener('click', function (e) { e.preventDefault(); tweenTo(0); });
     $('#restBtn').addEventListener('click', function () {
         var i = scenes.indexOf($('.scene-step1'));
-        T = starts[i] + parseFloat(scenes[i].dataset.len) * 0.6; kick();
+        tweenTo(starts[i] + parseFloat(scenes[i].dataset.len) * 0.75);
     });
 
     window.addEventListener('resize', function () { fitStages(); sizeHook(); });
     fitStages();
     sizeHook();
     render();
-    if (!reduced) requestAnimationFrame(hookLoop);
+    requestAnimationFrame(hookLoop);
 })();

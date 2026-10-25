@@ -12,21 +12,18 @@
 
 </head>
 <body>
-<a class="skip-link" href="#story">이야기 본문으로 건너뛰기</a>
 <div class="story-page" id="page">
     <header class="topbar" id="topbar">
-        <a href="./" id="homeLink" aria-label="oreum 이야기 처음으로"><img class="logo" src="assets/logo-white.png" alt="oreum"></a>
-        <nav class="nav-primary" aria-label="주요 메뉴">
-            <a href="./" class="nav-link nav-current" aria-current="page">이야기</a>
-            <a href="service.html" class="nav-link">서비스</a>
-            <a href="service.html#finder" class="nav-cta"><span class="nav-cta-full">내 시작점 찾기</span><span class="nav-cta-short">시작점</span></a>
+        <a href="#" id="homeLink" aria-label="oreum 처음으로"><img class="logo" src="assets/logo-white.png" alt="oreum"></a>
+        <nav aria-label="주요 메뉴">
+            <a href="service.html" class="nav-cta">서비스 소개</a>
         </nav>
     </header>
 
-    <main class="story" id="story" tabindex="-1">
+    <main class="story" id="story" aria-live="polite">
 
         <!-- 01 HOOK · 쉬었음 70만 -->
-        <section class="scene scene-hook" data-scene="hook" data-chapter="쉬었음 71.7만" data-len="8" aria-label="쉬었음 청년 71.7만 명">
+        <section class="scene scene-hook" data-scene="hook" data-beats="0,0.11,0.28,0.48,0.7,0.82,0.875" data-chapter="쉬었음 71.7만" data-len="8" aria-label="쉬었음 청년 71.7만 명">
             <canvas id="dots" aria-hidden="true"></canvas>
             <div class="hook-copy">
                 <p class="hook-eyebrow">2025 · 대한민국</p>
@@ -58,7 +55,7 @@
         </section>
 
         <!-- S00–S02 : 두 개의 방 -->
-        <section class="scene scene-building" data-scene="building" data-chapter="두 개의 방" data-len="5">
+        <section class="scene scene-building" data-scene="building" data-beats="0.12,0.4,0.66,0.79,0.87,0.98" data-chapter="두 개의 방" data-len="5">
             <div class="copy">
                 <div class="lines">
                     <div class="line" data-in="0" data-out="0.3">
@@ -157,12 +154,14 @@
         </section>
 
         <!-- S03–S04 : 벽, 그리고 네 계단 -->
-        <section class="scene scene-wall" data-scene="wall" data-chapter="문 밖의 벽" data-len="10">
+        <section class="scene scene-wall" data-scene="wall" data-beats="0.1,0.2,0.32,0.465,0.59,0.735,0.9" data-chapter="문 밖의 벽" data-len="10">
             <div class="copy">
                 <div class="lines">
                     <div class="line" data-in="0" data-out="0.12">
-                        <p class="kicker">방 밖으로 나와 보면,</p>
-                        <h2>눈앞에 높은 벽이 서 있어요.</h2>
+                        <p class="kicker">고립·은둔 청년의</p>
+                        <h2><em>80.8%</em>는 지금에서 벗어나고 싶어 해요.</h2>
+                        <p class="desc">그래서 용기를 내 방 밖으로 나와 보지만, 눈앞엔 높은 벽이 서 있어요.</p>
+                        <p class="source">출처: 보건복지부·한국보건사회연구원 「고립·은둔 청년 실태조사 연구」, 2023</p>
                     </div>
                     <div class="line" data-in="0.12" data-out="0.26">
                         <p class="kicker">청년 지원 프로그램</p>
@@ -175,12 +174,17 @@
                         </div>
                         <p class="source">출처: 고용노동부 「2026년 고용노동부 청년고용 관련 예산안」, 「청년의 도전/성장을 고용노동부가 지원하겠습니다」</p>
                     </div>
-                    <div class="line" data-in="0.26" data-out="0.38">
+                    <div class="line lift" data-in="0.26" data-out="0.38">
                         <p class="kicker">그런데</p>
-                        <h2>모든 문의 첫 칸은 <em>사람을 직접 만나는 일</em>이에요.</h2>
-                        <p class="desc">센터에 찾아가고, 전화로 상담을 신청하고, 처음 보는 사람과 마주 앉아야 시작돼요.</p>
-                        <blockquote class="quote">“고용노동센터나 일자리센터는 자신감이 없어서 못 갔어요”</blockquote>
-                        <p class="source">출처: 보건복지부 「고립·은둔 청년, 이제 국가가 돕겠습니다」 2023.12.13. 심층조사 결과</p>
+                        <h2 class="h-sm">모든 문의 첫 칸은 <em>사람을 직접 만나는 일</em>이에요.</h2>
+                        <ul class="bubbles" aria-label="고립·은둔 청년 심층조사 응답">
+                            <li>고용노동센터나 일자리센터는 자신감이 없어서 못 갔어요</li>
+                            <li>벗어날 수 있는 환경이어도 너무 지쳐서 아무 것도 안 하는 중입니다</li>
+                            <li>밖에 나가는 게 힘든데, 넌 하루 종일 집에 있냐는 가족의 말을 듣는 것도 힘들어요</li>
+                            <li>편의점에 가야 할 때도 항상 모자와 마스크를 쓰고 다니죠</li>
+                            <li>휴대폰에 걸려오는 전화가 무섭고, 내가 타인에게 전화 거는 것조차 무섭습니다</li>
+                        </ul>
+                        <p class="source">출처: 보건복지부, 「고립·은둔 청년, 이제 국가가 돕겠습니다」, 2023.12.13.(심층조사결과)</p>
                     </div>
                     <div class="line" data-in="0.38" data-out="0.48">
                         <p class="kicker">누군가에게는</p>
@@ -189,8 +193,7 @@
                     <div class="line" data-in="0.48" data-out="0.6">
                         <p class="kicker">누군가에게는</p>
                         <h2>아무리 뛰어도 닿지 않는 높이예요.</h2>
-                        <p class="desc">고립·은둔 청년의 <b>80.8%</b>는 지금에서 벗어나고 싶다고 말해요. 마음이 없는 게 아니라, 첫 칸이 너무 높은 거예요.</p>
-                        <p class="source">출처: 보건복지부·한국보건사회연구원 「고립·은둔 청년 실태조사 연구」, 2023</p>
+                        <p class="desc">벗어나고 싶은 마음이 없는 게 아니라, 첫 칸이 너무 높은 거예요.</p>
                     </div>
                     <div class="line" data-in="0.6" data-out="0.76">
                         <p class="kicker">그 높은 첫 칸,</p>
@@ -244,7 +247,7 @@
         </section>
 
         <!-- S05–S07 : 1단계, 얇은 층으로 -->
-        <section class="scene scene-step1" data-scene="step1" data-chapter="1단계 숨고르기" data-len="9">
+        <section class="scene scene-step1" data-scene="step1" data-beats="0.04,0.12,0.37,0.5,0.75,0.87,0.96" data-chapter="1단계 숨고르기" data-len="9">
             <div class="copy">
                 <div class="lines">
                     <div class="line" data-in="0" data-out="0.2">
@@ -285,7 +288,7 @@
                         <span class="mc-point" id="mcPoint">+1,000P</span>
                     </div>
                     <div class="dday" id="dday">D+0</div>
-                    <button type="button" class="rest-btn" id="restBtn" disabled hidden>다시 한 층 쌓기</button>
+                    <button type="button" class="rest-btn" id="restBtn">다시 한 층 쌓기</button>
                     <div class="compare" id="compare">
                         <span class="cmp-label">처음 → 지금 (예시)</span>
                         <span class="cmp-val">8시 기상 주 0일 → 5일</span>
@@ -295,7 +298,7 @@
         </section>
 
         <!-- S08 : 계속 오름 -->
-        <section class="scene scene-montage" data-scene="montage" data-chapter="계속 오름" data-len="6.4">
+        <section class="scene scene-montage" data-scene="montage" data-beats="0.08,0.3,0.47,0.72,0.84" data-chapter="계속 오름" data-len="6.4">
             <div class="copy">
                 <div class="lines">
                     <div class="line" data-in="0" data-out="0.18">
@@ -329,7 +332,7 @@
         </section>
 
         <!-- S09 : 문이 열린다 -->
-        <section class="scene scene-door" data-scene="door" data-chapter="문이 열린다" data-len="3.6">
+        <section class="scene scene-door" data-scene="door" data-beats="0.3,0.8" data-chapter="문이 열린다" data-len="3.6">
             <div class="copy">
                 <div class="lines">
                     <div class="line" data-in="0" data-out="1.01">
@@ -351,7 +354,7 @@
         </section>
 
         <!-- S10 : 에필로그 -->
-        <section class="scene scene-epilogue" data-scene="epilogue" data-chapter="아직 방 안의 누군가" data-len="3">
+        <section class="scene scene-epilogue" data-scene="epilogue" data-beats="0.25,1" data-chapter="아직 방 안의 누군가" data-len="3">
             <div class="copy">
                 <div class="lines">
                     <div class="line" data-in="0" data-out="0.45">
@@ -362,9 +365,8 @@
                         <p class="kicker">재촉하지 않아도 괜찮아요</p>
                         <h2>안부 한 마디면, 첫 칸이 됩니다.</h2>
                         <div class="cta-row">
-                            <a class="btn btn-primary" href="service.html#finder">내 시작점 찾기</a>
-                            <a class="btn btn-ghost-light" href="service.html#roadmap">네 개의 계단 보기</a>
-                            <button type="button" class="btn btn-text-light" id="shareBtn">이 이야기 전하기</button>
+                            <a class="btn btn-primary" href="service.html">오름 알아보기</a>
+                            <button type="button" class="btn btn-ghost-light" id="shareBtn">이 이야기 전하기</button>
                         </div>
                         <p class="share-msg" id="shareMsg" role="status"></p>
                     </div>

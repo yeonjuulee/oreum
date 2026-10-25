@@ -15,7 +15,19 @@
     document.documentElement.classList.add('story-root');
 
     /* ---------- stage scaling ---------- */
+    function fitPhone() {
+        var ph = $('#missionPhone'); if (!ph) return;
+        var copy = ph.parentNode, lines = $('.lines', copy);
+        ph.style.zoom = 1;
+        var sc = copy.parentNode, cs = getComputedStyle(sc);
+        var linesH = lines.offsetHeight;
+        $$('.line', lines).forEach(function (l) { linesH = Math.max(linesH, l.offsetHeight); });
+        lines.style.height = linesH + 'px';
+        var avail = sc.clientHeight - parseFloat(cs.paddingTop) - parseFloat(cs.paddingBottom) - linesH + 2;
+        ph.style.zoom = clamp(avail / ph.offsetHeight, .5, 1.35).toFixed(3);
+    }
     function fitStages() {
+        fitPhone();
         $$('.stage-wrap').forEach(function (wrap) {
             var s = Math.min(wrap.clientWidth / 960, wrap.clientHeight / 540);
             wrap.querySelector('.stage').style.setProperty('--s', Math.max(0.2, s).toFixed(4));
@@ -115,7 +127,7 @@
         var tw = ctx.measureText(txt).width;
         ctx.font = '600 12px ' + HOOK_FONT;
         var lw = legend ? ctx.measureText(legend).width + 14 : 0;
-        ctx.fillStyle = 'rgba(23,19,15,' + (.85 * a) + ')';
+        ctx.fillStyle = 'rgba(28,25,23,' + (.85 * a) + ')';
         ctx.fillRect(x - 2, y - 20, tw + lw + 18, 26);
         ctx.font = '700 14px ' + HOOK_FONT;
         ctx.fillStyle = 'rgba(255,233,217,' + a + ')';
@@ -261,6 +273,8 @@
         { z: 6, tx: 480 - 480 * 6, ty: 270 - 364 * 6 }      // 2F window
     ];
     var roomOru = $('#roomOru'), sigh = $('#sigh');
+    // 2층 방 바닥 위의 길: 방 안쪽 → 현관 앞 → 돌아서 몇 걸음 (stage px)
+    var RB = { start: [330, 424], door: [630, 424], back: [540, 424] };
     function updateBuilding(scene, p) {
         var ph = p < 0.3 ? 0 : (p < 0.62 ? 1 : 2);
         if (scene.dataset.phase !== String(ph)) {
@@ -272,12 +286,15 @@
         }
         // 2층 방: 현관까지 걸어가서 → 멈춰 한숨 → 돌아선다
         var walk = ease(seg(p, 0.68, 0.78)), back = ease(seg(p, 0.92, 1));
-        var x = lerp(330, 630, walk) - 90 * back;
+        var x = lerp(lerp(RB.start[0], RB.door[0], walk), RB.back[0], back);
+        var y = lerp(lerp(RB.start[1], RB.door[1], walk), RB.back[1], back);
         var sighing = p >= 0.8 && p < 0.94;
         roomOru.style.setProperty('--x', x.toFixed(1) + 'px');
+        roomOru.style.setProperty('--y', y.toFixed(1) + 'px');
         roomOru.style.setProperty('--flip', p >= 0.92 ? -1 : 1);
         roomOru.style.setProperty('--squash', sighing ? 0.93 : 1);
         sigh.style.setProperty('--x', (x - 40).toFixed(1) + 'px');
+        sigh.style.setProperty('--y', (y - 124).toFixed(1) + 'px');
         sigh.classList.toggle('on', sighing);
     }
 
@@ -289,13 +306,13 @@
        columns 20–37 = the plateau that holds the four 지원 프로그램 doors and never falls. */
     var GROUND = 500, B = 16, COLS = 38, ROWS = 15, X0 = 300, SW = 5, PLAT = 20;
     var TOP = GROUND - ROWS * B;                  // 260: top of the wall
-    var WALL_TONES = ['#2F2723', '#362D28', '#3D332C', '#2A231F'];
-    var STEP_TONES = [
-        ['#B8430A', '#C9500F', '#D85A12', '#A63A08'],
-        ['#E85D04', '#FF6A00', '#F27A1E', '#FF7A14'],
-        ['#FF8A3D', '#FF9A52', '#FFA766', '#FF8F45'],
-        ['#FFB27A', '#FFC294', '#FFD3B0', '#FFBB88'],
-        ['#FFE9D9', '#FFF1E6', '#FFDCC2', '#FFE4CF']
+    var WALL_TONES = ['#2C2825', '#332E2A', '#3A3430', '#262220'];
+    var STEP_TONES = [                            // same ramp as the big steps: deep orange → orange → light orange → peach
+        ['#8E3E0A', '#96420C', '#883B09', '#9A450E'],
+        ['#FF6A00', '#F56500', '#FF7410', '#FA6A05'],
+        ['#FFAA70', '#FFA264', '#FFB27C', '#FCA468'],
+        ['#FFDCC4', '#FFD4B8', '#FFE2CC', '#FCD8BE'],
+        ['#FFF1E6', '#FFF8F2', '#FFEBDD', '#FFF4EA']
     ];
     var blocksEl = $('#blocks');
     var blocks = [];
@@ -373,34 +390,49 @@
             if (b.keep) b.el.classList.toggle('lit', p > 0.84 + b.step * 0.012);
         });
 
-        // the four support doors appear one by one on the plateau; the first opens wider as 3F walks in
-        var enter = seg(p, 0.44, 0.47) * (1 - seg(p, 0.49, 0.53));
+        var sg = $('#stairGrain');
+        if (!sg.dataset.ready) {
+            var pts = [[X0, GROUND]];
+            for (var st = 0; st < 4; st++) { pts.push([X0 + st * SW * B, GROUND - 3 * B * (st + 1)]); pts.push([X0 + (st + 1) * SW * B, GROUND - 3 * B * (st + 1)]); }
+            pts = [[X0, GROUND], [X0, GROUND - 3 * B]].concat(pts.slice(2));
+            pts.push([X0 + PLAT * B, TOP], [X0 + COLS * B, TOP], [X0 + COLS * B, GROUND]);
+            sg.style.clipPath = 'polygon(' + pts.map(function (q) { return q[0] + 'px ' + q[1] + 'px'; }).join(',') + ')';
+            sg.dataset.ready = 1;
+        }
+        sg.style.opacity = (p > 0.86 ? 0.7 : 0) * fadeOut;
+
+        // the four entrances rise with the wall's top row; the first glows as 3F walks in
+        var enter = seg(p, 0.43, 0.46) * (1 - seg(p, 0.49, 0.53));
+        var rise = clamp(built - (blocks.length - COLS));                     // 0 → 1 while the top row lands
         doors.forEach(function (d, k) {
-            d.style.opacity = (p > 0.13 + k * 0.02 ? 1 : 0) * fadeOut;
-            d.style.transform = 'translateX(' + shake.toFixed(1) + 'px)';
-            d.style.setProperty('--open', (0.55 + (k === 0 ? 0.4 * enter : 0)).toFixed(3));
+            d.style.opacity = rise * fadeOut;
+            d.style.transform = 'translate(' + shake.toFixed(1) + 'px,' + ((1 - rise) * 16).toFixed(1) + 'px)';
         });
 
         // 3F: steps out, hops onto the wall, walks to the first door and goes in
         var out = seg(p, 0.02, 0.08), pos3, o3 = out, s3 = 1;
         if (p < 0.39) pos3 = [lerp(190, TX, out), FLOOR[2]];
         else if (p < 0.42) pos3 = arc([TX, FLOOR[2]], [322, TOP], ease(seg(p, 0.39, 0.42)), 38);
-        else if (p < 0.46) pos3 = [lerp(322, DOOR1, ease(seg(p, 0.42, 0.46))), TOP];
-        else { var g = seg(p, 0.46, 0.48); pos3 = [DOOR1, TOP]; o3 = 1 - g; s3 = 1 - 0.3 * g; }
+        else if (p < 0.455) pos3 = [lerp(322, DOOR1, ease(seg(p, 0.42, 0.455))), TOP];
+        else { var g = seg(p, 0.455, 0.475); pos3 = [DOOR1, TOP]; o3 = 1 - g; s3 = 1 - 0.3 * g; }
         put(oru3, pos3[0], pos3[1], o3 * fadeOut, s3);
 
         // 1F · 2F: step out, try twice to jump the wall (and fall short), then hop onto their own stair
         function youth(el, base, peaks, land, t0) {
             var o = seg(p, 0.02, 0.08), pos;
             if (p < 0.49) pos = [lerp(190, TX, o), base];
-            else if (p < 0.535) pos = tryJump(base, seg(p, 0.49, 0.535), peaks[0]);
-            else if (p < 0.585) pos = tryJump(base, seg(p, 0.54, 0.585), peaks[1]);
-            else if (p < t0) pos = [TX, base];
+            else if (p < 0.59) {                      // three small hops toward the wall that barely leave the floor
+                var hp = seg(p, 0.49, 0.585);
+                pos = [TX + 6 * Math.sin(Math.PI * Math.min(1, hp * 1.2)), base - peaks[0] * Math.abs(Math.sin(hp * Math.PI * 3)) * (1 - hp * .35)];
+            }
+            else if (p < t0) pos = [TX + 6 * (1 - seg(p, 0.59, 0.62)), base];
             else pos = arc([TX, base], land, ease(seg(p, t0, t0 + 0.04)), 46);
             put(el, pos[0], pos[1], o * fadeOut);
         }
-        youth(oru1, FLOOR[0], [70, 96], [X0 + 46, GROUND - 3 * B], 0.85);         // → 1단계
-        youth(oru2, FLOOR[1], [56, 84], [X0 + SW * B + 46, GROUND - 6 * B], 0.86);  // → 2단계
+        youth(oru1, FLOOR[0], [14], [X0 + 46, GROUND - 3 * B], 0.85);         // → 1단계
+        youth(oru2, FLOOR[1], [12], [X0 + SW * B + 46, GROUND - 6 * B], 0.86);
+        var shiver = p >= 0.49 && p < 0.85;          // they can't reach it: a small trembling while they wait
+        oru1.classList.toggle('shiver', shiver); oru2.classList.toggle('shiver', shiver);  // → 2단계
 
         // oreum symbol: flies in on an arc, strikes the wall, bounces back and fades
         var sym = $('#wallSymbol');
@@ -441,7 +473,7 @@
     /* one continuous colour ramp for the whole staircase (S05–S08).
        Level 0 = 1단계 tread, 1 = 2단계, 2 = 3단계, 3 = 4단계. Big steps and the thin layers between them
        take the colour of their own height, so the stairs read as separate steps but one gradient. */
-    var RAMP = [[0xB0, 0x40, 0x08], [0xF2, 0x63, 0x10], [0xFF, 0x96, 0x4C], [0xFF, 0xC8, 0x9C]];
+    var RAMP = [[0x8E, 0x3E, 0x0A], [0xFF, 0x6A, 0x00], [0xFF, 0xA8, 0x6C], [0xFF, 0xDC, 0xC4]];   // one ramp: 1단계 deep orange → 4단계 peach
     function rampRGB(L) {
         L = clamp(L, 0, RAMP.length - 1);
         var i = Math.min(RAMP.length - 2, Math.floor(L)), f = L - i;
@@ -452,8 +484,16 @@
         return 'rgb(' + c.map(function (v) { return Math.round(v * k); }).join(',') + ')';
     }
     function rampText(L) { var c = rampRGB(L); return (0.299 * c[0] + 0.587 * c[1] + 0.114 * c[2]) < 150 ? '#FFF1E6' : '#2A1608'; }
+    // mission layers: #FF6A00 → #FFD2B2 (brightest = today's layer)
+    var LAYER = [[0xFF, 0x6A, 0x00], [0xFF, 0x96, 0x4C], [0xFF, 0xB6, 0x82], [0xFF, 0xD2, 0xB2]];
+    function layerRGB(t) {
+        var L = clamp(t) * (LAYER.length - 1), i = Math.min(LAYER.length - 2, Math.floor(L)), f = L - i;
+        return LAYER[i].map(function (v, j) { return Math.round(lerp(v, LAYER[i + 1][j], f)); });
+    }
+    function layerColor(t, a) { var c = layerRGB(t); return a === undefined ? 'rgb(' + c.join(',') + ')' : 'rgba(' + c.join(',') + ',' + a + ')'; }
+    function layerText(t) { var c = layerRGB(t); return (0.299 * c[0] + 0.587 * c[1] + 0.114 * c[2]) < 165 ? '#FFF8F2' : '#332E2A'; }
     function paintStep(el, L) {                     // big step: its level colour, a touch darker toward the ground
-        el.style.background = 'linear-gradient(180deg, ' + rampColor(L) + ' 0%, ' + rampColor(L, 0.14) + ' 100%)';
+        el.style.background = 'var(--grain) 0 0 / 130px, linear-gradient(180deg, ' + rampColor(L) + ' 0%, ' + rampColor(L, 0.08) + ' 100%)';
     }
     var slabsEl = $('#slabs');
     MISSIONS.forEach(function (m, k) {
@@ -462,8 +502,10 @@
         d.style.left = (S1.left0 + k * S1.dx) + 'px';
         d.style.width = (S1.riser - S1.left0 - k * S1.dx) + 'px';
         d.style.top = (S1.ground - (k + 1) * S1.pitch) + 'px';
-        var lv = (k + 1) / (MISSIONS.length + 1);      // between 1단계 (0) and 2단계 (1)
+        var lv = (k + 1) / (MISSIONS.length + 1);      // between 1단계 (0) and 2단계 (1): the layers climb the gradient into the next step
         d.style.setProperty('--c', rampColor(lv));
+        d.style.setProperty('--c2', rampColor(lv + .12));
+        d.style.setProperty('--top', rampColor(lv + .55));
         d.style.setProperty('--tc', rampText(lv));
         d.innerHTML = '<span class="habit">' + m + '</span>';
         slabsEl.appendChild(d);
@@ -485,7 +527,7 @@
                 t.style.left = x.toFixed(1) + 'px';
                 t.style.top = (ground - P * (r + 1)).toFixed(1) + 'px';
                 t.style.setProperty('--sc', STEP_TONES[step][(seed * 7) % 4]);
-                t.dataset.fade = (0.02 + ((seed * 13 + Math.abs(k) * 5) % 23) / 23 * 0.12).toFixed(3);   // each tile dissolves at its own moment
+                t.dataset.fade = (0.02 + clamp(x / 960) * 0.06 + (r % 2) * 0.006).toFixed(3);   // a sweep from left to right
                 box.appendChild(t);
             }
         }
@@ -501,16 +543,35 @@
 
     paintStep($('.solid-1'), 0);
     paintStep($('.solid-2'), 1);
-    var bTiles = null;
+    var bTiles = null, lastN = 0;
     function updateStep1(scene, p) {
         // tiles dissolve one by one into the solid gradient steps
         if (!bTiles) bTiles = $$('.btile', scene);
-        bTiles.forEach(function (t) { t.style.opacity = (1 - seg(p, +t.dataset.fade, +t.dataset.fade + 0.03)).toFixed(3); });
+        bTiles.forEach(function (t) { t.style.opacity = (1 - seg(p, +t.dataset.fade, +t.dataset.fade + 0.025)).toFixed(3); });
         var n = step1Count(p);
         var resting = p >= 0.42 && p < 0.58;
         var top = p >= 0.8;
+        // the verification phone: camera shows the mission being done; a new layer = shutter flash + 인증 완료
+        var mp = $('#missionPhone');
+        if (mp) {
+            var mi = Math.max(0, n - 1);
+            if (mp.dataset.mi !== String(mi)) {
+                $$('.cam-shot, .mp-mission', mp).forEach(function (e) { e.classList.toggle('on', +e.dataset.i === mi); });
+                mp.dataset.mi = mi;
+            }
+            if (n > lastN && n > 0) { mp.classList.remove('snap'); void mp.offsetWidth; mp.classList.add('snap'); }
+            mp.classList.toggle('done', n > 0);
+            mp.classList.toggle('resting', resting);
+        }
+        if (n > lastN && n > 0) {
+            var fresh = slabEls[n - 1];
+            fresh.classList.remove('fresh'); void fresh.offsetWidth; fresh.classList.add('fresh');
+        }
+        lastN = n;
         slabEls.forEach(function (el, k) {
             el.classList.toggle('pending', k >= n);
+            el.classList.toggle('ghost', k >= n && k < n + 2 && !top);
+            el.classList.toggle('today', k === n - 1 && !top);
             el.classList.toggle('named', p >= 0.84);
         });
 
@@ -530,10 +591,6 @@
         zz.style.left = (x + 70) + 'px';
         zz.style.top = (y - 70) + 'px';
 
-        $('#mcLabel').textContent = resting ? '오늘은 쉬는 날' : (n === 0 ? '오늘의 미션' : '미션 ' + n + ' 클리어');
-        $('#mcName').textContent = resting ? '쌓은 층 4개, 그대로' : MISSIONS[Math.max(0, n - 1)];
-        $('#mcPoint').textContent = n === 0 ? '+1,000P' : '누적 ' + (n * 1000).toLocaleString('ko-KR') + 'P';
-        $('#missionCard').style.opacity = top ? 0 : 1;
 
         var days = n + (p >= 0.42 ? 1 : 0);
         $('#dday').textContent = top ? '1단계 완료' : (resting ? 'D+' + days + ' · 쉬는 날' : 'D+' + days);
@@ -554,6 +611,8 @@
             d.style.top = (g.ground - (k + 1) * 22) + 'px';
             var lv = g.level + (k + 1) / 6;              // 5 layers between two big steps
             d.style.setProperty('--c', rampColor(lv));
+            d.style.setProperty('--c2', rampColor(lv + .12));
+            d.style.setProperty('--top', rampColor(lv + .55));
             d.style.setProperty('--tc', rampText(lv));
             mSlabsEl.appendChild(d);
         }
@@ -565,7 +624,7 @@
     var mOru = $('#mOru');
     var lastMImg = 2, lastName = '';
     // dusk → evening: the room darkens so the door's light stands out
-    var BG = [[0x5A, 0x44, 0x36], [0xA8, 0x4A, 0x15], [0x2A, 0x1C, 0x14]];
+    var BG = [[0x1C, 0x19, 0x17], [0x33, 0x2A, 0x24], [0x1C, 0x19, 0x17]];
     function mixBg(t) {
         var a = t < 0.5 ? BG[0] : BG[1], b = t < 0.5 ? BG[1] : BG[2], u = t < 0.5 ? t * 2 : (t - 0.5) * 2;
         return 'rgb(' + a.map(function (v, i) { return Math.round(lerp(v, b[i], u)); }).join(',') + ')';
@@ -586,7 +645,11 @@
 
         var nA = p < 0.2 ? 0 : Math.min(5, 1 + Math.floor(seg(p, 0.2, 0.46) * 5));
         var nB = p < 0.56 ? 0 : Math.min(5, 1 + Math.floor(seg(p, 0.56, 0.84) * 5));
-        mSlabEls.forEach(function (el, i) { el.classList.toggle('pending', i < 5 ? i >= nA : i - 5 >= nB); });
+        var todayM = p < 0.56 ? nA - 1 : 5 + nB - 1;
+        mSlabEls.forEach(function (el, i) {
+            el.classList.toggle('pending', i < 5 ? i >= nA : i - 5 >= nB);
+            el.classList.toggle('today', i === todayM && p < 0.86 && (p < 0.48 || p >= 0.56));
+        });
 
         var x, y;
         if (p < 0.2) { x = 30; y = 430; }
@@ -618,19 +681,7 @@
         scene.style.setProperty('--flood', flood.toFixed(3));
         scene.classList.toggle('flooded', flood > 0.5);
     }
-    var town = $('#town');
-    [5, 7, 4, 6, 5].forEach(function (rows) {
-        var h = document.createElement('div');
-        h.className = 'house';
-        for (var i = 0; i < rows * 3; i++) { var w = document.createElement('span'); w.className = 'win'; h.appendChild(w); }
-        town.appendChild(h);
-    });
-    var wins = $$('.win', town);
-    var order = wins.map(function (_, i) { return i; }).sort(function (a, b) { return ((a * 29) % 41) - ((b * 29) % 41); });
-    function updateEpilogue(scene, p) {
-        var lit = Math.round(seg(p, 0.05, 0.6) * wins.length * 0.55) + 3;
-        order.forEach(function (idx, k) { wins[idx].classList.toggle('lit', k < lit); });
-    }
+    function updateEpilogue() {}
     $('#shareBtn').addEventListener('click', function () {
         var msg = $('#shareMsg');
         var url = location.href.split('#')[0];
@@ -664,14 +715,37 @@
     });
     beats.sort(function (a, b) { return a - b; });
 
-    var tw = null;                                // { from, to, t0, dur }
+    /* slow zones (data-slow="a-b:factor"): moments like a jump or walking through a door
+       take longer to play, whatever the size of the scroll */
+    var slow = [];
+    scenes.forEach(function (s, i) {
+        (s.dataset.slow || '').split(',').filter(Boolean).forEach(function (z) {
+            var m = z.split(':'), r = m[0].split('-'), L = parseFloat(s.dataset.len);
+            slow.push([starts[i] + parseFloat(r[0]) * L, starts[i] + parseFloat(r[1]) * L, parseFloat(m[1])]);
+        });
+    });
+    function weight(x) { for (var i = 0; i < slow.length; i++) if (x >= slow[i][0] && x < slow[i][1]) return slow[i][2]; return 1; }
+
+    var tw = null;                                // { from, to, t0, dur, cum }
+    var TN = 160;
     function tweenTo(target) {
         target = clamp(target, 0, END);
         hint.classList.add('off');
-        var dist = Math.abs(target - P);
+        var cum = [0];
+        for (var i = 1; i <= TN; i++) {
+            var x0 = lerp(P, target, (i - 1) / TN), x1 = lerp(P, target, i / TN);
+            cum.push(cum[i - 1] + Math.abs(x1 - x0) * weight((x0 + x1) / 2));
+        }
         T = target;
-        tw = { from: P, to: target, t0: performance.now(), dur: reduced ? 0 : clamp(520 + 380 * dist, 600, 1900) };
+        tw = { from: P, to: target, t0: performance.now(), cum: cum, dur: reduced ? 0 : clamp(560 + 340 * cum[TN], 700, 6500) };
         kick();
+    }
+    // where along the tween we are, given the share of (weighted) distance covered
+    function tweenAt(u) {
+        var c = tw.cum, w = u * c[TN], i = 1;
+        while (i < TN && c[i] < w) i++;
+        var f = c[i] > c[i - 1] ? (w - c[i - 1]) / (c[i] - c[i - 1]) : 1;
+        return lerp(tw.from, tw.to, (i - 1 + f) / TN);
     }
     function step(dir) {
         var i, target = null;
@@ -696,7 +770,7 @@
         });
         handlers[scene.dataset.scene](scene, p);
 
-        var onLight = scene.dataset.scene === 'door' && p > 0.56;
+        var onLight = (scene.dataset.scene === 'door' && p > 0.56) || scene.dataset.scene === 'epilogue';
         topbar.classList.toggle('on-light', onLight);
         ui.classList.toggle('on-light', onLight);
         var mode = onLight ? 'orange' : 'white';
@@ -710,7 +784,7 @@
     function tick(now) {
         if (tw) {
             var k = tw.dur ? clamp((now - tw.t0) / tw.dur) : 1;
-            P = lerp(tw.from, tw.to, ease(k));
+            P = tweenAt(ease(k));
             if (k >= 1) { P = tw.to; tw = null; }
         }
         render();
@@ -719,21 +793,27 @@
     function kick() { if (!running) { running = true; requestAnimationFrame(tick); } }
 
     /* inputs */
-    // wheel: one gesture = one beat. A gesture ends after a short pause; trackpad inertia
-    // (a long tail of small deltas) is ignored, a fresh strong flick after 1.1s counts again.
-    var wheelAcc = 0, wheelLast = 0, wheelLockAt = -1e9, locked = false;
+    // wheel: one gesture = one beat. Trackpad inertia (a decaying tail) never counts as a new gesture;
+    // a new one starts when the push gets stronger again after a pause, or right after the last step has played.
+    function busy(now) { return tw && tw.dur && (now - tw.t0) < tw.dur * 0.6; }
+    var lastAbs = 0, wheelAcc = 0, wheelLast = 0, wheelLockAt = -1e9, locked = false;
     window.addEventListener('wheel', function (e) {
         e.preventDefault();
         var now = performance.now();
         var dy = e.deltaMode === 1 ? e.deltaY * 33 : e.deltaY;
-        if (now - wheelLast > 220) { locked = false; wheelAcc = 0; }
+        // a new gesture = a real pause, then a real push (inertia tails and frame hiccups don't count)
+        var ad = Math.abs(dy), rising = ad >= 8 && ad > lastAbs * 1.3;
+        var gap = now - wheelLast;
+        if (((gap > 350 && rising) || (gap > 700 && ad >= 8)) && now - wheelLockAt > 500) { locked = false; wheelAcc = 0; }
+        lastAbs = ad;
         wheelLast = now;
         if (locked) {
-            if (now - wheelLockAt > 1100 && Math.abs(dy) > 40) { locked = false; wheelAcc = 0; }
+            if (now - wheelLockAt > 900 && rising && ad > 30 && !busy(now)) { locked = false; wheelAcc = 0; }   // a fresh flick right on the heels of the last one
             else return;
         }
+        if (busy(now)) return;                      // the current step is still playing
         wheelAcc += dy;
-        if (Math.abs(wheelAcc) >= 24) { step(wheelAcc > 0 ? 1 : -1); locked = true; wheelLockAt = now; wheelAcc = 0; }
+        if (Math.abs(wheelAcc) >= 36) { step(wheelAcc > 0 ? 1 : -1); locked = true; wheelLockAt = now; wheelAcc = 0; }
     }, { passive: false });
 
     var touchY = null;
@@ -741,13 +821,14 @@
     window.addEventListener('touchend', function (e) {
         if (touchY === null) return;
         var dy = touchY - e.changedTouches[0].clientY;
-        if (Math.abs(dy) > 36) step(dy > 0 ? 1 : -1);
+        if (Math.abs(dy) > 40 && !busy(performance.now())) step(dy > 0 ? 1 : -1);
         touchY = null;
     });
 
     window.addEventListener('keydown', function (e) {
         var k = e.key;
-        if (k === 'ArrowDown' || k === 'PageDown' || (k === ' ' && e.target === document.body)) { e.preventDefault(); step(1); }
+        var onControl = /^(A|BUTTON|INPUT|TEXTAREA|SELECT)$/.test(e.target.tagName);
+        if (k === 'ArrowDown' || k === 'PageDown' || ((k === ' ' || k === 'Enter') && !onControl)) { e.preventDefault(); step(1); }
         else if (k === 'ArrowUp' || k === 'PageUp') { e.preventDefault(); step(-1); }
         else if (k === 'Home') { e.preventDefault(); tweenTo(beats[0]); }
         else if (k === 'End') { e.preventDefault(); tweenTo(beats[beats.length - 1]); }
@@ -757,10 +838,11 @@
     $('#homeLink').addEventListener('click', function (e) { e.preventDefault(); tweenTo(0); });
     $('#restBtn').addEventListener('click', function () {
         var i = scenes.indexOf($('.scene-step1'));
-        tweenTo(starts[i] + parseFloat(scenes[i].dataset.len) * 0.75);
+        tweenTo(starts[i] + parseFloat(scenes[i].dataset.len) * 0.6);
     });
 
     window.addEventListener('resize', function () { fitStages(); sizeHook(); });
+    if (document.fonts && document.fonts.ready) document.fonts.ready.then(fitStages);
     fitStages();
     sizeHook();
     render();

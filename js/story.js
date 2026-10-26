@@ -30,7 +30,15 @@
         fitPhone();
         $$('.stage-wrap').forEach(function (wrap) {
             var s = Math.min(wrap.clientWidth / 960, wrap.clientHeight / 540);
-            wrap.querySelector('.stage').style.setProperty('--s', Math.max(0.2, s).toFixed(4));
+            var st = wrap.querySelector('.stage');
+            st.style.setProperty('--s', Math.max(0.2, s).toFixed(4));
+            /* bleed: the drawing runs on past the stage to the screen's right and bottom edges
+               (top and left stay at the stage box, so nothing behind the copy shows) */
+            if (wrap.classList.contains('bleed')) {
+                var r = st.getBoundingClientRect(), k = Math.max(0.2, s);
+                var R = Math.max(0, (window.innerWidth - r.right) / k), Bt = Math.max(0, (window.innerHeight - r.bottom) / k);
+                st.style.setProperty('--br', (R + 2).toFixed(1)); st.style.setProperty('--bb', (Bt + 2).toFixed(1));
+            }
         });
     }
 
@@ -94,12 +102,87 @@
         var tmp = out[0]; out[0] = out[best]; out[best] = tmp;   // 도희(0번)는 눈에 띄는 자리로
         return out;
     }
+    /* ===== dot terrain map: every shape is a regular grid of dots (one dot per person / 10 / 100),
+       each dot has an "elevation" that sets its size and colour, and thin contour lines trace the land ===== */
+    function gridPts(sp, test, box) {
+        var o = [];
+        for (var y = box[1] + sp / 2; y < box[3]; y += sp) for (var x = box[0] + sp / 2; x < box[2]; x += sp) if (test(x, y)) o.push([x, y]);
+        return o;
+    }
+    function gridShape(n, test, box, anchor, elev) {
+        var lo = 0.002, hi = 0.3;
+        for (var it = 0; it < 32; it++) { var m = (lo + hi) / 2; if (gridPts(m, test, box).length >= n) lo = m; else hi = m; }
+        // keep exactly n: drop the lowest dots at the shape's edge, so the grid has no holes
+        var all = gridPts(lo, test, box).map(function (q, i) { return { q: q, i: i, v: elev(q[0], q[1]) }; });
+        all.sort(function (a, b) { return b.v - a.v || a.i - b.i; });
+        var out = all.slice(0, n).sort(function (a, b) { return a.i - b.i; }).map(function (o) { return o.q; });
+        var best = 0, bd = 1e9;
+        out.forEach(function (q, i) { var d = Math.hypot(q[0] - anchor[0], q[1] - anchor[1]); if (d < bd) { bd = d; best = i; } });
+        var tmp = out[0]; out[0] = out[best]; out[best] = tmp;       // 도희(0번)
+        out.spacing = lo;
+        out.shade = out.map(function (q) { return clamp(elev(q[0], q[1]), 0.12, 1); });
+        return out;
+    }
+    // school: a plain rectangular building, 50 × 20 dots = 1,000 people, centred on the stage.
+    // 4 floors × 10 window bays (windows = small dark dots), a front door in the middle.
+    var SCH = { cols: 50, rows: 20, w: 1.6 };
+    SCH.sp = SCH.w / SCH.cols; SCH.h = SCH.sp * SCH.rows;
+    function schoolShape() {
+        var out = [], shade = [], sp = SCH.sp;
+        for (var r = 0; r < SCH.rows; r++) for (var c = 0; c < SCH.cols; c++) {
+            var x = -SCH.w / 2 + (c + .5) * sp, y = -SCH.h / 2 + (r + .5) * sp;
+            var floorRow = r % 5, bay = c % 5;                                  // 10 bays of 5 columns
+            var win = floorRow >= 1 && floorRow <= 3 && bay >= 1 && bay <= 3;
+            var door = c >= 22 && c <= 27 && r >= 16;                           // centred: columns 22–27
+            out.push([x, y]);
+            shade.push(door ? .14 : (win ? .24 : .92 - (r / SCH.rows) * .32));
+        }
+        // 도희 (index 0): a wall dot on the right of the second floor
+        var k = 12 * SCH.cols + 35, t = out[0]; out[0] = out[k]; out[k] = t; t = shade[0]; shade[0] = shade[k]; shade[k] = t;
+        out.spacing = sp; out.shade = shade;
+        return out;
+    }
+    // Jeju: elevation rises toward 한라산, with a few small oreum hills
+    var HALLA = [-.02, -.02];
+    var OREUMS = [[-.62, .06, .07], [.56, -.12, .06], [.34, .16, .055], [-.36, -.2, .06], [.8, -.2, .05]];
+    function jejuR(x, y) {                                            // 0 at 한라산 … 1 at the coast (scaled coastline)
+        var lo = 0, hi = 1.6;
+        for (var i = 0; i < 12; i++) { var k = (lo + hi) / 2; if (inPoly(HALLA[0] + (x - HALLA[0]) / k, HALLA[1] + (y - HALLA[1]) / k, JEJU)) hi = k; else lo = k; }
+        return hi;
+    }
+    function jejuElev(x, y) {
+        var e = Math.pow(1 - Math.min(1, jejuR(x, y)), 1.3);
+        OREUMS.forEach(function (o) { var d = Math.hypot(x - o[0], y - o[1]) / o[2]; if (d < 1) e = Math.max(e, .38 + .3 * (1 - d * d)); });
+        return .15 + .85 * e;
+    }
     var SHAPES = {
-        school: (function () { var o = []; for (var j = 0; j < 20; j++) for (var i = 0; i < 50; i++) o.push([-.8 + i * (1.6 / 49), -.3 + j * (.6 / 19)]); var t = o[0]; o[0] = o[525]; o[525] = t; return o; })(),
-        stadium: sample(2400, inStadium, [-1.2, -.85, 1.2, .95], [0, -.6]),
-        jeju: sample(6700, function (x, y) { return inPoly(x, y, JEJU); }, [-1, -.42, 1, .4], [0, 0]),
-        spill: sample(470, function (x, y) { return x > .15 && inPoly(x, y, JEJU, 1.2) && !inPoly(x, y, JEJU, 1.04); }, [-.2, -.5, 1.25, .5], [1, 0])
+        school: schoolShape(),
+        stadium: gridShape(2400, inStadium, [-1.2, -.85, 1.2, .95], [.45, -.62], function (x, y) { return 1 - .75 * (fieldDist(x, y) - .07) / .35; }),
+        jeju: gridShape(6700, function (x, y) { return inPoly(x, y, JEJU); }, [-1, -.42, 1, .4], [-.3, .05], jejuElev),
+        spill: gridShape(470, function (x, y) { return x > .15 && inPoly(x, y, JEJU, 1.2) && !inPoly(x, y, JEJU, 1.04); }, [-.2, -.5, 1.25, .5], [1, 0], function () { return .55; })
     };
+    // terrain colours: burnt → light orange → peach (the brand orange #FF6A00 is not used; 도희 is white)
+    var TERRAIN = ['#8A4A26', '#B0602F', '#D47838', '#F2924E', '#FFB682', '#FFDCC4'];
+    var dsh = new Float32Array(MAXP);
+    for (var dsi = 0; dsi < MAXP; dsi++) dsh[dsi] = .5;
+    function stageR(S) { return S.shape ? SHAPES[S.shape].spacing * HB * .54 : S.r * clamp(HB / 360, .6, 1); }
+    function dotShade(i, st) {
+        var S = STAGES[st];
+        if (!S.shape) return .8;
+        if (S.spill && i >= 6700) return SHAPES.spill.shade[i - 6700];
+        return SHAPES[S.shape].shade[i] || .5;
+    }
+
+    /* background: a faint field of dots over the whole screen (land / sea) */
+    var bgDots = document.createElement('canvas');
+    function buildBg(dpr) {
+        bgDots.width = W * dpr; bgDots.height = H * dpr;
+        var g = bgDots.getContext('2d'); g.setTransform(dpr, 0, 0, dpr, 0, 0);
+        var sp = W > 760 ? 12 : 10;
+        g.fillStyle = 'rgba(255,233,217,.09)'; g.beginPath();
+        for (var y = sp / 2; y < H; y += sp) for (var x = sp / 2; x < W; x += sp) { g.moveTo(x + 1, y); g.arc(x, y, 1, 0, 6.2832); }
+        g.fill();
+    }
     var dpx = new Float32Array(MAXP), dpy = new Float32Array(MAXP), dpa = new Float32Array(MAXP);
     var outPos = [], spd = new Float32Array(MAXP), ph = new Float32Array(MAXP);
     for (var di = 0; di < MAXP; di++) { var ang = rndH() * 6.2832; outPos.push([Math.cos(ang) * 2.6, Math.sin(ang) * 2.6]); spd[di] = .045 + rndH() * .05; ph[di] = rndH() * 6.2832; }
@@ -114,6 +197,7 @@
         hcx = wide ? W * .66 : W / 2; hcy = wide ? H * .45 : H * .3;
         HB = wide ? Math.min(W * .26, H * .38) : Math.min(W * .4, H * .2);
         for (var i = 0; i < MAXP; i++) if (dpa[i] < .01) { dpx[i] = hcx + outPos[i][0] * HB * 2; dpy[i] = hcy + outPos[i][1] * HB * 2; }
+        buildBg(dpr);
     }
     function dotTarget(i, st) {
         var S = STAGES[st];
@@ -141,12 +225,98 @@
         return { x: w.left + w.width / 2, y: w.top + w.height / 2, size: w.width };
     }
 
+    /* contour lines for each shape (drawn in shape units, faded in with the labels) */
+    function smoothPoly(pts) {        // closed curve through the midpoints, so contours read as terrain, not polygons
+        ctx.beginPath();
+        for (var i = 0; i <= pts.length; i++) {
+            var a = pts[i % pts.length], b = pts[(i + 1) % pts.length], mx = (a[0] + b[0]) / 2, my = (a[1] + b[1]) / 2;
+            if (i === 0) ctx.moveTo(mx, my); else ctx.quadraticCurveTo(a[0], a[1], mx, my);
+        }
+        ctx.closePath();
+    }
+    function XY(u, v) { return [hcx + u * HB, hcy + v * HB]; }
+    function drawContours(S, a) {
+        if (a < .02) return;
+        ctx.save(); ctx.lineWidth = 1;
+        if (S.shape === 'jeju') {
+            // sea: rings around the coast, fading out
+            [1.1, 1.22, 1.36].forEach(function (k, i) {
+                ctx.strokeStyle = 'rgba(255,233,217,' + (.16 - i * .045) * a + ')';
+                smoothPoly(JEJU.map(function (q) { return XY(HALLA[0] + (q[0] - HALLA[0]) * k, HALLA[1] + (q[1] - HALLA[1]) * k); })); ctx.stroke();
+            });
+            // land: coastline, then rising contours toward 한라산
+            [1, .8, .6, .42, .26, .12].forEach(function (k, i) {
+                ctx.strokeStyle = 'rgba(255,233,217,' + (i === 0 ? .55 : .3) * a + ')'; ctx.lineWidth = i === 0 ? 1.4 : 1;
+                smoothPoly(JEJU.map(function (q) { return XY(HALLA[0] + (q[0] - HALLA[0]) * k, HALLA[1] + (q[1] - HALLA[1]) * k); })); ctx.stroke();
+            });
+            ctx.lineWidth = 1; ctx.strokeStyle = 'rgba(255,233,217,' + .32 * a + ')';
+            OREUMS.forEach(function (o) { [1, .55].forEach(function (s) { var p = XY(o[0], o[1]); ctx.beginPath(); ctx.ellipse(p[0], p[1], o[2] * HB * s, o[2] * HB * s * .7, 0, 0, 6.2832); ctx.stroke(); }); });
+            var h = XY(HALLA[0], HALLA[1]);
+            ctx.fillStyle = 'rgba(255,248,242,' + .9 * a + ')'; ctx.font = '700 12px ' + HOOK_FONT; ctx.fillText('▲ 한라산', h[0] + 8, h[1] - 6);
+        } else if (S.shape === 'stadium') {
+            var c = Math.SQRT1_2, H0 = XY(HOME[0], HOME[1]);
+            // the field: grass in faint dots, the diamond and bases in white
+            ctx.fillStyle = 'rgba(160,170,140,' + .12 * a + ')';
+            var gs = SHAPES.stadium.spacing;
+            for (var gy = -.4; gy < .62; gy += gs) for (var gx = -.75; gx < .75; gx += gs) {
+                var dx = gx - HOME[0], dy = gy - HOME[1], an = Math.atan2(dy, dx);
+                if (Math.hypot(dx, dy) < .98 && an <= -Math.PI / 4 && an >= -3 * Math.PI / 4) { var gp = XY(gx, gy); ctx.fillRect(gp[0] - .9, gp[1] - .9, 1.8, 1.8); }
+            }
+            ctx.strokeStyle = 'rgba(255,248,242,' + .7 * a + ')'; ctx.lineWidth = 1.4;
+            ctx.beginPath(); var d1 = XY(HOME[0], HOME[1] - .6), d2 = XY(.3, HOME[1] - .3), d3 = XY(-.3, HOME[1] - .3);
+            ctx.moveTo(H0[0], H0[1]); ctx.lineTo(d2[0], d2[1]); ctx.lineTo(d1[0], d1[1]); ctx.lineTo(d3[0], d3[1]); ctx.closePath(); ctx.stroke();
+            ctx.beginPath(); var lf = XY(HOME[0] - c, HOME[1] - c), rf = XY(HOME[0] + c, HOME[1] - c);
+            ctx.moveTo(lf[0], lf[1]); ctx.lineTo(H0[0], H0[1]); ctx.lineTo(rf[0], rf[1]); ctx.stroke();
+            ctx.beginPath(); ctx.arc(H0[0], H0[1], .55 * HB, -Math.PI / 4, -3 * Math.PI / 4, true); ctx.strokeStyle = 'rgba(255,248,242,' + .3 * a + ')'; ctx.stroke();
+            ctx.fillStyle = 'rgba(255,248,242,' + .9 * a + ')';
+            [H0, d1, d2, d3].forEach(function (b) { ctx.fillRect(b[0] - 3, b[1] - 3, 6, 6); });
+            // the stands: contour rings between the seat tiers. Each ring is a true offset of the field
+            // (arc at home plate, both foul lines, round corners at the foul poles, the outfield arc),
+            // pushed out by half a dot so the outer / inner dots sit inside their lines.
+            ctx.save(); ctx.beginPath(); ctx.rect(0, 0, W, hcy + .95 * HB + 1); ctx.clip();
+            var half = SHAPES.stadium.spacing * .55, LP = XY(HOME[0] - c, HOME[1] - c), RP = XY(HOME[0] + c, HOME[1] - c);
+            [.07 - half, .155, .24, .33, .42 + half].forEach(function (d, i) {
+                var r = d * HB;
+                ctx.strokeStyle = 'rgba(255,233,217,' + (i === 0 || i === 4 ? .5 : .2) * a + ')'; ctx.lineWidth = i === 0 || i === 4 ? 1.4 : 1;
+                ctx.beginPath();
+                ctx.arc(H0[0], H0[1], r, Math.PI / 4, 3 * Math.PI / 4);               // behind home plate
+                ctx.lineTo(LP[0] - r * c, LP[1] + r * c);                              // along the left foul line
+                ctx.arc(LP[0], LP[1], r, 3 * Math.PI / 4, 5 * Math.PI / 4);            // round the left foul pole
+                ctx.arc(H0[0], H0[1], HB + r, -3 * Math.PI / 4, -Math.PI / 4);         // the outfield
+                ctx.arc(RP[0], RP[1], r, -Math.PI / 4, Math.PI / 4);                   // round the right foul pole
+                ctx.closePath(); ctx.stroke();                                         // back along the right foul line
+            });
+            // the stands end at the bottom: close them with a line
+            var yb = hcy + .95 * HB;
+            ctx.strokeStyle = 'rgba(255,233,217,' + .5 * a + ')'; ctx.lineWidth = 1.4;
+            var xb = Math.sqrt(Math.max(0, Math.pow((.42 + half) * HB, 2) - Math.pow(yb - H0[1], 2)));
+            ctx.beginPath(); ctx.moveTo(H0[0] - xb, yb); ctx.lineTo(H0[0] + xb, yb); ctx.stroke();
+            ctx.restore();
+        } else if (S.shape === 'school') {
+            var hw = SCH.w / 2 + SCH.sp * .6, hh = SCH.h / 2 + SCH.sp * .6;
+            var p = XY(-hw, -hh), q = XY(hw, hh);
+            ctx.strokeStyle = 'rgba(255,233,217,' + .5 * a + ')'; ctx.lineWidth = 1.4;
+            ctx.strokeRect(p[0], p[1], q[0] - p[0], q[1] - p[1]);                       // the building
+            var r0 = XY(-hw - .03, -hh - .035), r1 = XY(hw + .03, -hh - .035);
+            ctx.beginPath(); ctx.moveTo(r0[0], r0[1]); ctx.lineTo(r1[0], r1[1]); ctx.stroke();   // roof line
+            ctx.strokeStyle = 'rgba(255,233,217,' + .2 * a + ')'; ctx.lineWidth = 1;
+            for (var fl = 1; fl < 4; fl++) {                                            // floor lines
+                var fy = -SCH.h / 2 + fl * 5 * SCH.sp, f1 = XY(-hw, fy), f2 = XY(hw, fy);
+                ctx.beginPath(); ctx.moveTo(f1[0], f1[1]); ctx.lineTo(f2[0], f2[1]); ctx.stroke();
+            }
+            var g1 = XY(-hw - .08, hh), g2 = XY(hw + .08, hh);                            // ground
+            ctx.strokeStyle = 'rgba(255,233,217,' + .45 * a + ')'; ctx.lineWidth = 1.2;
+            ctx.beginPath(); ctx.moveTo(g1[0], g1[1]); ctx.lineTo(g2[0], g2[1]); ctx.stroke();
+        }
+        ctx.restore();
+    }
+
     function drawHook(now) {
         var S = STAGES[hookStage];
         // 떠나는 단계: 도희의 위치는 스크롤 진행도로 직접 정한다 (제주 위 자리 → 1층 창문)
         var leaveT = 0, spot = null;
         if (S.leave) {
-            leaveFrom = { x: hcx + SHAPES.jeju[0][0] * HB, y: hcy + SHAPES.jeju[0][1] * HB };   // 제주 위 도희 자리
+            leaveFrom = { x: hcx + SHAPES.jeju[0][0] * HB, y: hcy + SHAPES.jeju[0][1] * HB };
             spot = windowSpot();
             leaveT = ease(seg(hookP, LEAVE_AT + 0.02, 1));
             dpx[0] = lerp(leaveFrom.x, spot.x, leaveT);
@@ -154,79 +324,66 @@
         } else {
             leaveFrom = null;
         }
-        R += (S.r * clamp(HB / 360, .6, 1) - R) * .08;
+        R += (stageR(S) - R) * .08;
         la += ((now - stageAt > 700 ? 1 : 0) - la) * .08;
         ctx.clearRect(0, 0, W, H);
+        /* background dot field: drawn page-wide by html::before in style.css */
+        if (S.shape && !S.leave) drawContours(S, la * (S.dim ? .4 : 1));
 
-        if (S.shape === 'stadium') {
-            var c = Math.SQRT1_2, X = function (u) { return hcx + u * HB; }, Y = function (v) { return hcy + v * HB; };
-            ctx.strokeStyle = 'rgba(255,106,0,' + (.45 * la) + ')'; ctx.lineWidth = 1.5;
-            ctx.beginPath();
-            ctx.moveTo(X(HOME[0] - c), Y(HOME[1] - c)); ctx.lineTo(X(HOME[0]), Y(HOME[1])); ctx.lineTo(X(HOME[0] + c), Y(HOME[1] - c));
-            ctx.arc(X(HOME[0]), Y(HOME[1]), HB, -Math.PI / 4, -3 * Math.PI / 4, true);
-            ctx.stroke();
-            var d = .3;
-            ctx.beginPath();
-            ctx.moveTo(X(0), Y(HOME[1])); ctx.lineTo(X(d), Y(HOME[1] - d)); ctx.lineTo(X(0), Y(HOME[1] - 2 * d)); ctx.lineTo(X(-d), Y(HOME[1] - d)); ctx.closePath();
-            ctx.stroke();
-        }
-        if (S.shape === 'jeju' && !S.leave) {
-            ctx.strokeStyle = 'rgba(255,106,0,' + (.35 * la) + ')'; ctx.lineWidth = 1.5;
-            ctx.beginPath();
-            JEJU.forEach(function (q, i) { var x = hcx + q[0] * HB * 1.02, y = hcy + q[1] * HB * 1.02; if (i) ctx.lineTo(x, y); else ctx.moveTo(x, y); });
-            ctx.closePath(); ctx.stroke();
-        }
-
-        // 도희 주변의 은은한 빛 (숨 쉬듯 커졌다 작아짐)
+        // 도희 주변의 흰 빛 (숨 쉬듯)
         if (dpa[0] > .02) {
             var gx = dpx[0], gy = dpy[0], pulse = .5 + .5 * Math.sin(now / 650);
             var gr = Math.max(R * 2.2, 10) * (3.2 + pulse * 1.2) + (S.dim ? 24 : 0);
-            if (spot) gr = lerp(gr, spot.size * 1.3, leaveT);     // 창문 크기만큼 빛이 넓어지며 도착
+            if (spot) gr = lerp(gr, spot.size * 1.3, leaveT);
             var glow = ctx.createRadialGradient(gx, gy, 0, gx, gy, gr);
-            glow.addColorStop(0, 'rgba(255,140,50,' + (.45 * dpa[0]) + ')');
-            glow.addColorStop(.45, 'rgba(255,106,0,' + (.18 * dpa[0]) + ')');
-            glow.addColorStop(1, 'rgba(255,106,0,0)');
+            glow.addColorStop(0, 'rgba(255,255,255,' + (.42 * dpa[0]) + ')');
+            glow.addColorStop(.45, 'rgba(255,248,242,' + (.14 * dpa[0]) + ')');
+            glow.addColorStop(1, 'rgba(255,248,242,0)');
             ctx.fillStyle = glow;
             ctx.beginPath(); ctx.arc(gx, gy, gr, 0, 6.2832); ctx.fill();
         }
 
-        var wob = R > 6 ? 0 : .7, t = now * .0012;
-        ctx.fillStyle = 'rgba(255,233,217,.85)';
-        ctx.beginPath();
-        var solo = [];
+        // dots, batched by terrain colour
+        var paths = TERRAIN.map(function () { return []; }), solo = [];
         for (var i = 0; i < MAXP; i++) {
             var tg = dotTarget(i, hookStage);
             var tx = hcx + (tg ? tg[0] : outPos[i][0]) * HB, ty = hcy + (tg ? tg[1] : outPos[i][1]) * HB;
             var k = reduced ? 1 : spd[i];
             if (!(S.leave && i === 0)) { dpx[i] += (tx - dpx[i]) * k; dpy[i] += (ty - dpy[i]) * k; }
             dpa[i] += ((tg ? 1 : 0) - dpa[i]) * (reduced ? 1 : .07);
+            if (tg) dsh[i] += (dotShade(i, hookStage) - dsh[i]) * (reduced ? 1 : .08);
             if (dpa[i] < .02) continue;
-            var x = dpx[i] + Math.sin(t + ph[i]) * wob, y = dpy[i] + Math.cos(t * .9 + ph[i]) * wob;
-            if (i === 0 || (S.spill && i >= 6700) || dpa[i] < .95 || S.dim) { solo.push(i, x, y); continue; }
-            ctx.rect(x - R, y - R, R * 2, R * 2);
+            if (i === 0 || dpa[i] < .95 || S.dim || (S.spill && i >= 6700)) { solo.push(i); continue; }
+            paths[Math.min(TERRAIN.length - 1, Math.floor(dsh[i] * TERRAIN.length))].push(i);
         }
-        ctx.fill();
-        for (var s = 0; s < solo.length; s += 3) {
-            var si = solo[s], sx = solo[s + 1], sy = solo[s + 2];
-            var a = dpa[si], col = '255,233,217';
-            if (si === 0) col = '255,106,0';
-            else if (S.spill && si >= 6700) col = '255,178,122';
-            if (S.dim && si !== 0) a *= .22;
-            ctx.fillStyle = 'rgba(' + col + ',' + a + ')';
-            if (si === 0 || R > 4) { ctx.beginPath(); ctx.arc(sx, sy, si === 0 ? Math.max(R, 2.2) : R, 0, 6.2832); ctx.fill(); }
-            else ctx.fillRect(sx - R, sy - R, R * 2, R * 2);
-        }
+        paths.forEach(function (list, ci) {
+            if (!list.length) return;
+            ctx.fillStyle = TERRAIN[ci]; ctx.beginPath();
+            list.forEach(function (i) { var rd = R * (.42 + .58 * dsh[i]); ctx.moveTo(dpx[i] + rd, dpy[i]); ctx.arc(dpx[i], dpy[i], rd, 0, 6.2832); });
+            ctx.fill();
+        });
+        solo.forEach(function (si) {
+            if (si === 0) return;
+            var a = dpa[si], col = TERRAIN[Math.min(TERRAIN.length - 1, Math.floor(dsh[si] * TERRAIN.length))];
+            if (S.spill && si >= 6700) col = '#FFDCC4';
+            ctx.globalAlpha = S.dim ? a * .22 : a;
+            ctx.fillStyle = col; ctx.beginPath(); ctx.arc(dpx[si], dpy[si], R * (.42 + .58 * dsh[si]), 0, 6.2832); ctx.fill();
+        });
+        ctx.globalAlpha = 1;
 
         if (S.label && la > .02) {
-            var top = { school: -.3, stadium: -.85, jeju: -.42 }[S.shape];
-            var left = { school: -.8, stadium: -1.1, jeju: -1 }[S.shape];
+            var top = { school: -.43, stadium: -.85, jeju: -.42 }[S.shape];
+            var left = { school: -.82, stadium: -1.1, jeju: -1 }[S.shape];
             hookLabel(S.label, S.legend, hcx + left * HB, hcy + top * HB - 12, la);
             if (S.spill) hookLabel('+ 4.7만 명 · 섬에 다 담기지 못해요', '', Math.min(W - 270, hcx + .3 * HB), hcy + .62 * HB, la);
         }
 
+        // 도희: a white dot with a white ring
         if (dpa[0] > .02) {
             var x0 = dpx[0], y0 = dpy[0], rr = Math.max(R * 2.2, 10) + (S.dim ? 14 : 0);
-            ctx.strokeStyle = 'rgba(255,106,0,' + dpa[0] + ')'; ctx.lineWidth = 2.5;
+            ctx.fillStyle = 'rgba(255,255,255,' + dpa[0] + ')';
+            ctx.beginPath(); ctx.arc(x0, y0, Math.max(R * 1.1, 3), 0, 6.2832); ctx.fill();
+            ctx.strokeStyle = 'rgba(255,255,255,' + dpa[0] + ')'; ctx.lineWidth = 2;
             ctx.beginPath(); ctx.arc(x0, y0, rr, 0, 6.2832); ctx.stroke();
             if (hookStage <= 2 || S.dim || (S.leave && leaveT < .6)) {
                 ctx.font = '800 15px ' + HOOK_FONT; ctx.fillStyle = '#fff';
@@ -305,6 +462,7 @@
     /* 38 × 15 pixel tiles (16px). Columns 0–19 = 1~4단계 (5 columns each, 3(s+1) tiles high);
        columns 20–37 = the plateau that holds the four 지원 프로그램 doors and never falls. */
     var GROUND = 500, B = 16, COLS = 38, ROWS = 15, X0 = 300, SW = 5, PLAT = 20;
+    var NC = COLS + 40;                           // + plateau columns past the stage, out to the screen edge
     var TOP = GROUND - ROWS * B;                  // 260: top of the wall
     var WALL_TONES = ['#2C2825', '#332E2A', '#3A3430', '#262220'];
     var STEP_TONES = [                            // same ramp as the big steps: deep orange → orange → light orange → peach
@@ -318,7 +476,7 @@
     var blocks = [];
     (function buildBlocks() {
         for (var r = 0; r < ROWS; r++) {
-            for (var c = 0; c < COLS; c++) {
+            for (var c = 0; c < NC; c++) {
                 var stepIdx = c < PLAT ? Math.floor(c / SW) : 4;
                 var keep = stepIdx === 4 || r < 3 * (stepIdx + 1);
                 var seed = (r * 31 + c * 17 + r * c) % 23;
@@ -364,7 +522,7 @@
         cam.style.transform = 'translate(' + (ZOOM.tx * zoom).toFixed(1) + 'px,' + (ZOOM.ty * zoom).toFixed(1) + 'px) scale(' + lerp(1, ZOOM.s, zoom).toFixed(4) + ')';
         var fadeOut = 1 - seg(zoom, 0, 0.5);
         $$('.corner, .terrace, .t-door', scene).forEach(function (el) { el.style.opacity = fadeOut; });
-        $('#stepLabels').style.opacity = (p > 0.86 ? 1 : 0) * fadeOut;
+        $('#stepLabels').style.opacity = (p > 0.85 ? 1 : 0) * fadeOut;
 
         var built = seg(p, 0.02, 0.09) * blocks.length;
         var fly = seg(p, 0.62, 0.67);                // symbol flies in
@@ -387,7 +545,7 @@
             }
             b.el.style.transform = 'translate(' + x + 'px,' + y + 'px) rotate(' + r + 'deg)';
             b.el.style.opacity = o;
-            if (b.keep) b.el.classList.toggle('lit', p > 0.84 + b.step * 0.012);
+            if (b.keep) b.el.classList.toggle('lit', p > 0.84 + b.step * 0.008);
         });
 
         var sg = $('#stairGrain');
@@ -395,15 +553,15 @@
             var pts = [[X0, GROUND]];
             for (var st = 0; st < 4; st++) { pts.push([X0 + st * SW * B, GROUND - 3 * B * (st + 1)]); pts.push([X0 + (st + 1) * SW * B, GROUND - 3 * B * (st + 1)]); }
             pts = [[X0, GROUND], [X0, GROUND - 3 * B]].concat(pts.slice(2));
-            pts.push([X0 + PLAT * B, TOP], [X0 + COLS * B, TOP], [X0 + COLS * B, GROUND]);
+            pts.push([X0 + PLAT * B, TOP], [X0 + NC * B, TOP], [X0 + NC * B, GROUND]);
             sg.style.clipPath = 'polygon(' + pts.map(function (q) { return q[0] + 'px ' + q[1] + 'px'; }).join(',') + ')';
             sg.dataset.ready = 1;
         }
-        sg.style.opacity = (p > 0.86 ? 0.7 : 0) * fadeOut;
+        sg.style.opacity = (p > 0.85 ? 0.7 : 0) * fadeOut;
 
         // the four entrances rise with the wall's top row; the first glows as 3F walks in
         var enter = seg(p, 0.43, 0.46) * (1 - seg(p, 0.49, 0.53));
-        var rise = clamp(built - (blocks.length - COLS));                     // 0 → 1 while the top row lands
+        var rise = clamp(built - (blocks.length - NC));                     // 0 → 1 while the top row lands
         doors.forEach(function (d, k) {
             d.style.opacity = rise * fadeOut;
             d.style.transform = 'translate(' + shake.toFixed(1) + 'px,' + ((1 - rise) * 16).toFixed(1) + 'px)';
@@ -426,12 +584,12 @@
                 pos = [TX + 6 * Math.sin(Math.PI * Math.min(1, hp * 1.2)), base - peaks[0] * Math.abs(Math.sin(hp * Math.PI * 3)) * (1 - hp * .35)];
             }
             else if (p < t0) pos = [TX + 6 * (1 - seg(p, 0.59, 0.62)), base];
-            else pos = arc([TX, base], land, ease(seg(p, t0, t0 + 0.04)), 46);
+            else pos = arc([TX, base], land, ease(seg(p, t0, t0 + 0.03)), 46);
             put(el, pos[0], pos[1], o * fadeOut);
         }
-        youth(oru1, FLOOR[0], [14], [X0 + 46, GROUND - 3 * B], 0.85);         // → 1단계
-        youth(oru2, FLOOR[1], [12], [X0 + SW * B + 46, GROUND - 6 * B], 0.86);
-        var shiver = p >= 0.49 && p < 0.85;          // they can't reach it: a small trembling while they wait
+        youth(oru1, FLOOR[0], [14], [X0 + 46, GROUND - 3 * B], 0.878);         // → 1단계
+        youth(oru2, FLOOR[1], [12], [X0 + SW * B + 46, GROUND - 6 * B], 0.884);
+        var shiver = p >= 0.49 && p < 0.878;          // they can't reach it: a small trembling while they wait
         oru1.classList.toggle('shiver', shiver); oru2.classList.toggle('shiver', shiver);  // → 2단계
 
         // oreum symbol: flies in on an arc, strikes the wall, bounces back and fades
@@ -513,25 +671,6 @@
     var slabEls = $$('.slab', slabsEl);
     var stepOru = $('#stepOru');
 
-    // big steps as tiles: the wall grid (24px from x=360, ground y=500) after the ×2.14 zoom
-    (function buildBigTiles() {
-        var box = $('#bigTiles'), P = B * ZOOM.s;
-        var x0 = X0 * ZOOM.s + ZOOM.tx, ground = GROUND * ZOOM.s + ZOOM.ty;
-        for (var k = -Math.ceil(x0 / P); x0 + k * P < 960; k++) {
-            var x = x0 + k * P, step = x < 619 ? 0 : 1, rows = step === 0 ? 3 : 6;
-            for (var r = 0; r < rows; r++) {
-                var seed = Math.abs((r * 31 + k * 17 + r * k) % 23);
-                var t = document.createElement('span');
-                t.className = 'btile';
-                t.style.width = t.style.height = ((B - 2) * ZOOM.s).toFixed(1) + 'px';
-                t.style.left = x.toFixed(1) + 'px';
-                t.style.top = (ground - P * (r + 1)).toFixed(1) + 'px';
-                t.style.setProperty('--sc', STEP_TONES[step][(seed * 7) % 4]);
-                t.dataset.fade = (0.02 + clamp(x / 960) * 0.06 + (r % 2) * 0.006).toFixed(3);   // a sweep from left to right
-                box.appendChild(t);
-            }
-        }
-    })();
     var lastStage1Img = 1;
 
     function step1Count(p) {
@@ -546,8 +685,6 @@
     var bTiles = null, lastN = 0;
     function updateStep1(scene, p) {
         // tiles dissolve one by one into the solid gradient steps
-        if (!bTiles) bTiles = $$('.btile', scene);
-        bTiles.forEach(function (t) { t.style.opacity = (1 - seg(p, +t.dataset.fade, +t.dataset.fade + 0.025)).toFixed(3); });
         var n = step1Count(p);
         var resting = p >= 0.42 && p < 0.58;
         var top = p >= 0.8;
@@ -584,7 +721,7 @@
         stepOru.style.setProperty('--flip', p >= 0.84 ? -1 : 1);
 
         var want = p >= 0.9 ? 2 : 1;
-        if (want !== lastStage1Img) { stepOru.src = 'assets/oreumi-' + want + '.png'; lastStage1Img = want; }
+        if (want !== lastStage1Img) { stepOru.src = 'assets/oreumi' + want + '.png'; lastStage1Img = want; }
 
         scene.classList.toggle('resting', resting);
         var zz = $('.zz', scene);
@@ -594,7 +731,6 @@
 
         var days = n + (p >= 0.42 ? 1 : 0);
         $('#dday').textContent = top ? '1단계 완료' : (resting ? 'D+' + days + ' · 쉬는 날' : 'D+' + days);
-        $('#compare').classList.toggle('on', p >= 0.9);
     }
 
     /* ======================================================
@@ -634,6 +770,7 @@
     function updateMontage(scene, pRaw) {
         var p = clamp(pRaw / 0.85);                  // the climb runs on the first 85%
         var zoom = ease(seg(pRaw, 0.87, 1));
+        scene.style.setProperty('--dzs', (1 - zoom).toFixed(3));
         $('#mCam').style.transform = 'translate(' + (MZ.tx * zoom).toFixed(1) + 'px,' + (MZ.ty * zoom).toFixed(1) + 'px) scale(' + lerp(1, MZ.s, zoom).toFixed(4) + ')';
         var fade = 1 - seg(zoom, 0, 0.4);
         mOru.style.opacity = fade;
@@ -661,7 +798,7 @@
         mOru.style.top = y + 'px';
 
         var img = p >= 0.5 ? 3 : 2;
-        if (img !== lastMImg) { mOru.src = 'assets/oreumi-' + img + '.png'; lastMImg = img; }
+        if (img !== lastMImg) { mOru.src = 'assets/oreumi' + img + '.png'; lastMImg = img; }
         var name = p < 0.5 ? '2단계 둘러보기' : (p < 0.86 ? '3단계 마주하기' : '4단계 도전하기');
         var nameEl = $('#stageName');
         if (name !== lastName) {
@@ -836,10 +973,6 @@
     $('#nextBtn').addEventListener('click', function () { step(1); });
     $('#prevBtn').addEventListener('click', function () { step(-1); });
     $('#homeLink').addEventListener('click', function (e) { e.preventDefault(); tweenTo(0); });
-    $('#restBtn').addEventListener('click', function () {
-        var i = scenes.indexOf($('.scene-step1'));
-        tweenTo(starts[i] + parseFloat(scenes[i].dataset.len) * 0.6);
-    });
 
     window.addEventListener('resize', function () { fitStages(); sizeHook(); });
     if (document.fonts && document.fonts.ready) document.fonts.ready.then(fitStages);

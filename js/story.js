@@ -578,6 +578,12 @@
     }
   })();
 
+  /* sprite frames: preloaded so swapping src never flickers */
+  function frames(prefix, n) { var a = []; for (var i = 1; i <= n; i++) { var im = new Image(); im.src = 'assets/' + prefix + i + '.png'; a.push('assets/' + prefix + i + '.png'); } return a; }
+  var HOP1 = frames('hop1-', 7);     // 1단계 오르미: squash → stretch → land
+  var RUN4 = frames('run4-', 9);     // 4단계 오르미: 1–6 run cycle, 7 joy, 8 leap, 9 stand
+  function setSrc(el, src) { if (el.getAttribute('src') !== src) el.setAttribute('src', src); }
+
   var HIT = { x: 430, y: 330 };                 // where the symbol strikes the wall (left part, over the future stairs)
   var FLY_FROM = { x: -120, y: 40 };
   var doors = $$('.wall-door');
@@ -656,6 +662,11 @@
     else if (p < 0.455) pos3 = [lerp(322, DOOR1, ease(seg(p, 0.42, 0.455))), TOP];
     else { var g = seg(p, 0.455, 0.475); pos3 = [DOOR1, TOP]; o3 = 1 - g; s3 = 1 - 0.3 * g; }
     put(oru3, pos3[0], pos3[1], o3 * fadeOut, s3);
+    // sprite frame from the motion itself: running while moving, a leap on the jump, standing when still
+    var f3 = 'assets/oreumi4.png';
+    if (p >= 0.39 && p < 0.42) f3 = RUN4[seg(p, 0.39, 0.42) < 0.5 ? 7 : 6];
+    else if ((out > 0 && out < 1 && p < 0.39) || (p >= 0.42 && p < 0.475)) f3 = RUN4[Math.floor(pos3[0] / 13) % 6];
+    setSrc(oru3, f3);
 
     // 1F · 2F: step out, try twice to jump the wall (and fall short), then hop onto their own stair
     function youth(el, base, peaks, land, t0) {
@@ -753,7 +764,19 @@
   var slabEls = $$('.slab', slabsEl);
   var stepOru = $('#stepOru');
 
-  var lastStage1Img = 1;
+  var lastStage1Img = 1, lastSpot = null, hopRaf = 0;
+  // the hop plays in time with the 0.8s move between layers (CSS transition on left/top)
+  function stopHop() { if (hopRaf) cancelAnimationFrame(hopRaf); hopRaf = 0; }
+  function playHop() {
+    stopHop();
+    var t0 = performance.now(), D = 760;
+    (function tick(now) {
+      var k = (now - t0) / D;
+      if (k >= 1 || lastStage1Img !== 1) { hopRaf = 0; if (lastStage1Img === 1) setSrc(stepOru, 'assets/oreumi1.png'); return; }
+      setSrc(stepOru, HOP1[Math.min(HOP1.length - 1, Math.floor(k * HOP1.length))]);
+      hopRaf = requestAnimationFrame(tick);
+    })(t0);
+  }
 
   function step1Count(p) {
     if (p < 0.06) return 0;
@@ -803,7 +826,9 @@
     stepOru.style.setProperty('--flip', p >= 0.84 ? -1 : 1);
 
     var want = p >= 0.9 ? 2 : 1;
-    if (want !== lastStage1Img) { stepOru.src = 'assets/oreumi' + want + '.png'; lastStage1Img = want; }
+    if (want !== lastStage1Img) { stopHop(); stepOru.src = 'assets/oreumi' + want + '.png'; lastStage1Img = want; }
+    var spot = x + ',' + y;
+    if (spot !== lastSpot) { if (lastSpot !== null && want === 1 && !reduced) playHop(); lastSpot = spot; }
 
     scene.classList.toggle('resting', resting);
     var zz = $('.zz', scene);

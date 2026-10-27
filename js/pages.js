@@ -47,3 +47,28 @@
     return '<figure class="item"><div class="phone"><div class="phone__bar"><span>9:41</span><span>●●●</span></div><div class="scr">' + s[1] + '</div></div><em>' + s[0] + '</em></figure>';
   }).join('');
 })();
+/* tabs (plan page: persona A/B, 3C) */
+(function () {
+  'use strict';
+  Array.prototype.forEach.call(document.querySelectorAll('[data-tabs]'), function (list) {
+    var key = list.getAttribute('data-tabs');
+    var panels = document.querySelector('[data-tabs-for="' + key + '"]');
+    var btns = Array.prototype.slice.call(list.querySelectorAll('[data-tab]'));
+    function show(id) {
+      btns.forEach(function (b) { b.setAttribute('aria-selected', b.getAttribute('data-tab') === id ? 'true' : 'false'); b.tabIndex = b.getAttribute('data-tab') === id ? 0 : -1; });
+      Array.prototype.forEach.call(panels.children, function (p) {
+        var on = p.getAttribute('data-panel') === id;
+        p.hidden = !on;
+        if (on) Array.prototype.forEach.call(p.querySelectorAll('.rv'), function (e) { e.classList.add('in'); });
+      });
+    }
+    btns.forEach(function (b, i) {
+      b.addEventListener('click', function () { show(b.getAttribute('data-tab')); });
+      b.addEventListener('keydown', function (e) {
+        var d = e.key === 'ArrowRight' ? 1 : e.key === 'ArrowLeft' ? -1 : 0;
+        if (!d) return;
+        e.preventDefault(); var n = btns[(i + d + btns.length) % btns.length]; n.focus(); n.click();
+      });
+    });
+  });
+})();

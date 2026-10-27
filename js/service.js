@@ -16,8 +16,8 @@
     }
     var step1 = q1 === 'low';
     out.innerHTML = step1
-        ? '<strong>1단계 숨고르기</strong>부터 시작해 보세요. 창문 열기처럼 아주 작은 일상부터 다시 쌓아요.'
-        : '<strong>2단계 둘러보기</strong>부터 시작해 보세요. 일상은 이어지고 있으니, 집 앞으로 한 걸음부터요.';
+      ? '<strong>1단계 숨고르기</strong>부터 시작해 보세요. 창문 열기처럼 아주 작은 일상부터 다시 쌓아요.'
+      : '<strong>2단계 둘러보기</strong>부터 시작해 보세요. 일상은 이어지고 있으니, 집 앞으로 한 걸음부터요.';
   });
 
   form.addEventListener('change', function () {

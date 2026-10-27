@@ -16,11 +16,23 @@
     }
     var step1 = q1 === 'low';
     out.innerHTML = step1
-      ? '<strong>1단계 숨고르기</strong>부터 시작해 보세요. 창문 열기처럼 아주 작은 일상부터 다시 쌓아요.'
-      : '<strong>2단계 둘러보기</strong>부터 시작해 보세요. 일상은 이어지고 있으니, 집 앞으로 한 걸음부터요.';
+        ? '<strong>1단계 숨고르기</strong>부터 시작해 보세요. 창문 열기처럼 아주 작은 일상부터 다시 쌓아요.'
+        : '<strong>2단계 둘러보기</strong>부터 시작해 보세요. 일상은 이어지고 있으니, 집 앞으로 한 걸음부터요.';
   });
 
   form.addEventListener('change', function () {
     if (out.textContent.indexOf('아직') === 0) out.textContent = '네 질문에 답하면 시작할 계단을 알려드려요.';
   });
+})();
+
+/* hero phone: the app's home screens, one after another every second */
+(function () {
+  var shots = Array.prototype.slice.call(document.querySelectorAll('.phone-shots img'));
+  if (shots.length < 2) return;
+  var i = 0;
+  setInterval(function () {
+    shots[i].classList.remove('on');
+    i = (i + 1) % shots.length;
+    shots[i].classList.add('on');
+  }, 1000);
 })();

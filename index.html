@@ -9,6 +9,7 @@
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Syncopate:wght@400;700&family=Noto+Sans+KR:wght@400;500;700;900&display=swap">
     <link rel="stylesheet" href="css/style.css">
+    <script src="js/fit.js" data-mode="story"></script>
 
 </head>
 <body>
@@ -17,16 +18,17 @@
     <header class="topbar" id="topbar">
         <a href="#" id="homeLink" aria-label="oreum 처음으로"><img class="logo" src="assets/logo-white.png" alt="oreum"></a>
         <nav aria-label="주요 메뉴">
-            <a href="plan.html" class="nav-extra">기획</a>
-            <a href="design.html" class="nav-extra">디자인</a>
-            <a href="service.html" class="nav-cta">서비스 소개</a>
+            <a href="./" class="nav-story" aria-current="page">이야기</a>
+            <a href="plan.html" class="nav-plan">기획</a>
+            <a href="design.html" class="nav-design">디자인</a>
+            <a href="service.html" class="nav-service">서비스 소개</a>
         </nav>
     </header>
 
     <main class="story" id="story" aria-live="polite">
 
         <!-- 01 HOOK · 쉬었음 70만 -->
-        <section class="scene scene-hook" data-scene="hook" data-beats="0,0.11,0.28,0.48,0.7,0.82,0.875" data-chapter="쉬었음 71.7만" data-len="8" aria-label="쉬었음 청년 71.7만 명">
+        <section class="scene scene-hook" data-scene="hook" data-beats="0,0.11,0.28,0.48,0.7,0.82,0.875" data-slow="0.875-1:3" data-chapter="쉬었음 71.7만" data-len="8" aria-label="쉬었음 청년 71.7만 명">
             <i class="bg-dots" aria-hidden="true"></i>
             <canvas id="dots" aria-hidden="true"></canvas>
             <div class="hook-copy">
@@ -37,7 +39,7 @@
                         <p class="hook-sub">일도, 구직도 하지 않고 “그냥 쉬었다”고 답한 청년은 몇 명일까요?</p>
                         <p class="hook-scroll"><span></span>스크롤해서 세어 보세요</p>
                     </div>
-                    <div class="hk" data-k="1"><p class="hook-sub">이 점 하나가 한 사람이에요. 도희예요.</p></div>
+                    <div class="hk" data-k="1"><p class="hook-sub">이 점 하나가 한 사람이에요. 준호예요.</p></div>
                     <div class="hk" data-k="2"><p class="hook-q2">한 학교 전교생을 모두 모으면</p><p class="hook-sub">1,000명 · 점 1개 = 1명</p></div>
                     <div class="hk" data-k="3"><p class="hook-q2">잠실야구장을 가득 채우면</p><p class="hook-sub">2.4만 명 · 이제 점 1개 = 10명</p></div>
                     <div class="hk" data-k="4"><p class="hook-q2">제주도에 사는 모든 사람</p><p class="hook-sub">67만 명 · 이제 점 1개 = 100명</p></div>
@@ -50,7 +52,7 @@
                         </svg>
                     </div>
                     <div class="hk" data-k="6">
-                        <p class="hook-q2"><span class="dot-o"></span>이 71.7만 명 중 한 명이 <em class="dh">도희</em>예요</p>
+                        <p class="hook-q2"><span class="dot-o"></span>이 71.7만 명 중 한 명이 <em class="dh">준호</em>예요</p>
                         <p class="hook-sub">숫자 뒤에는 한 사람 한 사람이 있어요. 이제, 그 사람들이 사는 방을 들여다볼게요.</p>
                     </div>
                 </div>
@@ -59,7 +61,7 @@
         </section>
 
         <!-- S00–S02 : 두 개의 방 -->
-        <section class="scene scene-building" data-scene="building" data-slow="0.66-1:4" data-beats="0.12,0.4,0.66,0.8,0.98" data-chapter="두 개의 방" data-len="5">
+        <section class="scene scene-building" data-scene="building" data-slow="0-0.12:3,0.66-1:4" data-beats="0.12,0.4,0.66,0.8,0.98" data-chapter="두 개의 방" data-len="5">
             <i class="bg-dots" aria-hidden="true"></i>
             <div class="copy">
                 <div class="lines">
@@ -106,7 +108,7 @@
         </section>
 
         <!-- S03–S04 : 벽, 그리고 네 계단 -->
-        <section class="scene scene-wall" data-scene="wall" data-beats="0.1,0.2,0.32,0.478,0.59,0.875,0.915" data-slow="0.39-0.478:7,0.49-0.59:4.5,0.72-0.84:1.6,0.876-0.915:5" data-chapter="문 밖의 벽" data-len="10">
+        <section class="scene scene-wall" data-scene="wall" data-beats="0.1,0.2,0.32,0.478,0.59,0.875,0.915" data-slow="0.39-0.478:7,0.49-0.59:4.5,0.6-0.67:6,0.67-0.72:2.4,0.72-0.84:1.6,0.876-0.915:5" data-chapter="문 밖의 벽" data-len="10">
             <i class="bg-dots" aria-hidden="true"></i>
             <div class="copy">
                 <div class="lines">
@@ -245,6 +247,20 @@
                     </div>
                     <p class="mp-note">앱 카메라로 찍은 사진만 인증돼요 · 사진은 인증 후 삭제</p>
                     <span class="mp-shutter" aria-hidden="true"></span>
+                    <div class="mp-revive" aria-hidden="true">
+                        <div class="rv-status"><span>9:41</span><span class="rv-icons"><i></i><i></i><i></i></span></div>
+                        <span class="rv-x"></span>
+                        <img class="rv-char" src="assets/oreumipoz01.png" alt="">
+                        <b class="rv-title">준호님, 기다리고 있었어요!</b>
+                        <p class="rv-sub">부활 미션을 완료하면<br>기록을 이어갈 수 있어요</p>
+                        <div class="rv-week">
+                            <span class="d ok"><i></i>월</span><span class="d ok"><i></i>화</span><span class="d miss"><i></i>수</span>
+                            <span class="d now"><i></i>목</span><span class="d"><i></i>금</span><span class="d"><i></i>토</span><span class="d"><i></i>일</span>
+                        </div>
+                        <span class="rv-btn">부활 미션하기</span>
+                        <span class="rv-home">홈으로 돌아가기</span>
+                        <span class="rv-bar"></span>
+                    </div>
                 </div>
             </div>
             <div class="stage-wrap bleed">
@@ -307,7 +323,7 @@
                     </div>
                 </div>
             </div>
-            <div class="stage-wrap">
+            <div class="stage-wrap bleed">
                 <div class="stage">
                     <div class="big-door lightdoor arch-door" id="bigDoor" style="--open:.35;--floor:170px" aria-label="청년 지원 프로그램 문"><span class="wd-open"></span><span class="ld-sign">청년 지원 프로그램</span></div>
                     <div class="programs">
@@ -339,7 +355,7 @@
                     </div>
                 </div>
             </div>
-            <div class="stage-wrap">
+            <div class="stage-wrap bleed">
                 <div class="stage">
                     <!-- the door scene's picture, kept as it was when the light filled the room -->
                     <div class="big-door lightdoor arch-door" style="--open:1" aria-label="청년 지원 프로그램 문"><span class="wd-open"></span><span class="ld-sign">청년 지원 프로그램</span></div>

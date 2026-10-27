@@ -9,47 +9,41 @@
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Syncopate:wght@400;700&family=Noto+Sans+KR:wght@400;500;700;900&display=swap">
   <link rel="stylesheet" href="css/style.css">
+  <script src="js/fit.js"></script>
 </head>
 <body class="service-page">
 
 <header class="topbar">
   <a href="./" aria-label="oreum 이야기로 돌아가기"><img class="logo" src="assets/logo-orange.png" alt="oreum"></a>
   <nav aria-label="주요 메뉴">
-    <a href="./">이야기 보기</a>
-    <a href="plan.html" class="nav-extra">기획</a>
-    <a href="design.html" class="nav-extra">디자인</a>
-    <a href="#start" class="nav-cta">앱 시작하기</a>
+    <a href="./" class="nav-story">이야기</a>
+    <a href="plan.html" class="nav-plan">기획</a>
+    <a href="design.html" class="nav-design">디자인</a>
+    <a href="service.html" class="nav-service" aria-current="page">서비스 소개</a>
   </nav>
 </header>
 
 <main>
   <!-- 01 히어로 -->
   <section class="hero band">
+    <i class="bg-dots" aria-hidden="true"></i>
     <div class="wrap hero-grid">
       <div class="hero-copy">
         <p class="eyebrow">oreum</p>
         <h1>쉼에서,<br>다시 움직임으로</h1>
         <p class="lead">하루 한 칸씩 오르는 사회복귀 앱. 아주 작은 미션 하나로 시작해, 한 단계씩 지원 프로그램의 문 앞까지 함께 갑니다.</p>
         <div class="btn-row">
-          <a class="btn btn-primary" href="#start">시작하기</a>
           <a class="btn btn-ghost-dark" href="#finder">내 시작점 찾기</a>
         </div>
       </div>
       <div class="hero-visual">
-        <div class="phone" aria-label="오름 앱 메인 화면 예시">
-          <div class="ph-top"><span class="ph-logo">oreum</span><span class="ph-streak">D+12</span></div>
-          <div class="ph-stage">
-            <span class="ph-tag">2단계 둘러보기</span>
-            <div class="ph-bar"><span style="width:50%"></span></div>
-            <span class="ph-meta">층 3 / 6</span>
-          </div>
-          <div class="ph-mission">
-            <span class="ph-label">오늘의 미션</span>
-            <span class="ph-name">집 앞 10분 산책</span>
-            <span class="ph-point">+1,000P</span>
-          </div>
-          <button type="button" class="ph-btn" tabindex="-1">위치로 인증하기</button>
-          <img src="assets/oreumi2.png" alt="" class="ph-oru">
+        <div class="phone phone-shots" aria-label="오름 앱 홈 화면 예시: 하루마다 바뀌는 오르미의 공간">
+          <img src="assets/main1.png" alt="" class="on">
+          <img src="assets/main2.png" alt="">
+          <img src="assets/main3.png" alt="">
+          <img src="assets/main4.png" alt="">
+          <img src="assets/main5.png" alt="">
+          <img src="assets/main6.png" alt="">
         </div>
         <img src="assets/oreumi4.png" alt="활짝 핀 오르미" class="hero-oru">
       </div>
@@ -58,6 +52,7 @@
 
   <!-- 02 이런 분께 맞아요 -->
   <section class="band" id="finder">
+    <i class="bg-dots" aria-hidden="true"></i>
     <div class="wrap">
       <div class="sec-head">
         <h2>이런 분께 맞아요</h2>
@@ -128,6 +123,7 @@
 
   <!-- 03 4단계 로드맵 -->
   <section class="band band-peach">
+    <i class="bg-dots" aria-hidden="true"></i>
     <div class="wrap">
       <div class="sec-head">
         <h2>네 개의 계단</h2>
@@ -168,23 +164,25 @@
 
   <!-- 04 하루 사용 흐름 -->
   <section class="band">
+    <i class="bg-dots" aria-hidden="true"></i>
     <div class="wrap">
       <div class="sec-head">
         <h2>하루는 이렇게 흘러가요</h2>
         <p>하루에 미션 하나. 끝내면 사진이나 위치로 인증하고, 리워드와 연속 기록이 쌓여요.</p>
       </div>
       <ol class="flow">
-        <li><div class="mini"><span class="m-label">오늘의 미션</span><span class="m-big">창문 열고<br>환기</span></div><b>미션 확인</b><span>앱을 열면 오늘 할 일 하나만 보여요</span></li>
-        <li><div class="mini mini-act"><span class="m-big">5분이면<br>충분해요</span></div><b>수행</b><span>내 속도로, 할 수 있는 만큼</span></li>
-        <li><div class="mini"><span class="m-photo"></span><span class="m-label">사진 · 위치 인증</span></div><b>인증</b><span>사진 한 장이나 위치로 기록해요</span></li>
-        <li><div class="mini"><span class="m-big m-orange">+1,000P</span><span class="m-label">누적 12,000P</span></div><b>리워드</b><span>미션마다 1,000원 상당 적립</span></li>
-        <li><div class="mini"><span class="m-big">D+12</span><span class="m-label">층 +1</span></div><b>연속 기록</b><span>얇은 층이 하나 쌓여요</span></li>
+        <li><div class="mini mini-shot"><img src="assets/dayflow1.png" alt="홈 화면: 오늘의 오름"></div><b>미션 확인</b><span>앱을 열면 오늘 할 일 하나만 보여요</span></li>
+        <li><div class="mini mini-shot"><img src="assets/dayflow2.png" alt="미션 인증 카메라"></div><b>수행</b><span>내 속도로, 할 수 있는 만큼</span></li>
+        <li><div class="mini mini-shot"><img src="assets/dayflow3.png" alt="인증 확인 중 화면"></div><b>인증</b><span>사진 한 장이나 위치로 기록해요</span></li>
+        <li><div class="mini mini-shot"><img src="assets/dayflow4.png" alt="인증 완료와 리워드 화면"></div><b>리워드</b><span>미션마다 1,000원 상당 적립</span></li>
+        <li><div class="mini mini-shot"><img src="assets/dayflow5.png" alt="연속 활동 달력 화면"></div><b>연속 기록</b><span>얇은 층이 하나 쌓여요</span></li>
       </ol>
     </div>
   </section>
 
   <!-- 05 지속 장치 -->
   <section class="band band-dark">
+    <i class="bg-dots" aria-hidden="true"></i>
     <div class="wrap">
       <div class="sec-head">
         <h2>계속할 수 있도록</h2>
@@ -201,6 +199,7 @@
 
   <!-- 06 재진단과 연계 -->
   <section class="band">
+    <i class="bg-dots" aria-hidden="true"></i>
     <div class="wrap">
       <div class="sec-head">
         <h2>마지막 계단 너머</h2>
@@ -216,6 +215,7 @@
 
   <!-- 07 FAQ -->
   <section class="band band-peach">
+    <i class="bg-dots" aria-hidden="true"></i>
     <div class="wrap narrow">
       <div class="sec-head"><h2>자주 묻는 질문</h2></div>
       <div class="faq">
@@ -226,6 +226,7 @@
       </div>
     </div>
   </section>
+</main>
 
 <footer class="foot">
   <div class="wrap foot-row">

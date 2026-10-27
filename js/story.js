@@ -35,7 +35,7 @@
             /* bleed: the drawing runs on past the stage to the screen's right and bottom edges
                (top and left stay at the stage box, so nothing behind the copy shows) */
             if (wrap.classList.contains('bleed')) {
-                var r = st.getBoundingClientRect(), k = Math.max(0.2, s);
+                var r = st.getBoundingClientRect(), k = r.width / 960;   // on-screen px per stage unit (includes page zoom)
                 var R = Math.max(0, (window.innerWidth - r.right) / k), Bt = Math.max(0, (window.innerHeight - r.bottom) / k);
                 st.style.setProperty('--br', (R + 2).toFixed(1)); st.style.setProperty('--bb', (Bt + 2).toFixed(1));
             }
@@ -68,7 +68,12 @@
     function stageOf(p) { return p < 0.05 ? 0 : p < 0.17 ? 1 : p < 0.35 ? 2 : p < 0.57 ? 3 : p < 0.79 ? 4 : p < 0.85 ? 5 : p < LEAVE_AT ? 6 : 7; }
     var hookP = 0, leaveFrom = null;
 
-    var JEJU = [[-1, -.02], [-.97, -.12], [-.88, -.2], [-.76, -.26], [-.6, -.31], [-.4, -.36], [-.2, -.39], [0, -.41], [.2, -.4], [.4, -.37], [.58, -.33], [.72, -.3], [.84, -.3], [.93, -.34], [.99, -.27], [.98, -.17], [.92, -.08], [.84, .02], [.7, .14], [.52, .24], [.32, .32], [.12, .37], [-.08, .39], [-.28, .37], [-.48, .32], [-.66, .25], [-.82, .17], [-.94, .09]];
+    /* 제주 해안선 (지도에서 따라 그린 윤곽, y는 실제 비율에 맞게 눌러 줌) + 우도 */
+    var JEJU = [[-0.95, 0.063], [-0.934, 0.032], [-0.893, 0.011], [-0.844, -0.01], [-0.811, -0.03], [-0.77, -0.047], [-0.738, -0.071], [-0.705, -0.106], [-0.689, -0.133], [-0.656, -0.154], [-0.615, -0.181], [-0.591, -0.208], [-0.55, -0.219], [-0.509, -0.229], [-0.46, -0.239], [-0.411, -0.247], [-0.362, -0.261], [-0.313, -0.274], [-0.264, -0.284], [-0.215, -0.298], [-0.183, -0.315], [-0.147, -0.328], [-0.109, -0.321], [-0.069, -0.324], [-0.028, -0.335], [0.021, -0.348], [0.07, -0.359], [0.119, -0.37], [0.16, -0.38], [0.201, -0.394], [0.217, -0.414], [0.258, -0.421], [0.307, -0.428], [0.364, -0.442], [0.429, -0.442], [0.486, -0.444], [0.552, -0.439], [0.617, -0.437], [0.666, -0.431], [0.699, -0.411], [0.731, -0.387], [0.772, -0.366], [0.805, -0.352], [0.846, -0.332], [0.87, -0.304], [0.862, -0.27], [0.881, -0.236], [0.908, -0.211], [0.927, -0.192], [0.952, -0.167], [0.957, -0.137], [0.927, -0.119], [0.895, -0.115], [0.875, -0.092], [0.875, -0.051], [0.859, -0.016], [0.837, 0.011], [0.805, 0.045], [0.772, 0.077], [0.735, 0.107], [0.712, 0.134], [0.682, 0.155], [0.633, 0.173], [0.576, 0.184], [0.519, 0.196], [0.454, 0.214], [0.397, 0.241], [0.331, 0.252], [0.266, 0.265], [0.209, 0.282], [0.152, 0.299], [0.095, 0.319], [0.038, 0.337], [-0.028, 0.348], [-0.093, 0.359], [-0.15, 0.367], [-0.207, 0.367], [-0.264, 0.359], [-0.313, 0.351], [-0.362, 0.348], [-0.42, 0.343], [-0.477, 0.337], [-0.534, 0.337], [-0.583, 0.347], [-0.624, 0.367], [-0.648, 0.395], [-0.659, 0.429], [-0.681, 0.447], [-0.705, 0.429], [-0.73, 0.398], [-0.757, 0.378], [-0.787, 0.356], [-0.819, 0.329], [-0.852, 0.299], [-0.881, 0.265], [-0.909, 0.23], [-0.93, 0.189], [-0.942, 0.148], [-0.947, 0.107]];
+    var UDO = [[0.947, -0.339], [0.968, -0.352], [0.996, -0.348], [1.017, -0.329], [1.02, -0.304], [1.009, -0.284], [0.989, -0.269], [0.963, -0.271], [0.948, -0.291], [0.94, -0.315]];
+    var UDO_C = UDO.reduce(function (a, q) { return [a[0] + q[0] / UDO.length, a[1] + q[1] / UDO.length]; }, [0, 0]);
+    function nearUdo(x, y, k) { return inPoly(UDO_C[0] + (x - UDO_C[0]) / k, UDO_C[1] + (y - UDO_C[1]) / k, UDO); }
+    function onJeju(x, y) { return inPoly(x, y, JEJU) || inPoly(x, y, UDO); }
     function inPoly(x, y, P, k) {
         k = k || 1;
         var c = false;
@@ -143,8 +148,8 @@
         return out;
     }
     // Jeju: elevation rises toward 한라산, with a few small oreum hills
-    var HALLA = [-.02, -.02];
-    var OREUMS = [[-.62, .06, .07], [.56, -.12, .06], [.34, .16, .055], [-.36, -.2, .06], [.8, -.2, .05]];
+    var HALLA = [.02, .0];
+    var OREUMS = [[-.6, .08, .07], [.56, -.1, .06], [.34, .18, .055], [-.36, -.18, .06], [.78, -.16, .05]];
     function jejuR(x, y) {                                            // 0 at 한라산 … 1 at the coast (scaled coastline)
         var lo = 0, hi = 1.6;
         for (var i = 0; i < 12; i++) { var k = (lo + hi) / 2; if (inPoly(HALLA[0] + (x - HALLA[0]) / k, HALLA[1] + (y - HALLA[1]) / k, JEJU)) hi = k; else lo = k; }
@@ -158,8 +163,9 @@
     var SHAPES = {
         school: schoolShape(),
         stadium: gridShape(2400, inStadium, [-1.2, -.85, 1.2, .95], [.45, -.62], function (x, y) { return 1 - .75 * (fieldDist(x, y) - .07) / .35; }),
-        jeju: gridShape(6700, function (x, y) { return inPoly(x, y, JEJU); }, [-1, -.42, 1, .4], [-.3, .05], jejuElev),
-        spill: gridShape(470, function (x, y) { return x > .15 && inPoly(x, y, JEJU, 1.2) && !inPoly(x, y, JEJU, 1.04); }, [-.2, -.5, 1.25, .5], [1, 0], function () { return .55; })
+        jeju: gridShape(6700, onJeju, [-1, -.5, 1.1, .5], [-.3, .05], jejuElev),
+        // the 4.7만 who don't fit: a loose ring of dots all around the coast (clear of 우도)
+        spill: gridShape(470, function (x, y) { return inPoly(x, y, JEJU, 1.2) && !inPoly(x, y, JEJU, 1.07) && !nearUdo(x, y, 2.2); }, [-1.4, -.75, 1.4, .75], [0, -.6], function () { return .55; })
     };
     // terrain colours: burnt → light orange → peach (the brand orange #FF6A00 is not used; 도희 is white)
     var TERRAIN = ['#8A4A26', '#B0602F', '#D47838', '#F2924E', '#FFB682', '#FFDCC4'];
@@ -189,13 +195,14 @@
     var hcx = 0, hcy = 0, HB = 1;
 
     function sizeHook() {
-        var dpr = Math.min(2, window.devicePixelRatio || 1);
         W = cv.clientWidth; H = cv.clientHeight;
+        var zf = W ? cv.getBoundingClientRect().width / W : 1;          // page zoom: draw at the real on-screen resolution
+        var dpr = Math.min(4, (window.devicePixelRatio || 1) * zf);
         cv.width = W * dpr; cv.height = H * dpr;
         ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
         var wide = W > 760;
-        hcx = wide ? W * .66 : W / 2; hcy = wide ? H * .45 : H * .3;
-        HB = wide ? Math.min(W * .26, H * .38) : Math.min(W * .4, H * .2);
+        hcx = wide ? W * .725 : W / 2; hcy = wide ? H * .47 : H * .3;
+        HB = wide ? Math.min(W * .195, H * .35) : Math.min(W * .4, H * .2);
         for (var i = 0; i < MAXP; i++) if (dpa[i] < .01) { dpx[i] = hcx + outPos[i][0] * HB * 2; dpy[i] = hcy + outPos[i][1] * HB * 2; }
         buildBg(dpr);
     }
@@ -221,8 +228,8 @@
 
     // 1층 창문(캐릭터 자리)의 화면 좌표 — 캔버스는 화면 전체를 덮으므로 그대로 쓴다
     function windowSpot() {
-        var w = $('.u-a .w').getBoundingClientRect();
-        return { x: w.left + w.width / 2, y: w.top + w.height / 2, size: w.width };
+        var w = $('.u-a .w').getBoundingClientRect(), c = cv.getBoundingClientRect(), f = c.width ? cv.clientWidth / c.width : 1;   // screen px → canvas px
+        return { x: (w.left - c.left + w.width / 2) * f, y: (w.top - c.top + w.height / 2) * f, size: w.width * f };
     }
 
     /* contour lines for each shape (drawn in shape units, faded in with the labels) */
@@ -248,6 +255,11 @@
             [1, .8, .6, .42, .26, .12].forEach(function (k, i) {
                 ctx.strokeStyle = 'rgba(255,233,217,' + (i === 0 ? .55 : .3) * a + ')'; ctx.lineWidth = i === 0 ? 1.4 : 1;
                 smoothPoly(JEJU.map(function (q) { return XY(HALLA[0] + (q[0] - HALLA[0]) * k, HALLA[1] + (q[1] - HALLA[1]) * k); })); ctx.stroke();
+            });
+            // 우도: its own coastline and one ring of sea
+            [[1, .55], [1.6, .12]].forEach(function (r) {
+                ctx.strokeStyle = 'rgba(255,233,217,' + r[1] * a + ')'; ctx.lineWidth = r[0] === 1 ? 1.4 : 1;
+                smoothPoly(UDO.map(function (q) { return XY(UDO_C[0] + (q[0] - UDO_C[0]) * r[0], UDO_C[1] + (q[1] - UDO_C[1]) * r[0]); })); ctx.stroke();
             });
             ctx.lineWidth = 1; ctx.strokeStyle = 'rgba(255,233,217,' + .32 * a + ')';
             OREUMS.forEach(function (o) { [1, .55].forEach(function (s) { var p = XY(o[0], o[1]); ctx.beginPath(); ctx.ellipse(p[0], p[1], o[2] * HB * s, o[2] * HB * s * .7, 0, 0, 6.2832); ctx.stroke(); }); });
@@ -372,10 +384,10 @@
         ctx.globalAlpha = 1;
 
         if (S.label && la > .02) {
-            var top = { school: -.43, stadium: -.85, jeju: -.42 }[S.shape];
-            var left = { school: -.82, stadium: -1.1, jeju: -1 }[S.shape];
+            var top = { school: -.43, stadium: -.85, jeju: -.62 }[S.shape];
+            var left = { school: -.82, stadium: -1.1, jeju: -1.05 }[S.shape];
             hookLabel(S.label, S.legend, hcx + left * HB, hcy + top * HB - 12, la);
-            if (S.spill) hookLabel('+ 4.7만 명 · 섬에 다 담기지 못해요', '', Math.min(W - 270, hcx + .3 * HB), hcy + .62 * HB, la);
+            if (S.spill) hookLabel('+ 4.7만 명 · 섬에 다 담기지 못해요', '', Math.min(W - 270, hcx + .25 * HB), hcy + (W > 760 ? .78 : .6) * HB, la);
         }
 
         // 도희: a white dot with a white ring
@@ -757,6 +769,7 @@
     paintStep($('.m-s2'), 1);
     paintStep($('.m-s3'), 2);
     paintStep($('.m-s4'), 3);
+    $$('.door-floor').forEach(function (el) { paintStep(el, 3); });
     var mOru = $('#mOru');
     var lastMImg = 2, lastName = '';
     // dusk → evening: the room darkens so the door's light stands out
@@ -767,10 +780,37 @@
     }
     // camera move at the end: the door grows and slides into place as the door scene's door
     var MZ = { s: 2.3, tx: 415 - 840 * 2.3, ty: 40 - 110 * 2.3 };
+    /* the climb as keyframes [p, x, y, hop]: a short arc onto each new layer right after it appears,
+       a few steps along the tread between the two flights, then the walk to the door */
+    var CLIMB = (function () {
+        var k = [[0, 30, 430, 0]], x = 30, y = 430;
+        function to(pa, pb, nx, ny, hop) { k.push([pa, x, y, 0]); k.push([pb, nx, ny, hop]); x = nx; y = ny; }
+        for (var i = 0; i < 5; i++) { var pi = 0.2 + i * 0.052; to(pi + 0.006, pi + 0.042, 58 + 54 * i, 430 - 22 * (i + 1), 30); }
+        to(0.47, 0.54, 400, 320, 0);
+        for (var j = 0; j < 5; j++) { var q = 0.56 + j * 0.056; to(q + 0.006, q + 0.044, 388 + 54 * j, 320 - 22 * (j + 1), 30); }
+        to(0.85, 0.92, 720, 210, 0);
+        return k;
+    })();
+    function climbAt(p) {
+        var k = CLIMB;
+        if (p <= k[0][0]) return [k[0][1], k[0][2], 1];
+        for (var i = 1; i < k.length; i++) {
+            if (p <= k[i][0]) {
+                var a = k[i - 1], b = k[i], t = b[0] > a[0] ? (p - a[0]) / (b[0] - a[0]) : 1;
+                if (!b[3]) {                              // walking: steady pace with a small bob
+                    var w = t; return [lerp(a[1], b[1], w), lerp(a[2], b[2], w) - Math.abs(Math.sin(w * Math.PI * 4)) * 3, 1];
+                }
+                var e = t < .5 ? 2 * t * t : 1 - Math.pow(-2 * t + 2, 2) / 2;   // hop: crouch, arc, little landing squash
+                var sq = t < .15 ? 1 - .12 * (t / .15) : (t > .85 ? 1 - .12 * ((1 - t) / .15) : 1);
+                return [lerp(a[1], b[1], e), lerp(a[2], b[2], e) - b[3] * 4 * t * (1 - t), sq];
+            }
+        }
+        var L = k[k.length - 1]; return [L[1], L[2], 1];
+    }
     function updateMontage(scene, pRaw) {
         var p = clamp(pRaw / 0.85);                  // the climb runs on the first 85%
         var zoom = ease(seg(pRaw, 0.87, 1));
-        scene.style.setProperty('--dzs', (1 - zoom).toFixed(3));
+        var mc = $('#mCam'); mc.style.setProperty('--zs', lerp(1, MZ.s, zoom).toFixed(4)); mc.style.setProperty('--zy', (MZ.ty * zoom).toFixed(1) + 'px');
         $('#mCam').style.transform = 'translate(' + (MZ.tx * zoom).toFixed(1) + 'px,' + (MZ.ty * zoom).toFixed(1) + 'px) scale(' + lerp(1, MZ.s, zoom).toFixed(4) + ')';
         var fade = 1 - seg(zoom, 0, 0.4);
         mOru.style.opacity = fade;
@@ -788,14 +828,10 @@
             el.classList.toggle('today', i === todayM && p < 0.86 && (p < 0.48 || p >= 0.56));
         });
 
-        var x, y;
-        if (p < 0.2) { x = 30; y = 430; }
-        else if (p < 0.48) { x = M[0].left0 + (nA - 1) * 54 + 8; y = 430 - nA * 22; }
-        else if (p < 0.56) { x = 400; y = 320; }
-        else if (p < 0.88) { x = M[1].left0 + (Math.max(1, nB) - 1) * 54 + 8; y = 320 - Math.max(1, nB) * 22; }
-        else { x = 720; y = 210; }
-        mOru.style.left = x + 'px';
-        mOru.style.top = y + 'px';
+        var pos = climbAt(p);
+        mOru.style.left = pos[0].toFixed(1) + 'px';
+        mOru.style.top = pos[1].toFixed(1) + 'px';
+        mOru.style.setProperty('--sq', pos[2].toFixed(3));
 
         var img = p >= 0.5 ? 3 : 2;
         if (img !== lastMImg) { mOru.src = 'assets/oreumi' + img + '.png'; lastMImg = img; }

@@ -24,7 +24,7 @@
     var down = false, sx = 0, sl = 0;
     box.addEventListener('pointerdown', function (e) { if (e.pointerType !== 'mouse') return; down = true; sx = e.clientX; sl = box.scrollLeft; box.classList.add('drag'); });
     window.addEventListener('pointerup', function () { down = false; box.classList.remove('drag'); });
-    window.addEventListener('pointermove', function (e) { if (down) box.scrollLeft = sl - (e.clientX - sx); });
+    window.addEventListener('pointermove', function (e) { if (down) box.scrollLeft = sl - (e.clientX - sx) / (window.__zoom || 1); });
   });
 })();
 /* design 전용: 앱 화면 캐러셀 생성 */

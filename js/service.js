@@ -50,3 +50,49 @@
     shots[i].classList.add('on'); if (orus[i]) orus[i].classList.add('on');
   }, 2000);
 })();
+
+/* widget mockup: show images one by one every 2 seconds with clickable dots */
+(function () {
+  var shots = Array.prototype.slice.call(document.querySelectorAll('.widget-mockup img'));
+  if (shots.length < 2) return;
+  var dots = Array.prototype.slice.call(document.querySelectorAll('.widget-dots .dot'));
+  var idx = 0;
+  var timer = null;
+
+  function show(nextIdx) {
+    shots[idx].classList.remove('on');
+    if (dots[idx]) {
+      dots[idx].classList.remove('on');
+      dots[idx].setAttribute('aria-selected', 'false');
+    }
+    idx = (nextIdx !== undefined) ? nextIdx : (idx + 1) % shots.length;
+    shots[idx].classList.add('on');
+    if (dots[idx]) {
+      dots[idx].classList.add('on');
+      dots[idx].setAttribute('aria-selected', 'true');
+    }
+  }
+
+  function start() {
+    stop();
+    timer = setInterval(function () {
+      show();
+    }, 2000);
+  }
+
+  function stop() {
+    if (timer) {
+      clearInterval(timer);
+      timer = null;
+    }
+  }
+
+  dots.forEach(function (dot, k) {
+    dot.addEventListener('click', function () {
+      show(k);
+      start();
+    });
+  });
+
+  start();
+})();

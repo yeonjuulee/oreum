@@ -197,7 +197,7 @@ html.story-root body { background: var(--night); }
 .hook-copy, .hook-src { transition: opacity .5s ease; }
 .scene-hook.leaving .hook-copy, .scene-hook.leaving .hook-src { opacity: 0; }
 /* the window 준호's dot lands on keeps glowing at the start of the apartment scene */
-.scene-building[data-phase="0"] .u-a .w {
+.scene-building[data-phase="0"] .u-a .w, .scene-building[data-phase="0"] .u-b .w {
   background: radial-gradient(60% 70% at 50% 85%, rgba(255, 248, 242, .5), rgba(255, 248, 242, 0) 100%);
   box-shadow: 0 0 18px rgba(255, 248, 242, .3);
   animation: winGlow 2.6s ease-in-out infinite;
@@ -1201,7 +1201,7 @@ body.info-page .topbar nav a { padding: 8px 16px; }
 .rv-week .miss i::before, .rv-week .miss i::after { content: ""; position: absolute; left: 50%; top: 50%; width: 9px; height: 1.8px; margin: -.9px 0 0 -4.5px; border-radius: 1px; background: #8B95A1; transform: rotate(45deg); }
 .rv-week .miss i::after { transform: rotate(-45deg); }
 .rv-week .now { color: var(--orange); }
-.rv-week .now i { background: #FFF1E6 url("../assets/symbol-orange.png") center / 10px no-repeat; box-shadow: inset 0 0 0 1.2px transparent; outline: 1.2px dashed var(--orange); outline-offset: -1.2px; }
+.rv-week .now i { background: #FFF1E6 url("../assets/brand/symbol-orange.png") center / 10px no-repeat; box-shadow: inset 0 0 0 1.2px transparent; outline: 1.2px dashed var(--orange); outline-offset: -1.2px; }
 .rv-btn { align-self: stretch; margin-top: auto; padding: 10px 0; border-radius: 8px; background: var(--orange); color: #fff; font-size: 11px; font-weight: 800; }
 .rv-home { margin: 11px 0 9px; font-size: 9.5px; font-weight: 700; color: #333D4B; }
 .rv-bar { width: 64px; height: 3px; border-radius: 2px; background: #191F28; opacity: .85; }
@@ -1647,3 +1647,100 @@ body.info-page .expr-4 .e:hover .lv, body.info-page .expr-4 .e:hover p { color: 
 @media (max-width: 640px) { .topbar { padding-left: 16px !important; padding-right: 12px !important; } .topbar .logo { height: 18px; } }
 body.info-page .expr-4 .e { background: rgba(255,255,255,.6); box-shadow: 0 1px 0 rgba(51,46,42,.06), 0 16px 32px -24px rgba(184,85,15,.45); }
 body.info-page .expr-4 .e img { width: auto; height: 130px; max-width: 80%; object-fit: contain; object-position: center bottom; }
+body.info-page .pg-ia-img { overflow-x: auto; }
+body.info-page .pg-ia-img img { display: block; width: 100%; min-width: 820px; height: auto; }
+body.info-page .pg-panel > .pg-subh:not(:first-child) { margin-top: 48px; }
+
+/* background dot field removed site-wide */
+.bg-dots { display: none !important; }
+/* hook: title at the same size as the next scenes' main titles, the lines a step smaller */
+.hook-title { font-size: clamp(28px, calc(3.4 * var(--vw, 1vw)), 44px) !important; line-height: 1.3 !important; letter-spacing: -.02em !important; }
+.hook-title #hookN { padding: 0 .14em; }
+.hook-q2 { font-size: clamp(20px, calc(1.9 * var(--vw, 1vw)), 28px); white-space: normal !important; }
+@media (min-width: 761px) { .hk-subs { height: 130px; width: 640px; } .hk { max-width: 640px; } }
+
+/* hook: no big "쉬었음 N 시대" title (kept for screen readers); the step line is the headline, centred vertically */
+.scene-hook .hook-title { position: absolute !important; width: 1px; height: 1px; overflow: hidden; clip: rect(0 0 0 0); clip-path: inset(50%); white-space: nowrap; }
+.scene-hook .hook-copy { top: 50% !important; bottom: auto !important; transform: translateY(-50%); }
+.scene-hook .hk-subs { height: 190px !important; margin-top: 0 !important; }
+.scene-hook .hk { top: 50%; transform: translateY(calc(-50% + 16px)); }
+.scene-hook .hk.on { transform: translateY(-50%); }
+.scene-hook .hook-q2 { font-size: clamp(28px, calc(3.4 * var(--vw, 1vw)), 44px) !important; font-weight: 900; line-height: 1.3; letter-spacing: -.02em; margin-bottom: 14px; }
+.scene-hook .hook-q2 em { color: var(--orange); }
+.scene-hook .hook-sub { font-size: clamp(15px, calc(1.25 * var(--vw, 1vw)), 19px); }
+@media (min-width: 761px) { .scene-hook .hk-subs, .scene-hook .hk { width: min(640px, 44vw); max-width: none; } }
+@media (max-width: 760px) { .scene-hook .hook-copy { top: auto !important; bottom: calc(150px + env(safe-area-inset-bottom, 0px)) !important; transform: none; } .scene-hook .hk-subs { height: 170px !important; } }
+.scene-hook .hk-subs { height: 160px !important; }
+.scene-hook .hook-eyebrow { margin-bottom: 6px; }
+.scene-hook .hook-scroll { margin-top: 18px; }
+
+/* ===== plan: smaller elements overall ===== */
+body.info-page[data-page="plan"] .pg-sec > .wrap { zoom: .8; width: min(1180px, 100% - 2 * clamp(24px, 6vw, 120px)); }
+@media (max-width: 640px) { body.info-page[data-page="plan"] .pg-sec > .wrap { zoom: 1; width: calc(100% - 40px); } }
+/* user-analysis charts: centred, no left indent */
+body.info-page .pg-g2.indent { padding-left: 0; max-width: 1000px; margin-inline: auto; }
+body.info-page #user1 .pg-lead { max-width: 1000px; margin-inline: auto; }
+/* design (and other info pages): flat single-colour backgrounds, no radial blobs / rings */
+body.info-page .aurora, body.info-page .grainy, body.info-page .blob { display: none !important; }
+body.info-page .sec--orange { background: var(--orange) !important; }
+body.info-page .page-hero--orange { background: var(--bg) !important; }
+
+/* ===== design page: smaller elements; one type size in the typography cards ===== */
+body.info-page[data-page="design"] .sec > .wrap { zoom: .8; }
+body.info-page[data-page="design"] .hscroll { zoom: .8; }
+@media (max-width: 640px) { body.info-page[data-page="design"] .sec > .wrap, body.info-page[data-page="design"] .hscroll { zoom: 1; } }
+body.info-page .type-3 .en, body.info-page .type-3 .kr { font-size: 26px !important; line-height: 1.4; margin: 0 0 6px; letter-spacing: -.01em; }
+body.info-page .type-3 .en { letter-spacing: .02em; }
+
+/* design page: real app screens */
+body.info-page .hscroll .item .shot { display: block; width: 230px; height: auto; aspect-ratio: 402 / 874; border-radius: 30px; border: 6px solid #1C1917; background: #fff; box-shadow: 0 24px 48px -24px rgba(0,0,0,.6); pointer-events: none; -webkit-user-drag: none; }
+
+/* pixel prelude layers over the vector apartment */
+.apt-px, .apt-up { position: absolute; left: 0; top: 0; width: 960px; height: 540px; image-rendering: pixelated; image-rendering: crisp-edges; pointer-events: none; }
+.apt-up { opacity: 0; }
+
+/* ===== start screen (before the story) ===== */
+.scene-intro { display: block; padding: 0; background: #1C1917; }
+.scene-intro canvas { position: absolute; inset: 0; width: 100%; height: 100%; object-fit: cover; image-rendering: pixelated; image-rendering: crisp-edges; }
+.intro-copy { position: absolute; z-index: 2; top: 50%; transform: translateY(-50%); left: max(clamp(24px, calc(6 * var(--vw, 1vw)), 96px), env(safe-area-inset-left, 0px)); display: grid; justify-items: start; gap: 18px; max-width: min(620px, 46%); }
+.intro-logo { width: clamp(180px, calc(22 * var(--vw, 1vw)), 320px); height: auto; margin-bottom: 4px; }
+.intro-title { margin: 0; font-size: clamp(26px, calc(2.6 * var(--vw, 1vw)), 38px); font-weight: 900; letter-spacing: -.02em; line-height: 1.3; color: #FFF8F2; }
+.intro-sub { margin: 0; font-size: clamp(15px, calc(1.3 * var(--vw, 1vw)), 19px); color: #DCCFC3; }
+.intro-cta { margin-top: 8px; display: inline-flex; align-items: center; gap: 10px; min-height: 52px; padding: 0 30px; border: 0; border-radius: 999px; background: var(--orange); color: #1A1715; font: 800 clamp(15px, calc(1.25 * var(--vw, 1vw)), 18px) var(--font-body); cursor: pointer; }
+.intro-cta:hover { background: #ff7d1f; }
+.intro-cta i { font-style: normal; display: inline-block; animation: introNudge 1.6s ease-in-out infinite; }
+@keyframes introNudge { 50% { transform: translateY(3px); } }
+.topbar.on-intro .logo { opacity: 0; }
+.topbar .logo { transition: opacity .4s; }
+@media (max-width: 760px) {
+  .intro-copy { top: calc(110px + env(safe-area-inset-top, 0px)); transform: none; max-width: calc(100% - 48px); }
+}
+@media (prefers-reduced-motion: reduce) { .intro-cta i { animation: none; } }
+@media (min-width: 761px) { .scene-hook .hk-subs, .scene-hook .hk { width: min(760px, 52vw) !important; } }
+@media (min-width: 761px) { .scene-hook .hook-q2 { white-space: nowrap !important; } }
+@media (max-width: 760px) { .scene-hook .hook-q2 br { display: none; } }
+
+/* 두 개의 방 · 문 밖의 벽: hand-set line breaks, a slightly wider copy column so each line stays whole */
+@media (min-width: 801px) {
+  .scene-building, .scene-wall { grid-template-columns: minmax(280px, 460px) minmax(0, 1fr); }
+  .scene-building .line h2, .scene-wall .line h2 { font-size: clamp(26px, calc(2.6 * var(--vw, 1vw)), 36px); white-space: nowrap; }
+  .scene-building .line h2 br, .scene-wall .line h2 br { display: inline; }
+}
+@media (max-width: 800px) { .scene-building .line h2 br, .scene-wall .line h2 br, .scene-building .desc br, .scene-wall .desc br { display: none; } }
+
+/* ===== one title position for every story page (desktop canvas): the title's top at 21% of the screen,
+   its left edge on the same line as the logo. Kickers sit just above the title so the title itself never moves. ===== */
+@media (min-width: 901px) and (min-aspect-ratio: 4/3) {
+  .story-page .topbar { padding-left: max(clamp(24px, calc(6 * var(--vw, 1vw)), 96px), env(safe-area-inset-left, 0px)); padding-right: max(clamp(24px, calc(6 * var(--vw, 1vw)), 96px), env(safe-area-inset-right, 0px)); }
+  .scene > .copy { align-self: start; margin-top: calc(21 * var(--vh, 1vh) - 88px - env(safe-area-inset-top, 0px)); padding-top: 0 !important; }
+  .scene .line .kicker { position: absolute; left: 0; bottom: 100%; margin: 0 0 10px; white-space: nowrap; }
+  .line.lift { top: 0; }
+  /* intro: title at the same spot, the small top-bar logo stays visible instead of the big one */
+  .scene-intro .intro-copy { top: calc(21 * var(--vh, 1vh)); transform: none; }
+  .scene-intro .intro-logo { display: none; }
+  .topbar.on-intro .logo { opacity: 1; }
+  /* hook: its lines start at the same spot */
+  .scene-hook .hook-copy { top: calc(21 * var(--vh, 1vh)) !important; bottom: auto !important; transform: none; }
+  .scene-hook .hk { top: 0; transform: translateY(16px); }
+  .scene-hook .hk.on { transform: none; }
+}

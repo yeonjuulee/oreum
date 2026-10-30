@@ -278,6 +278,7 @@
   }
   function dotTarget(i, st) {
     var S = STAGES[st];
+    if (S.leave) return (i === 0 || i === D2) ? SHAPES.jeju[i] : null;
     if (i >= S.n) return null;
     if (st === 1) return [0, 0];
     if (S.spill && i >= 6700) return SHAPES.spill[i - 6700];
@@ -297,8 +298,8 @@
   }
 
   // 1층 창문(캐릭터 자리)의 화면 좌표 — 캔버스는 화면 전체를 덮으므로 그대로 쓴다
-  function windowSpot() {
-    var w = $('.u-a .w').getBoundingClientRect(), c = cv.getBoundingClientRect(), f = c.width ? cv.clientWidth / c.width : 1;   // screen px → canvas px
+  function windowSpot(sel) {
+    var w = $(sel || '.u-a .w').getBoundingClientRect(), c = cv.getBoundingClientRect(), f = c.width ? cv.clientWidth / c.width : 1;   // screen px → canvas px
     return { x: (w.left - c.left + w.width / 2) * f, y: (w.top - c.top + w.height / 2) * f, size: w.width * f };
   }
 
@@ -393,37 +394,41 @@
     ctx.restore();
   }
 
+  /* heroes: the lone first dot (stage 1), then two people picked out of the 71.7만 — 준호 and 도희 (stage 6+) */
+  var D2 = (function () { var best = 1, bd = 1e9; SHAPES.jeju.forEach(function (q, i) { if (i === 0) return; var d = Math.hypot(q[0] - .42, q[1] + .1); if (d < bd) { bd = d; best = i; } }); return best; })();
+  var HEROES = [{ i: 0, name: '준호', win: '.u-a .w' }, { i: D2, name: '도희', win: '.u-b .w' }];
+  function heroesOf(st) { var S = STAGES[st]; if (st === 1) return [HEROES[0]]; return (S.dim || S.leave) ? HEROES : []; }
   function drawHook(now) {
-    var S = STAGES[hookStage];
-    // 떠나는 단계: 준호의 위치는 스크롤 진행도로 직접 정한다 (제주 위 자리 → 1층 창문)
-    var leaveT = 0, spot = null;
+    var S = STAGES[hookStage], hs = heroesOf(hookStage), isHero = {};
+    hs.forEach(function (h) { isHero[h.i] = h; });
+    // 떠나는 단계: 준호 → 1층 창, 도희 → 2층 창 (스크롤 진행도로 위치를 정한다)
+    var leaveT = 0;
     if (S.leave) {
-      leaveFrom = { x: hcx + SHAPES.jeju[0][0] * HB, y: hcy + SHAPES.jeju[0][1] * HB };
-      spot = windowSpot();
       leaveT = ease(seg(hookP, LEAVE_AT + 0.02, 1));
-      dpx[0] = lerp(leaveFrom.x, spot.x, leaveT);
-      dpy[0] = lerp(leaveFrom.y, spot.y, leaveT);
-    } else {
-      leaveFrom = null;
+      hs.forEach(function (h) {
+        var from = SHAPES.jeju[h.i], spot = windowSpot(h.win);
+        h.spot = spot;
+        dpx[h.i] = lerp(hcx + from[0] * HB, spot.x, leaveT);
+        dpy[h.i] = lerp(hcy + from[1] * HB, spot.y, leaveT);
+      });
     }
     R += (stageR(S) - R) * .08;
     la += ((now - stageAt > 700 ? 1 : 0) - la) * .08;
     ctx.clearRect(0, 0, W, H);
-    /* background dot field: drawn page-wide by html::before in style.css */
     if (S.shape && !S.leave) drawContours(S, la * (S.dim ? .4 : 1));
 
-    // 준호 주변의 흰 빛 (숨 쉬듯)
-    if (dpa[0] > .02) {
-      var gx = dpx[0], gy = dpy[0], pulse = .5 + .5 * Math.sin(now / 650);
+    // soft white light around each hero (breathing)
+    hs.forEach(function (h, n) {
+      var a0 = dpa[h.i]; if (a0 < .02) return;
+      var gx = dpx[h.i], gy = dpy[h.i], pulse = .5 + .5 * Math.sin(now / 650 + n * 1.7);
       var gr = Math.max(R * 2.2, 10) * (3.2 + pulse * 1.2) + (S.dim ? 24 : 0);
-      if (spot) gr = lerp(gr, spot.size * 1.3, leaveT);
+      if (h.spot) gr = lerp(gr, h.spot.size * 1.3, leaveT);
       var glow = ctx.createRadialGradient(gx, gy, 0, gx, gy, gr);
-      glow.addColorStop(0, 'rgba(255,255,255,' + (.42 * dpa[0]) + ')');
-      glow.addColorStop(.45, 'rgba(255,248,242,' + (.14 * dpa[0]) + ')');
+      glow.addColorStop(0, 'rgba(255,255,255,' + (.42 * a0) + ')');
+      glow.addColorStop(.45, 'rgba(255,248,242,' + (.14 * a0) + ')');
       glow.addColorStop(1, 'rgba(255,248,242,0)');
-      ctx.fillStyle = glow;
-      ctx.beginPath(); ctx.arc(gx, gy, gr, 0, 6.2832); ctx.fill();
-    }
+      ctx.fillStyle = glow; ctx.beginPath(); ctx.arc(gx, gy, gr, 0, 6.2832); ctx.fill();
+    });
 
     // dots, batched by terrain colour
     var paths = TERRAIN.map(function () { return []; }), solo = [];
@@ -431,11 +436,11 @@
       var tg = dotTarget(i, hookStage);
       var tx = hcx + (tg ? tg[0] : outPos[i][0]) * HB, ty = hcy + (tg ? tg[1] : outPos[i][1]) * HB;
       var k = reduced ? 1 : spd[i];
-      if (!(S.leave && i === 0)) { dpx[i] += (tx - dpx[i]) * k; dpy[i] += (ty - dpy[i]) * k; }
+      if (!(S.leave && isHero[i])) { dpx[i] += (tx - dpx[i]) * k; dpy[i] += (ty - dpy[i]) * k; }
       dpa[i] += ((tg ? 1 : 0) - dpa[i]) * (reduced ? 1 : .07);
       if (tg) dsh[i] += (dotShade(i, hookStage) - dsh[i]) * (reduced ? 1 : .08);
-      if (dpa[i] < .02) continue;
-      if (i === 0 || dpa[i] < .95 || S.dim || (S.spill && i >= 6700)) { solo.push(i); continue; }
+      if (dpa[i] < .02 || isHero[i]) continue;
+      if (dpa[i] < .95 || S.dim || (S.spill && i >= 6700)) { solo.push(i); continue; }
       paths[Math.min(TERRAIN.length - 1, Math.floor(dsh[i] * TERRAIN.length))].push(i);
     }
     paths.forEach(function (list, ci) {
@@ -445,7 +450,6 @@
       ctx.fill();
     });
     solo.forEach(function (si) {
-      if (si === 0) return;
       var a = dpa[si], col = TERRAIN[Math.min(TERRAIN.length - 1, Math.floor(dsh[si] * TERRAIN.length))];
       if (S.spill && si >= 6700) col = '#FFDCC4';
       ctx.globalAlpha = S.dim ? a * .22 : a;
@@ -460,19 +464,21 @@
       if (S.spill) hookLabel('+ 4.7만 명 · 섬에 다 담기지 못해요', '', Math.min(W - 270, hcx + .25 * HB), hcy + (W > 760 ? .62 : .6) * HB, la);
     }
 
-    // 준호: a white dot with a white ring
-    if (dpa[0] > .02) {
-      var x0 = dpx[0], y0 = dpy[0], rr = Math.max(R * 2.2, 10) + (S.dim ? 14 : 0);
-      ctx.fillStyle = 'rgba(255,255,255,' + dpa[0] + ')';
+    // heroes: a white dot with a white ring (+ their names once two are picked out)
+    hs.forEach(function (h) {
+      var a0 = dpa[h.i]; if (a0 < .02) return;
+      var x0 = dpx[h.i], y0 = dpy[h.i], rr = Math.max(R * 2.2, 10) + (S.dim ? 14 : 0);
+      ctx.fillStyle = 'rgba(255,255,255,' + a0 + ')';
       ctx.beginPath(); ctx.arc(x0, y0, Math.max(R * 1.1, 3), 0, 6.2832); ctx.fill();
-      ctx.strokeStyle = 'rgba(255,255,255,' + dpa[0] + ')'; ctx.lineWidth = 2;
+      ctx.strokeStyle = 'rgba(255,255,255,' + a0 + ')'; ctx.lineWidth = 2;
       ctx.beginPath(); ctx.arc(x0, y0, rr, 0, 6.2832); ctx.stroke();
-      if (hookStage <= 2 || S.dim || (S.leave && leaveT < .6)) {
+      if (S.dim || (S.leave && leaveT < .6)) {
         ctx.font = '800 15px ' + HOOK_FONT; ctx.fillStyle = '#fff';
-        ctx.fillText('준호', x0 + rr + 8, y0 + 5);
+        ctx.fillText(h.name, x0 + rr + 8, y0 + 5);
       }
-    }
+    });
   }
+
 
   // 숫자: 진행도에 맞춰 점 수 × 점 1개가 나타내는 사람 수로
   var KP = [[0, 0], [.05, 0], [.07, 1], [.17, 1], [.23, 1000], [.35, 1000], [.41, 24000], [.57, 24000], [.65, 670000], [.79, 670000], [.81, 717000], [1, 717000]];
@@ -514,7 +520,59 @@
   var roomOru = $('#roomOru'), sigh = $('#sigh');
   // 2층 방 바닥 위의 길: 방 안쪽 → 현관 앞 → 돌아서 몇 걸음 (stage px)
   var RB = { start: [330, 424], door: [630, 424], back: [540, 424] };
+  /* pixel prelude → vector: the apartment first appears as pixel art, then on scroll it "resolves" into
+     the vector drawing through a mosaic whose blocks shrink from 24px to 1px */
+  var aptPx = $('#aptPx'), aptUp = $('#aptUp'), aptArt = $('.apt-art'), pxCtx = aptPx.getContext('2d'), upCtx = aptUp.getContext('2d');
+  var upImg = null, upT = -1, buildingP = 0;
+  (function snapshot() {
+    try {
+      var defs = document.querySelector('.fx-defs defs').outerHTML;
+      var c = aptArt.cloneNode(true);
+      c.setAttribute('xmlns', 'http://www.w3.org/2000/svg'); c.setAttribute('xmlns:xlink', 'http://www.w3.org/1999/xlink');
+      c.setAttribute('width', 960); c.setAttribute('height', 540); c.removeAttribute('class');
+      var imgs = [].slice.call(c.querySelectorAll('image')), left = imgs.length;
+      function finish() {
+        c.insertAdjacentHTML('afterbegin', defs);
+        var im = new Image();
+        im.onload = function () { upImg = im; upT = -1; };
+        im.src = 'data:image/svg+xml;charset=utf-8,' + encodeURIComponent(new XMLSerializer().serializeToString(c));
+      }
+      if (!left) return finish();
+      imgs.forEach(function (node) {   // inline the character pngs so they survive inside an svg image
+        var src = node.getAttribute('href'), pic = new Image();
+        pic.onload = function () { try { var cv = document.createElement('canvas'); cv.width = pic.naturalWidth; cv.height = pic.naturalHeight; cv.getContext('2d').drawImage(pic, 0, 0); node.setAttribute('href', cv.toDataURL('image/png')); } catch (e) { node.remove(); } if (!--left) finish(); };
+        pic.onerror = function () { node.remove(); if (!--left) finish(); };
+        pic.src = src;
+      });
+    } catch (e) {}
+  })();
+  var small = document.createElement('canvas');
+  function drawUp(t) {
+    if (!upImg) return;
+    var b = Math.max(1, Math.round(Math.pow(24, 1 - t)));           // 24px blocks → 1px
+    if (b === upT) return; upT = b;
+    var w = Math.ceil(960 / b), h = Math.ceil(540 / b);
+    small.width = w; small.height = h;
+    var sc = small.getContext('2d'); sc.imageSmoothingEnabled = true; sc.clearRect(0, 0, w, h); sc.drawImage(upImg, 0, 0, w, h);
+    upCtx.imageSmoothingEnabled = false; upCtx.clearRect(0, 0, 960, 540); upCtx.drawImage(small, 0, 0, w * b, h * b);
+  }
+  function pxLoop(now) {
+    var sc = $('.scene-building');
+    if (sc.classList.contains('active') && buildingP < 0.2 && window.OreumPixel) window.OreumPixel.draw(pxCtx, now);
+    requestAnimationFrame(pxLoop);
+  }
+  requestAnimationFrame(pxLoop);
+  function updatePrelude(p) {
+    buildingP = p;
+    var t = seg(p, 0.08, 0.18);                       // 0 = pixel art, 1 = vector
+    var e = ease(t);
+    aptPx.style.opacity = (1 - seg(e, 0, 0.35)).toFixed(3);
+    aptUp.style.opacity = (seg(e, 0, 0.25) * (1 - seg(e, 0.85, 1))).toFixed(3);
+    aptArt.style.opacity = seg(e, 0.8, 1).toFixed(3);
+    if (t > 0 && t < 1) drawUp(e);
+  }
   function updateBuilding(scene, p) {
+    updatePrelude(p);
     var ph = p < 0.3 ? 0 : (p < 0.62 ? 1 : 2);
     if (scene.dataset.phase !== String(ph)) {
       scene.dataset.phase = ph;
@@ -579,7 +637,7 @@
   })();
 
   /* sprite frames: preloaded so swapping src never flickers */
-  function frames(prefix, n) { var a = []; for (var i = 1; i <= n; i++) { var im = new Image(); im.src = 'assets/' + prefix + i + '.png'; a.push('assets/' + prefix + i + '.png'); } return a; }
+  function frames(prefix, n) { var a = []; for (var i = 1; i <= n; i++) { var im = new Image(); im.src = 'assets/character/sprites/' + prefix + i + '.png'; a.push('assets/character/sprites/' + prefix + i + '.png'); } return a; }
   var HOP1 = frames('hop1-', 7);     // 1단계 오르미: squash → stretch → land
   var RUN4 = frames('run4-', 9);     // 4단계 오르미: 1–6 run cycle, 7 joy, 8 leap, 9 stand
   function setSrc(el, src) { if (el.getAttribute('src') !== src) el.setAttribute('src', src); }
@@ -612,7 +670,7 @@
     $$('.corner, .terrace, .t-door', scene).forEach(function (el) { el.style.opacity = fadeOut; });
     $('#stepLabels').style.opacity = (p > 0.85 ? 1 : 0) * fadeOut;
 
-    var built = seg(p, 0.02, 0.09) * blocks.length;
+    var built = seg(p, 0.12, 0.19) * blocks.length;   // the wall and its doors appear with "청년 지원 프로그램"
     var fly = seg(p, 0.62, 0.67);                // symbol flies in
     var hit = seg(p, 0.67, 0.72);                // impact: shake + crack
     var fallT = seg(p, 0.72, 0.84);              // non-stair tiles fall
@@ -656,14 +714,14 @@
     });
 
     // 3F: steps out, hops onto the wall, walks to the first door and goes in
-    var out = seg(p, 0.02, 0.08), pos3, o3 = out, s3 = 1;
+    var out = seg(p, 0.27, 0.33), pos3, o3 = out, s3 = 1;   // 3F steps out only at "그런데 … 대면"
     if (p < 0.39) pos3 = [lerp(190, TX, out), FLOOR[2]];
     else if (p < 0.42) pos3 = arc([TX, FLOOR[2]], [322, TOP], ease(seg(p, 0.39, 0.42)), 38);
     else if (p < 0.455) pos3 = [lerp(322, DOOR1, ease(seg(p, 0.42, 0.455))), TOP];
     else { var g = seg(p, 0.455, 0.475); pos3 = [DOOR1, TOP]; o3 = 1 - g; s3 = 1 - 0.3 * g; }
     put(oru3, pos3[0], pos3[1], o3 * fadeOut, s3);
     // sprite frame from the motion itself: running while moving, a leap on the jump, standing when still
-    var f3 = 'assets/oreumi4.png';
+    var f3 = 'assets/character/oreumi4.png';
     if (p >= 0.39 && p < 0.42) f3 = RUN4[seg(p, 0.39, 0.42) < 0.5 ? 7 : 6];
     else if ((out > 0 && out < 1 && p < 0.39) || (p >= 0.42 && p < 0.475)) f3 = RUN4[Math.floor(pos3[0] / 13) % 6];
     setSrc(oru3, f3);
@@ -772,7 +830,7 @@
     var t0 = performance.now(), D = 760;
     (function tick(now) {
       var k = (now - t0) / D;
-      if (k >= 1 || lastStage1Img !== 1) { hopRaf = 0; if (lastStage1Img === 1) setSrc(stepOru, 'assets/oreumi1.png'); return; }
+      if (k >= 1 || lastStage1Img !== 1) { hopRaf = 0; if (lastStage1Img === 1) setSrc(stepOru, 'assets/character/oreumi1.png'); return; }
       setSrc(stepOru, HOP1[Math.min(HOP1.length - 1, Math.floor(k * HOP1.length))]);
       hopRaf = requestAnimationFrame(tick);
     })(t0);
@@ -826,7 +884,7 @@
     stepOru.style.setProperty('--flip', p >= 0.84 ? -1 : 1);
 
     var want = p >= 0.9 ? 2 : 1;
-    if (want !== lastStage1Img) { stopHop(); stepOru.src = 'assets/oreumi' + want + '.png'; lastStage1Img = want; }
+    if (want !== lastStage1Img) { stopHop(); stepOru.src = 'assets/character/oreumi' + want + '.png'; lastStage1Img = want; }
     var spot = x + ',' + y;
     if (spot !== lastSpot) { if (lastSpot !== null && want === 1 && !reduced) playHop(); lastSpot = spot; }
 
@@ -928,7 +986,7 @@
     mOru.style.setProperty('--sq', pos[2].toFixed(3));
 
     var img = p >= 0.5 ? 3 : 2;
-    if (img !== lastMImg) { mOru.src = 'assets/oreumi' + img + '.png'; lastMImg = img; }
+    if (img !== lastMImg) { mOru.src = 'assets/character/oreumi' + img + '.png'; lastMImg = img; }
     var name = p < 0.5 ? '2단계 둘러보기' : (p < 0.86 ? '3단계 마주하기' : '4단계 도전하기');
     var nameEl = $('#stageName');
     if (name !== lastName) {
@@ -962,7 +1020,7 @@
      One-screen engine
      ====================================================== */
   var scenes = $$('.scene');
-  var handlers = { hook: updateHook, building: updateBuilding, wall: updateWall, step1: updateStep1, montage: updateMontage, door: updateDoor, epilogue: updateEpilogue };
+  var handlers = { intro: function () {}, hook: updateHook, building: updateBuilding, wall: updateWall, step1: updateStep1, montage: updateMontage, door: updateDoor, epilogue: updateEpilogue };
   var starts = [], total = 0;
   scenes.forEach(function (s) { starts.push(total); total += parseFloat(s.dataset.len); });
   var END = total - 0.0001;
@@ -1039,9 +1097,10 @@
 
     var onLight = (scene.dataset.scene === 'door' && p > 0.56) || scene.dataset.scene === 'epilogue';
     topbar.classList.toggle('on-light', onLight);
+    topbar.classList.toggle('on-intro', scene.dataset.scene === 'intro');
     ui.classList.toggle('on-light', onLight);
     var mode = onLight ? 'orange' : 'white';
-    if (mode !== logoMode) { logo.src = 'assets/logo-' + mode + '.png'; logoMode = mode; }
+    if (mode !== logoMode) { logo.src = 'assets/brand/logo-' + mode + '.png'; logoMode = mode; }
     bar.style.width = (P / END * 100).toFixed(2) + '%';
     $('#prevBtn').disabled = T <= beats[0] + 1e-4;
     $('#nextBtn').disabled = T >= beats[beats.length - 1] - 1e-4;

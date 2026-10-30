@@ -27,48 +27,13 @@
     window.addEventListener('pointermove', function (e) { if (down) box.scrollLeft = sl - (e.clientX - sx) / (window.__zoom || 1); });
   });
 })();
-/* design 전용: 앱 화면 캐러셀 생성 */
+/* design 전용: 앱 화면 캐러셀 (assets/app/ 의 실제 화면, 피그마 보드 순서) */
 (function () {
   'use strict';
   var box = document.getElementById('appScroll');
   if (!box) return;
-  var C = 'assets/';
-  var SCREENS = [
-    ['홈', '<div class="app">oreum</div><h5>오늘도<br>한 걸음 올라가볼까요?</h5><div class="m-card"><div class="row"><img src="' + C + 'oreumi3.png" alt=""><div><b>창문 열고 환기하기</b><span>약 5분</span></div></div></div><div class="m-btn">활동 시작하기</div>'],
-    ['자가진단', '<div class="app">자가진단 1/3</div><h5>하루 중 씻거나<br>방을 정리하는 일은?</h5><div class="chips" style="flex-direction:column;margin-top:16px"><i>거의 하지 못해요</i><i class="on">며칠에 한 번 해요</i><i>대부분 하고 있어요</i></div><div class="m-btn">다음</div>'],
-    ['자가진단 완료', '<div class="app">시작점</div><h5>지금의 시작점은<br><span class="hl">A</span> 단계예요</h5><img class="done-ch" src="' + C + 'oreumi1.png" alt=""><div class="m-btn">미션 받기</div>'],
-    ['미션 인증', '<div class="app">오름 인증</div><h5 style="font-size:16px">창문 열고 환기하기</h5><div class="cam"><img src="' + C + 'oreumi2.png" alt=""></div><div class="shutter"><i></i></div>'],
-    ['인증 완료', '<img class="done-ch" src="' + C + 'oreumi4.png" alt=""><h5 class="center">인증 완료!</h5><div class="reward-row">미션 리워드<b>+P</b></div><div class="reward-row">연속 보너스<b>+P</b></div><div class="m-btn">계속하기</div>'],
-    ['연속 활동', '<div class="app">oreum</div><h5>7일째<br>이어가고 있어요</h5><img class="done-ch" src="' + C + 'oreumi3.png" alt=""><div class="cal"><i class="f"></i><i class="f"></i><i class="f"></i><i class="f"></i><i class="f"></i><i class="f"></i><i class="h"></i></div>'],
-    ['챕터', '<div class="app">oreum</div><h5>챕터</h5><div class="m-card"><b>01 숨고르기</b></div><div class="m-card"><b>02 둘러보기</b></div><div class="m-card" style="opacity:.6"><b>03 마주하기</b></div><div class="m-card" style="opacity:.4"><b>04 도전하기</b></div>'],
-    ['리워드', '<div class="app">oreum · 리워드</div><h5>움직인 만큼,<br>돌아와요</h5><div class="m-card" style="background:var(--orange);color:#fff"><span style="color:#fff">내 리워드</span><b style="font-size:24px">3,200P</b></div><div class="reward-row">위젯 설치 보너스<b>+15%</b></div><div class="reward-row">환급 모드<b>›</b></div>']
-  ];
+  var SCREENS = [["01_splash", "스플래시"], ["02_diagnosis", "자가진단"], ["03_diagnosis-done", "자가진단 완료"], ["04_home", "홈"], ["05_home-sheet", "홈 · 오늘의 미션"], ["06_home-decorate", "홈 꾸미기"], ["07_chapter", "챕터"], ["08_mission-camera", "미션 인증"], ["09_mission-loading", "인증 확인 중"], ["10_mission-done", "인증 완료"], ["11_mission-fail", "인증 실패"], ["12_unlock", "배경 해금"], ["13_unlock-popup", "배경 팝업"], ["14_revive-onboarding", "부활 온보딩"], ["15_revive", "부활 미션"], ["16_mission-streak", "연속 활동 달성"], ["17_streak", "연속 활동"], ["18_reward", "리워드 · 환급모드"], ["19_reward-history", "리워드 내역"], ["20_mypage", "마이페이지"], ["21_profile", "프로필"]];
   box.innerHTML = SCREENS.map(function (s) {
-    return '<figure class="item"><div class="phone"><div class="phone__bar"><span>9:41</span><span>●●●</span></div><div class="scr">' + s[1] + '</div></div><em>' + s[0] + '</em></figure>';
+    return '<figure class="item"><img class="shot" src="assets/app/' + s[0] + '.png" alt="오름 앱 ' + s[1] + ' 화면" loading="lazy" width="402" height="874"><em>' + s[1] + '</em></figure>';
   }).join('');
-})();
-/* tabs (plan page: persona A/B, 3C) */
-(function () {
-  'use strict';
-  Array.prototype.forEach.call(document.querySelectorAll('[data-tabs]'), function (list) {
-    var key = list.getAttribute('data-tabs');
-    var panels = document.querySelector('[data-tabs-for="' + key + '"]');
-    var btns = Array.prototype.slice.call(list.querySelectorAll('[data-tab]'));
-    function show(id) {
-      btns.forEach(function (b) { b.setAttribute('aria-selected', b.getAttribute('data-tab') === id ? 'true' : 'false'); b.tabIndex = b.getAttribute('data-tab') === id ? 0 : -1; });
-      Array.prototype.forEach.call(panels.children, function (p) {
-        var on = p.getAttribute('data-panel') === id;
-        p.hidden = !on;
-        if (on) Array.prototype.forEach.call(p.querySelectorAll('.rv'), function (e) { e.classList.add('in'); });
-      });
-    }
-    btns.forEach(function (b, i) {
-      b.addEventListener('click', function () { show(b.getAttribute('data-tab')); });
-      b.addEventListener('keydown', function (e) {
-        var d = e.key === 'ArrowRight' ? 1 : e.key === 'ArrowLeft' ? -1 : 0;
-        if (!d) return;
-        e.preventDefault(); var n = btns[(i + d + btns.length) % btns.length]; n.focus(); n.click();
-      });
-    });
-  });
 })();

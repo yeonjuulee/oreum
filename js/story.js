@@ -648,8 +648,9 @@
   var DOOR1 = 656;                              // centre of the first door (3F walks in here)
 
   // the youths: feet points on their terraces, and where they land on the stairs
-  var TX = 222, FLOOR = [494, 406, 318];        // 1F, 2F, 3F terrace floors
-  var oru1 = $('#wallOru'), oru2 = $('#wallOru2'), oru3 = $('#wallOru3');
+  var TX = 222, FH = 70.4, FLOOR = [0, 1, 2, 3, 4].map(function (n) { return 494 - FH * n; });   // 1F–5F terrace floors (5-storey building)
+  var oru1 = $('#wallOru'), oru2 = $('#wallOru2'), oru3 = $('#wallOru3'), oru4 = $('#wallOru4'), oru5 = $('#wallOru5');
+  var WALL_UP = GROUND - TOP;                   // the wall (and its doors) start below the ground and rise this far
   function put(el, x, y, o, sc) {
     el.style.transform = 'translate(' + x.toFixed(1) + 'px,' + y.toFixed(1) + 'px) translate(-50%,-100%) scale(' + (sc || 1) + ')';
     el.style.opacity = o;
@@ -670,7 +671,13 @@
     $$('.corner, .terrace, .t-door', scene).forEach(function (el) { el.style.opacity = fadeOut; });
     $('#stepLabels').style.opacity = (p > 0.85 ? 1 : 0) * fadeOut;
 
-    var built = seg(p, 0.12, 0.19) * blocks.length;   // the wall and its doors appear with "청년 지원 프로그램"
+    // "정부에서도 …": only the four doors, standing on the ground. "하지만 … 대면": the wall grows up under them and lifts them
+    // 벽과 문이 "누군가에게는 쉽게 올라갈 수 있는 높이지만,"에 맞춰 최종 높이까지 일치하여 도달하도록 타이밍 조정
+    var doorIn = seg(p, 0.13, 0.19);
+    var rise = ease(seg(p, 0.27, 0.41));
+    var lift = (1 - rise) * WALL_UP;
+    blocksEl.style.clipPath = rise < 1 ? 'polygon(-600px -600px, 3600px -600px, 3600px ' + GROUND + 'px, -600px ' + GROUND + 'px)' : '';
+    var built = blocks.length;
     var fly = seg(p, 0.62, 0.67);                // symbol flies in
     var hit = seg(p, 0.67, 0.72);                // impact: shake + crack
     var fallT = seg(p, 0.72, 0.84);              // non-stair tiles fall
@@ -678,7 +685,7 @@
 
     blocks.forEach(function (b, i) {
       var appear = clamp(built - i);
-      var x = b.x + shake, y = b.y - (1 - appear) * 16, r = 0, o = appear;
+      var x = b.x + shake, y = b.y + lift, r = 0, o = rise > 0 ? 1 : 0;
       if (!b.keep) {
         if (hit > 0 && fallT === 0) { x += Math.sin(i * 1.7 + p * 420) * 2; y += Math.cos(i * 2.3 + p * 380) * 1; }
         var t = clamp((fallT - b.delay * 0.6) / 0.45);
@@ -706,25 +713,36 @@
     sg.style.opacity = (p > 0.85 ? 0.7 : 0) * fadeOut;
 
     // the four entrances rise with the wall's top row; the first glows as 3F walks in
-    var enter = seg(p, 0.43, 0.46) * (1 - seg(p, 0.49, 0.53));
-    var rise = clamp(built - (blocks.length - NC));                     // 0 → 1 while the top row lands
+    var enter = seg(p, 0.44, 0.475) * (1 - seg(p, 0.49, 0.53));
     doors.forEach(function (d, k) {
-      d.style.opacity = rise * fadeOut;
-      d.style.transform = 'translate(' + shake.toFixed(1) + 'px,' + ((1 - rise) * 16).toFixed(1) + 'px)';
+      var a = clamp(doorIn * 1.6 - k * 0.2);
+      d.style.opacity = a * fadeOut;
+      d.style.transform = 'translate(' + shake.toFixed(1) + 'px,' + (lift - (1 - a) * 14).toFixed(1) + 'px)';
     });
 
-    // 3F: steps out, hops onto the wall, walks to the first door and goes in
-    var out = seg(p, 0.27, 0.33), pos3, o3 = out, s3 = 1;   // 3F steps out only at "그런데 … 대면"
-    if (p < 0.39) pos3 = [lerp(190, TX, out), FLOOR[2]];
-    else if (p < 0.42) pos3 = arc([TX, FLOOR[2]], [322, TOP], ease(seg(p, 0.39, 0.42)), 38);
-    else if (p < 0.455) pos3 = [lerp(322, DOOR1, ease(seg(p, 0.42, 0.455))), TOP];
-    else { var g = seg(p, 0.455, 0.475); pos3 = [DOOR1, TOP]; o3 = 1 - g; s3 = 1 - 0.3 * g; }
-    put(oru3, pos3[0], pos3[1], o3 * fadeOut, s3);
-    // sprite frame from the motion itself: running while moving, a leap on the jump, standing when still
-    var f3 = 'assets/character/oreumi4.png';
-    if (p >= 0.39 && p < 0.42) f3 = RUN4[seg(p, 0.39, 0.42) < 0.5 ? 7 : 6];
-    else if ((out > 0 && out < 1 && p < 0.39) || (p >= 0.42 && p < 0.475)) f3 = RUN4[Math.floor(pos3[0] / 13) % 6];
-    setSrc(oru3, f3);
+    // 3F · 4F · 5F: they step out with the others, then (at "누군가에게는 쉽게 …") each hops onto the wall
+    // and walks into a door of their own: 5F → door 3, 4F → door 2, 3F → door 1. 1F · 2F can't reach.
+    function climber(el, base, jump, walkEnd, doorX, h) {
+      var o = seg(p, 0.02, 0.08), pos, op = o, sc = 1, moving = false;
+      if (p < jump) { pos = [lerp(190, TX, o), base]; moving = o > 0 && o < 1; }
+      else if (p < jump + 0.025) pos = arc([TX, base], [322, TOP], ease(seg(p, jump, jump + 0.025)), h);
+      else if (p < walkEnd) {
+        var w = ease(seg(p, jump + 0.025, walkEnd)); pos = [lerp(322, doorX, w), TOP]; moving = true;
+        if (el !== oru5) pos[1] -= Math.abs(Math.sin(w * Math.PI * 7)) * 4;   // little bounces while walking
+      }
+      else { var g = seg(p, walkEnd, walkEnd + 0.015); pos = [doorX, TOP]; op = 1 - g; sc = 1 - 0.3 * g; }
+      put(el, pos[0], pos[1], op * fadeOut, sc);
+      return { pos: pos, moving: moving, jumping: p >= jump && p < jump + 0.025, jt: seg(p, jump, jump + 0.025) };
+    }
+    var DOOR_X = [DOOR1, DOOR1 + 72, DOOR1 + 144];
+    var c5 = climber(oru5, FLOOR[4], 0.41, 0.465, DOOR_X[2], 26);
+    climber(oru4, FLOOR[3], 0.418, 0.47, DOOR_X[1], 30);
+    climber(oru3, FLOOR[2], 0.426, 0.475, DOOR_X[0], 40);
+    // 5F runs with the sprite frames: a leap on the jump, running while it moves, standing when still
+    var f5 = 'assets/character/oreumi4.png';
+    if (c5.jumping) f5 = RUN4[c5.jt < 0.5 ? 7 : 6];
+    else if (c5.moving) f5 = RUN4[Math.floor(c5.pos[0] / 13) % 6];
+    setSrc(oru5, f5);
 
     // 1F · 2F: step out, try twice to jump the wall (and fall short), then hop onto their own stair
     function youth(el, base, peaks, land, t0) {

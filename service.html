@@ -44,7 +44,7 @@
           <img src="assets/service/hero/main5.png" alt="">
           <img src="assets/service/hero/main6.png" alt="">
         </div>
-        <img src="assets/character/oreumi4.png" alt="활짝 핀 오르미" class="hero-oru">
+        <div class="hero-oru" aria-hidden="true"><img src="assets/service/hero/oru-aquarium.png" alt="" class="on"><img src="assets/service/hero/oru-christmas.png" alt=""><img src="assets/service/hero/oru-cinema.png" alt=""><img src="assets/service/hero/oru-concert.png" alt=""><img src="assets/service/hero/oru-basic.png" alt=""><img src="assets/service/hero/oru-park.png" alt=""></div>
       </div>
     </div>
   </section>
@@ -61,61 +61,69 @@
           <img src="assets/character/oreumi1.png" alt="웅크린 오르미">
           <div>
             <h3>일상이 무너진 분</h3>
-            <p>1시간 이상 외출한 날 <b>주 0~1일</b>, 누군가와 대화한 날 <b>주 0~1일</b>. 기상과 씻기 같은 일상부터 다시 세워요.</p>
-            <span class="pill">1단계 숨고르기부터</span>
+            <p>하루 평균 외출 <b>0~1회</b>, 주변 사람과 대화한 날 <b>주 0~1일</b>. 기상과 씻기 같은 일상부터 다시 세워요.</p>
+            <span class="pill">A유형 · 1단계 숨고르기부터</span>
           </div>
         </article>
         <article class="type">
           <img src="assets/character/oreumi2.png" alt="얼굴을 내민 오르미">
           <div>
             <h3>문 밖이 어려운 분</h3>
-            <p>외출한 날 <b>주 2~3일</b>, 대화한 날 <b>주 2일 이상</b>. 일상은 유지되니 1단계는 건너뛰고 집 밖에서 시작해요.</p>
-            <span class="pill">2단계 둘러보기부터</span>
+            <p>하루 평균 외출 <b>3회 이하</b>, 대화는 <b>주 2일 이상</b> 이어지는 분. 일상은 유지되니 1단계는 건너뛰고 집 밖에서 시작해요.</p>
+            <span class="pill">B유형 · 2단계 둘러보기부터</span>
           </div>
         </article>
       </div>
+      <div class="type-general">
+        <h3>A·B 유형에 해당하지 않으면 <span>일반군</span>이에요</h3>
+        <p>하루 4회 이상 외출하거나, 지금 상태가 3개월이 안 됐거나, 일상·학업·일·관계에 어려움이 없다면 일반군으로 분류돼요. 오름은 고립·은둔 상태의 청년이 다시 문 밖으로 나오도록 돕는 서비스라 <b>일반군은 서비스 대상이 아니에요.</b> 일자리나 교육 지원이 필요하다면 고용24, 지역 청년센터의 청년 지원 프로그램을 바로 이용해 보세요.</p>
+      </div>
 
-      <form class="quiz" id="quiz" novalidate>
-        <div class="quiz-head">
+      <div class="finder">
+        <div class="finder-head">
           <h3>질문 4개로, 나의 시작점 찾기</h3>
-          <p>답변은 저장되지 않아요.</p>
+          <p>앱의 첫 진단과 같은 질문이에요. 답변은 저장되지 않아요.</p>
         </div>
-        <fieldset>
-          <legend>1. 최근 4주, 1시간 이상 외출한 날은 일주일에 며칠인가요?</legend>
-          <div class="opts">
-            <label><input type="radio" name="q1" id="q1a" value="low"> 0~1일</label>
-            <label><input type="radio" name="q1" id="q1b" value="mid"> 2~3일</label>
-            <label><input type="radio" name="q1" id="q1c" value="high"> 4일 이상</label>
+        <form class="sq" id="quiz" novalidate aria-label="시작점 찾기 질문">
+          <div class="sq-bar" aria-hidden="true"><i id="sqBar"></i></div>
+          <div class="sq-steps">
+            <fieldset class="sq-step on" data-step="1">
+              <legend>최근 1주일 동안,<br>하루 평균 외출한 횟수는 얼마인가요?</legend>
+              <p class="sq-help">정답은 없어요 요즘 나와 가장 가까운 걸 골라주세요</p>
+              <label><input type="radio" name="q1" value="0"><i></i>거의 하지 않음 (0회)</label>
+              <label><input type="radio" name="q1" value="1"><i></i>1회</label>
+              <label><input type="radio" name="q1" value="2"><i></i>2회~ 3회</label>
+              <label><input type="radio" name="q1" value="4"><i></i>4회 이상</label>
+            </fieldset>
+            <fieldset class="sq-step" data-step="2">
+              <legend>최근 4주간, 일주일에 며칠 정도<br>주변 사람과 대화했나요?</legend>
+              <p class="sq-help">정답은 없어요 요즘 나와 가장 가까운 걸 골라주세요</p>
+              <label><input type="radio" name="q2" value="0"><i></i>거의 하지 않음 (0회)</label>
+              <label><input type="radio" name="q2" value="1"><i></i>1회</label>
+              <label><input type="radio" name="q2" value="2"><i></i>2회~ 3회</label>
+              <label><input type="radio" name="q2" value="4"><i></i>4회 이상</label>
+            </fieldset>
+            <fieldset class="sq-step" data-step="3">
+              <legend>이러한 상태가 얼마나 이어졌나요?</legend>
+              <p class="sq-help">정답은 없어요 요즘 나와 가장 가까운 걸 골라주세요</p>
+              <label><input type="radio" name="q3" value="0"><i></i>3개월 미만</label>
+              <label><input type="radio" name="q3" value="3"><i></i>3개월 ~ 6개월</label>
+              <label><input type="radio" name="q3" value="6"><i></i>6개월 이상</label>
+            </fieldset>
+            <fieldset class="sq-step" data-step="4">
+              <legend>이로 인해 일상이나 학업, 일, 관계에<br>어려움을 겪고 있나요?</legend>
+              <p class="sq-help">정답은 없어요 요즘 나와 가장 가까운 걸 골라주세요</p>
+              <label><input type="radio" name="q4" value="yes"><i></i>예</label>
+              <label><input type="radio" name="q4" value="no"><i></i>아니오</label>
+            </fieldset>
+            <div class="sq-step sq-result" data-step="5" id="quizResult" role="status" aria-live="polite"></div>
           </div>
-        </fieldset>
-        <fieldset>
-          <legend>2. 누군가와 대화한 날은 일주일에 며칠인가요?</legend>
-          <div class="opts">
-            <label><input type="radio" name="q2" id="q2a" value="low"> 0~1일</label>
-            <label><input type="radio" name="q2" id="q2b" value="mid"> 2일 이상</label>
+          <div class="sq-nav">
+            <button type="button" class="sq-prev" id="sqPrev">이전</button>
+            <button type="button" class="sq-next" id="sqNext">다음</button>
           </div>
-        </fieldset>
-        <fieldset>
-          <legend>3. 지금 같은 생활이 얼마나 이어졌나요?</legend>
-          <div class="opts">
-            <label><input type="radio" name="q3" id="q3a" value="1"> 3개월 미만</label>
-            <label><input type="radio" name="q3" id="q3b" value="2"> 3~6개월</label>
-            <label><input type="radio" name="q3" id="q3c" value="3"> 6개월 이상</label>
-          </div>
-        </fieldset>
-        <fieldset>
-          <legend>4. 지금 생활이 일상에 얼마나 영향을 주나요?</legend>
-          <div class="opts">
-            <label><input type="radio" name="q4" id="q4a" value="1"> 거의 없어요</label>
-            <label><input type="radio" name="q4" id="q4b" value="2"> 조금 있어요</label>
-            <label><input type="radio" name="q4" id="q4c" value="3"> 많이 있어요</label>
-          </div>
-        </fieldset>
-        <div class="quiz-foot">
-          <button type="submit" class="btn btn-primary">시작점 확인하기</button>
-          <p class="quiz-result" id="quizResult" role="status" aria-live="polite">네 질문에 답하면 시작할 계단을 알려드려요.</p>
-        </div>
-      </form>
+        </form>
+      </div>
     </div>
   </section>
 
@@ -212,10 +220,10 @@
     <div class="wrap narrow">
       <div class="sec-head"><h2>자주 묻는 질문</h2></div>
       <div class="faq">
-        <details><summary>비용이 드나요?</summary><p class="tbd">[답변 미정: 기획 확정 후 입력]</p></details>
-        <details><summary>인증 사진은 누가 보나요?</summary><p class="tbd">[답변 미정: 개인정보 처리 방식 확정 후 입력]</p></details>
-        <details><summary>며칠 쉬면 어떻게 되나요?</summary><p>쌓은 층은 그대로 남아요. 처음으로 돌아가지 않고, 부활 미션으로 다시 이어갈 수 있어요.</p></details>
-        <details><summary>가족이 대신 신청할 수 있나요?</summary><p class="tbd">[답변 미정: 신청 방식 확정 후 입력]</p></details>
+        <details><summary>인증 사진은 타인이 볼 수 있나요?</summary><p class="tbd">촬영된 사진은 인증 후 바로 삭제됩니다. 타인이 볼 수도, 서비스에 저장되지도 않아요.</p></details>
+        <details><summary>리워드는 현금인가요? 어떻게 쓰나요?</summary><p class="tbd">리워드는 현금으로 지급됩니다. 계좌 설정 시 리워드를 현금으로 받을 수 있어요.</p></details>
+        <details><summary>오래 쉬면 처음부터 다시 시작해야 하나요?</summary><p>쌓은 층은 그대로 유지되며 처음으로 돌아가지 않아요.</p></details>
+        <details><summary>연속 기록을 복구하고 싶어요</summary><p class="tbd">부활 미션으로 기록을 복구하여 연속 활동을 이어갈 수 있어요.</p></details>
       </div>
     </div>
   </section>
@@ -225,7 +233,7 @@
 <footer class="foot">
   <div class="wrap foot-row">
     <img src="assets/brand/logo-orange.png" alt="oreum">
-    <p>쉼에서, 다시 시작해오름</p>
+    <p>다시 시작해오름</p>
   </div>
 </footer>
 

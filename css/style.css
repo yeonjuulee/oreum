@@ -299,7 +299,7 @@ html.story-root body { background: var(--night); }
 .wall-doors { left: 0; top: 0; width: 960px; height: 540px; }
 .wall-door { position: absolute; top: 216px; width: 34px; height: 44px; opacity: 0; will-change: transform, opacity; }
 /* an entrance cut into the top of the wall: just a lit opening with a thin frame */
-.wd-open { position: absolute; inset: 0; border-radius: 17px 17px 0 0; background: linear-gradient(180deg, #FFF8F2 0%, #FFE9D9 70%, #FFD2B2 100%); box-shadow: 0 0 0 2px #332E2A, 0 0 14px 2px rgba(255, 233, 217, calc(.25 + var(--lit, 0) * .5)); }
+.wd-open { position: absolute; inset: 0; border-radius: 2px 2px 0 0; background: linear-gradient(180deg, #FFF8F2 0%, #FFE9D9 70%, #FFD2B2 100%); box-shadow: 0 0 0 2px #332E2A, 0 0 14px 2px rgba(255, 233, 217, calc(.25 + var(--lit, 0) * .5)); }
 .wall-door .ld-sign { position: absolute; left: 50%; bottom: calc(100% + 7px); transform: translateX(-50%); white-space: nowrap; font: 900 9px/1.25 var(--font-body); color: var(--cream); background: rgba(28, 25, 23, .85); border: 1px solid rgba(255, 233, 217, .4); padding: 3px 7px; border-radius: 8px; text-align: center; }
 .wall-symbol { left: 0; top: 0; width: 70px; opacity: 0; z-index: 3; transform-origin: 35px 35px; filter: drop-shadow(0 0 18px rgba(255, 106, 0, .75)); will-change: transform, opacity; }
 .impact { left: 0; top: 0; width: 80px; height: 80px; border-radius: 50%; opacity: 0; z-index: 2; pointer-events: none; border: 3px solid rgba(255, 178, 122, .9); box-shadow: 0 0 30px rgba(255, 106, 0, .6), inset 0 0 20px rgba(255, 106, 0, .4); }
@@ -401,10 +401,61 @@ html.story-root body { background: var(--night); }
 .scene-door > * { position: relative; z-index: 1; }
 .scene-door.flooded { --fg: var(--ink); --sub: #5C4A3E; --kicker: var(--orange-ink); }
 .scene-door .line h2, .scene-door .kicker { transition: color .6s; }
-.big-door { left: 415px; top: 40px; width: 130px; height: 230px; }
-.programs { z-index: 2; left: 150px; top: 330px; width: 660px; display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 14px; }
-.program { padding: 18px; border-radius: 12px; background: #fff; box-shadow: 0 1px 0 var(--line), 0 10px 30px -18px rgba(51, 46, 42, .35); text-align: center; font-size: 17px; font-weight: 900; color: var(--ink); opacity: 0; transform: translateY(10px); transition: opacity .45s, transform .45s; }
-.program.on { opacity: 1; transform: none; }
+.big-door { left: 415px; top: 70px; width: 130px; height: 230px; }
+.scene-door .big-door .ld-sign, .scene-epilogue .big-door .ld-sign {
+  animation: floatSign 3.2s ease-in-out infinite;
+}
+.programs {
+  z-index: 3;
+  left: 50%;
+  top: 16px;
+  transform: translateX(-50%);
+  display: flex;
+  gap: 12px;
+  justify-content: center;
+  align-items: center;
+  white-space: nowrap;
+  width: auto;
+}
+.program {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  padding: 4px 14px;
+  border-radius: 999px;
+  font: 900 12px/1.4 var(--font-body);
+  color: var(--sand);
+  background: rgba(28, 25, 23, .85);
+  border: 1px solid rgba(255, 233, 217, .45);
+  box-shadow: 0 4px 14px rgba(0, 0, 0, .25);
+  text-align: center;
+  white-space: nowrap;
+  opacity: 0;
+  transform: translateY(8px);
+  transition: opacity .45s ease, transform .45s ease, background .6s, color .6s;
+  pointer-events: none;
+}
+.program.on {
+  opacity: 1;
+  animation: floatProg 3.6s ease-in-out infinite;
+}
+.programs .program:nth-child(1) { animation-delay: -0.7s; }
+.programs .program:nth-child(2) { animation-delay: -2.1s; }
+.programs .program:nth-child(3) { animation-delay: -1.4s; }
+.scene-door.flooded .program, .scene-epilogue .program {
+  color: var(--navy);
+  background: var(--sand);
+  border-color: transparent;
+  box-shadow: 0 4px 16px rgba(255, 182, 130, .45);
+}
+@keyframes floatSign {
+  0%, 100% { transform: translateX(-50%) translateY(0); }
+  50% { transform: translateX(-50%) translateY(-6px); }
+}
+@keyframes floatProg {
+  0%, 100% { transform: translateY(0); }
+  50% { transform: translateY(-6px); }
+}
 
 /* ----- scene: epilogue ----- */
 .scene-epilogue { background: var(--navy); }
@@ -682,8 +733,8 @@ html.story-root body { background: var(--night); }
 
 /* montage + door scene: the same simple arched entrance as on the wall; its light grows as it "opens" */
 .arch-door .wd-open { box-shadow: 0 0 0 2px #332E2A, 0 0 calc(12px + var(--open, 0) * 46px) calc(var(--open, 0) * 10px) rgba(255, 233, 217, calc(.25 + var(--open, 0) * .45)); }
-.m-door .wd-open { border-radius: 28px 28px 0 0; }
-.big-door .wd-open { border-radius: 65px 65px 0 0; box-shadow: 0 0 0 3px #332E2A, 0 0 calc(20px + var(--open, 0) * 90px) calc(var(--open, 0) * 24px) rgba(255, 233, 217, calc(.25 + var(--open, 0) * .5)); }
+.m-door .wd-open { border-radius: 3px 3px 0 0; }
+.big-door .wd-open { border-radius: 4px 4px 0 0; box-shadow: 0 0 0 3px #332E2A, 0 0 calc(20px + var(--open, 0) * 90px) calc(var(--open, 0) * 24px) rgba(255, 233, 217, calc(.25 + var(--open, 0) * .5)); }
 .scene-door.flooded .big-door .wd-open { box-shadow: 0 0 0 3px rgba(51, 46, 42, .25), 0 0 60px 20px rgba(255, 182, 130, .35); }
 /* epilogue: keeps the door scene's bright, light-flooded background */
 .scene-epilogue { --fg: var(--ink); --sub: #5C4A3E; --kicker: var(--orange-ink); background: var(--grain) 0 0 / 200px, radial-gradient(80% 90% at 65% 40%, #FFFDF8 0%, #FFF3E6 55%, #FFE2C8 100%); background-blend-mode: soft-light, normal; }
@@ -1935,7 +1986,6 @@ body.info-page .hscroll .item .shot { display: block; width: 230px; height: auto
 /* ===== top bar + bubbles as in the reference screens (desktop canvas) ===== */
 @media (min-width: 901px) and (min-aspect-ratio: 4/3) {
   .story-page .topbar { padding-top: calc(27px + env(safe-area-inset-top, 0px)); padding-right: calc(5.1 * var(--vw, 1vw)); }
-  .story-page .topbar .logo { height: 10.5px; }
   .story-page .topbar nav { gap: 46.5px; }
   .story-page .topbar nav a, .story-page .topbar nav a[aria-current="page"] { padding: 0; min-height: 40px; border-radius: 0; background: none !important; color: inherit; font-size: 13.5px; font-weight: 400; opacity: .78; }
   .story-page .topbar nav a[aria-current="page"] { font-weight: 600; opacity: 1; }
@@ -1982,3 +2032,7 @@ body.info-page .hscroll .item .shot { display: block; width: 230px; height: auto
 .wall-oru.w3 { width: 58px; }
 .wall-oru.w4 { width: 48px; }
 .wall-oru.w5 { width: 50px; }
+
+/* 문이 열린다 · 아직 방 안의 누군가: the three programs sit under the door, a little larger (same style) */
+.scene-door .programs, .scene-epilogue .programs { top: 346px; gap: 16px; }
+.scene-door .program, .scene-epilogue .program { padding: 7px 20px; font-size: 15px; }

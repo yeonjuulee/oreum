@@ -166,13 +166,12 @@
       </defs>
     </svg>
     <header class="topbar" id="topbar">
-      <div class="brand"><a href="#" id="homeLink" aria-label="oreum 처음으로"><img class="logo"
-            src="assets/brand/wordmark-white.png" alt="oreum"></a><span class="slogan">다시 시작해오름</span></div>
+      <div class="brand"><a href="#" id="homeLink" aria-label="oreum 처음으로"><span class="logo">oreum</span></a><span class="slogan">다시 시작해오름</span></div>
       <nav aria-label="주요 메뉴">
-        <a href="./" class="nav-story" aria-current="page">서비스 인트로</a>
-        <a href="service.html" class="nav-service">서비스 소개</a>
-        <a href="plan.html" class="nav-plan">서비스 배경</a>
-        <a href="design.html" class="nav-design">디자인</a>
+        <a href="./" class="nav-story" aria-current="page">INTRO</a>
+        <a href="service.html" class="nav-service">SERVICE</a>
+        <a href="plan.html" class="nav-plan">PLAN</a>
+        <a href="design.html" class="nav-design">DESIGN</a>
       </nav>
       <div class="track" aria-hidden="true"><span id="progressBar"></span></div>
     </header>
@@ -247,18 +246,20 @@
             </div>
           </div>
         </div>
+        <!-- as the dots fly into the apartment, the next scene's title is already up, in the exact place it has there -->
+        <div class="hook-handoff" aria-hidden="true"><h2>준호와 도희가 <br>쉬고 있는 집에 찾아가 볼까요?</h2></div>
       </section>
 
       <!-- S00–S02 : 두 개의 방 -->
       <section class="scene scene-building" data-scene="building" data-slow="0-0.06:3,0.08-0.2:3,0.66-1:4"
-        data-beats="0.06,0.2,0.46,0.745,0.98" data-chapter="두 개의 방" data-len="5">
+        data-beats="0.06,0.46,0.745,0.98" data-chapter="두 개의 방" data-len="5">
         <div class="copy">
           <div class="lines">
             <!--            <div class="line" data-in="0" data-out="0.12">-->
             <!--              <p class="kicker">고립 은둔형 쉬었음 청년</p>-->
             <!--              <h2>준호와 도희가 <br>쉬고 있는 집에 찾아가 볼까요?</h2>-->
             <!--            </div>-->
-            <div class="line" data-in="0.12" data-out="0.3">
+            <div class="line instant" data-in="0" data-out="0.3">
               <h2>준호와 도희가 <br>쉬고 있는 집에 찾아가 볼까요?</h2>
             </div>
             <div class="line" data-in="0.3" data-out="0.62">
@@ -277,168 +278,44 @@
           <div class="stage">
             <div class="apt" id="apt" style="--z:1;--tx:0px;--ty:10px">
               <svg class="apt-art" viewBox="0 0 960 540" role="img"
-                aria-label="밤의 5층 아파트. 2층 창에는 불이 켜져 있고 1층 창은 어둡다. 오른쪽에 층마다 테라스가 있다.">
-                <circle cx="860" cy="74" r="120" fill="url(#glowP)" opacity=".35" filter="url(#speckle)" />
-                <circle cx="860" cy="74" r="20" fill="#FFF8F2" />
-                <defs>
-                  <linearGradient id="gndV" x1="0" y1="500" x2="0" y2="720" gradientUnits="userSpaceOnUse">
-                    <stop offset="0" stop-color="#262220" />
-                    <stop offset="1" stop-color="#262220" stop-opacity="0" />
-                  </linearGradient>
-                  <linearGradient id="gndH" x1="0" y1="0" x2="150" y2="0" gradientUnits="userSpaceOnUse">
-                    <stop offset="0" stop-color="#fff" stop-opacity="0" />
-                    <stop offset="1" stop-color="#fff" />
-                  </linearGradient>
-                  <mask id="gndM" maskUnits="userSpaceOnUse" x="0" y="480" width="4000" height="260">
-                    <rect x="0" y="480" width="4000" height="260" fill="url(#gndH)" />
-                  </mask>
-                </defs>
-                <g mask="url(#gndM)">
-                  <rect x="0" y="500" width="4000" height="220" fill="url(#gndV)" />
-                  <rect x="0" y="500" width="4000" height="2" fill="#47413C" />
-                </g>
-                <rect x="292" y="50" width="376" height="12" fill="#47413C" rx="2" />
-                <rect x="580" y="22" width="44" height="28" fill="#47413C" rx="3" />
-                <rect x="300" y="60" width="360" height="440" fill="#332E2A" />
-                <rect x="300" y="146" width="360" height="2" fill="#262220" />
-                <rect x="300" y="234" width="360" height="2" fill="#262220" />
-                <rect x="300" y="322" width="360" height="2" fill="#262220" />
-                <rect x="300" y="410" width="360" height="2" fill="#262220" />
-                <rect x="300" y="60" width="360" height="440" fill="url(#faceLight)" filter="url(#speckle)" />
-                <rect x="300" y="60" width="360" height="440" fill="url(#faceShade)" filter="url(#speckle)" />
-                <rect x="318" y="74" width="84" height="52" fill="#1C1917" rx="2" />
-                <rect x="359" y="74" width="2" height="52" fill="#332E2A" />
-                <rect x="314" y="132" width="94" height="2" fill="#FFE9D9" opacity=".35" />
-                <rect x="438" y="74" width="84" height="52" fill="#1C1917" rx="2" />
-                <rect x="479" y="74" width="2" height="52" fill="#332E2A" />
-                <rect x="434" y="132" width="94" height="2" fill="#FFE9D9" opacity=".35" />
-                <rect x="558" y="74" width="84" height="52" fill="url(#winDim)" rx="2" />
-                <rect x="599" y="74" width="2" height="52" fill="#332E2A" />
-                <rect x="554" y="132" width="94" height="2" fill="#FFE9D9" opacity=".35" />
-                <rect x="318" y="162" width="84" height="52" fill="url(#winWarm)" rx="2" />
-                <rect x="359" y="162" width="2" height="52" fill="#332E2A" />
-                <rect x="314" y="220" width="94" height="2" fill="#FFE9D9" opacity=".35" />
-                <rect x="438" y="162" width="84" height="52" fill="#1C1917" rx="2" />
-                <rect x="479" y="162" width="2" height="52" fill="#332E2A" />
-                <rect x="434" y="220" width="94" height="2" fill="#FFE9D9" opacity=".35" />
-                <rect x="558" y="162" width="84" height="52" fill="#1C1917" rx="2" />
-                <rect x="599" y="162" width="2" height="52" fill="#332E2A" />
-                <rect x="554" y="220" width="94" height="2" fill="#FFE9D9" opacity=".35" />
-                <rect x="318" y="250" width="84" height="52" fill="#1C1917" rx="2" />
-                <rect x="359" y="250" width="2" height="52" fill="#332E2A" />
-                <rect x="314" y="308" width="94" height="2" fill="#FFE9D9" opacity=".35" />
-                <rect x="438" y="250" width="84" height="52" fill="url(#winDim)" rx="2" />
-                <rect x="479" y="250" width="2" height="52" fill="#332E2A" />
-                <rect x="434" y="308" width="94" height="2" fill="#FFE9D9" opacity=".35" />
-                <rect x="558" y="250" width="84" height="52" fill="url(#winWarm)" rx="2" />
-                <rect x="599" y="250" width="2" height="52" fill="#332E2A" />
-                <rect x="554" y="308" width="94" height="2" fill="#FFE9D9" opacity=".35" />
-                <rect x="318" y="338" width="84" height="52" fill="#1C1917" rx="2" />
-                <rect x="359" y="338" width="2" height="52" fill="#332E2A" />
-                <rect x="314" y="396" width="94" height="2" fill="#FFE9D9" opacity=".35" />
-                <rect x="438" y="338" width="84" height="52" fill="url(#winB)" rx="2" />
-                <image href="assets/character/oreumi2.png" x="460" y="362" width="40" height="26.7" />
-                <polygon points="438,390 522,390 542,424 418,424" fill="url(#beamP)" opacity=".45"
-                  filter="url(#speckle)" />
-                <rect x="479" y="338" width="2" height="52" fill="#332E2A" />
-                <rect x="434" y="396" width="94" height="2" fill="#FFE9D9" opacity=".35" />
-                <rect x="558" y="338" width="84" height="52" fill="url(#winDim)" rx="2" />
-                <rect x="599" y="338" width="2" height="52" fill="#332E2A" />
-                <rect x="554" y="396" width="94" height="2" fill="#FFE9D9" opacity=".35" />
-                <rect x="334" y="436" width="52" height="6" fill="#47413C" rx="2" />
-                <rect x="340" y="442" width="40" height="58" fill="url(#doorP)" />
-                <polygon points="340,500 380,500 404,540 316,540" fill="url(#beamP)" opacity=".5"
-                  filter="url(#speckle)" />
-                <rect x="438" y="426" width="84" height="52" fill="#1C1917" rx="2" />
-                <ellipse cx="484" cy="472" rx="34" ry="16" fill="url(#glowO)" filter="url(#speckle)" />
-                <image href="assets/character/oreumi1.png" x="460" y="454" width="40" height="24.0" />
-                <rect x="558" y="426" width="84" height="52" fill="#1C1917" rx="2" />
-                <rect x="599" y="426" width="2" height="52" fill="#332E2A" />
-                <rect x="656" y="142" width="70" height="6" fill="#FFE9D9" rx="1" />
-                <rect x="658" y="120" width="68" height="2" fill="#FFE9D9" opacity=".8" />
-                <rect x="662" y="122" width="2" height="20" fill="#FFE9D9" opacity="0.55" />
-                <rect x="672" y="122" width="2" height="20" fill="#FFE9D9" opacity="0.55" />
-                <rect x="682" y="122" width="2" height="20" fill="#FFE9D9" opacity="0.55" />
-                <rect x="692" y="122" width="2" height="20" fill="#FFE9D9" opacity="0.55" />
-                <rect x="702" y="122" width="2" height="20" fill="#FFE9D9" opacity="0.55" />
-                <rect x="712" y="122" width="2" height="20" fill="#FFE9D9" opacity="0.55" />
-                <rect x="722" y="122" width="2" height="20" fill="#FFE9D9" opacity="0.55" />
-                <rect x="656" y="230" width="70" height="6" fill="#FFE9D9" rx="1" />
-                <rect x="658" y="208" width="68" height="2" fill="#FFE9D9" opacity=".8" />
-                <rect x="662" y="210" width="2" height="20" fill="#FFE9D9" opacity="0.55" />
-                <rect x="672" y="210" width="2" height="20" fill="#FFE9D9" opacity="0.55" />
-                <rect x="682" y="210" width="2" height="20" fill="#FFE9D9" opacity="0.55" />
-                <rect x="692" y="210" width="2" height="20" fill="#FFE9D9" opacity="0.55" />
-                <rect x="702" y="210" width="2" height="20" fill="#FFE9D9" opacity="0.55" />
-                <rect x="712" y="210" width="2" height="20" fill="#FFE9D9" opacity="0.55" />
-                <rect x="722" y="210" width="2" height="20" fill="#FFE9D9" opacity="0.55" />
-                <rect x="656" y="318" width="70" height="6" fill="#FFE9D9" rx="1" />
-                <rect x="658" y="296" width="68" height="2" fill="#FFE9D9" opacity=".8" />
-                <rect x="662" y="298" width="2" height="20" fill="#FFE9D9" opacity="0.55" />
-                <rect x="672" y="298" width="2" height="20" fill="#FFE9D9" opacity="0.55" />
-                <rect x="682" y="298" width="2" height="20" fill="#FFE9D9" opacity="0.55" />
-                <rect x="692" y="298" width="2" height="20" fill="#FFE9D9" opacity="0.55" />
-                <rect x="702" y="298" width="2" height="20" fill="#FFE9D9" opacity="0.55" />
-                <rect x="712" y="298" width="2" height="20" fill="#FFE9D9" opacity="0.55" />
-                <rect x="722" y="298" width="2" height="20" fill="#FFE9D9" opacity="0.55" />
-                <rect x="656" y="406" width="70" height="6" fill="#FFE9D9" rx="1" />
-                <rect x="658" y="384" width="68" height="2" fill="#FFE9D9" opacity=".8" />
-                <rect x="662" y="386" width="2" height="20" fill="#FFE9D9" opacity="0.55" />
-                <rect x="672" y="386" width="2" height="20" fill="#FFE9D9" opacity="0.55" />
-                <rect x="682" y="386" width="2" height="20" fill="#FFE9D9" opacity="0.55" />
-                <rect x="692" y="386" width="2" height="20" fill="#FFE9D9" opacity="0.55" />
-                <rect x="702" y="386" width="2" height="20" fill="#FFE9D9" opacity="0.55" />
-                <rect x="712" y="386" width="2" height="20" fill="#FFE9D9" opacity="0.55" />
-                <rect x="722" y="386" width="2" height="20" fill="#FFE9D9" opacity="0.55" />
-                <rect x="656" y="494" width="70" height="6" fill="#FFE9D9" rx="1" />
-                <rect x="658" y="472" width="68" height="2" fill="#FFE9D9" opacity=".8" />
-                <rect x="662" y="474" width="2" height="20" fill="#FFE9D9" opacity="0.55" />
-                <rect x="672" y="474" width="2" height="20" fill="#FFE9D9" opacity="0.55" />
-                <rect x="682" y="474" width="2" height="20" fill="#FFE9D9" opacity="0.55" />
-                <rect x="692" y="474" width="2" height="20" fill="#FFE9D9" opacity="0.55" />
-                <rect x="702" y="474" width="2" height="20" fill="#FFE9D9" opacity="0.55" />
-                <rect x="712" y="474" width="2" height="20" fill="#FFE9D9" opacity="0.55" />
-                <rect x="722" y="474" width="2" height="20" fill="#FFE9D9" opacity="0.55" />
-                <rect x="812" y="330" width="3" height="170" fill="#FFE9D9" opacity=".6" />
-                <rect x="806" y="326" width="22" height="5" fill="#FFE9D9" rx="2" opacity=".8" />
-                <polygon points="808,332 828,332 892,500 744,500" fill="url(#beamO)" opacity=".55"
-                  filter="url(#speckle)" />
+                aria-label="밤의 4층 아파트를 도트로 그린 그림. 가운데 2층 창에는 불이 켜져 있고, 가운데 1층 창에는 주황 불빛이 아래에서 은은하게 번진다. 하늘에 달, 오른쪽에 가로등이 있다.">
+                <!-- dot matrix (assets/building/apartment-dots.png): only the building, the lamp, the moon and their light are dots;
+                     the sky and the ground stay flat. -->
+                                <image href="assets/building/apartment-dots.png" x="0" y="0" width="960" height="540" />
               </svg>
               <canvas class="apt-px apt-dot" id="aptPx" width="1920" height="1080" aria-hidden="true"></canvas>
               <canvas class="apt-up" id="aptUp" width="960" height="540" aria-hidden="true"></canvas>
               <!-- 1층 창: 훅 장면의 주황 점이 날아와 앉는 자리 -->
-              <div class="unit u-a" style="left:420px;top:412px">
-                <div class="w ph"></div>
+              <div class="unit u-a" style="left:441.0px;top:395.7px">
+                <div class="w ph" style="width:47.4px;height:70.9px"></div>
               </div>
-              <div class="unit u-b" style="left:420px;top:324px">
-                <div class="w ph"></div>
+              <div class="unit u-b" style="left:441.0px;top:297.3px">
+                <div class="w ph" style="width:47.4px;height:70.8px"></div>
               </div>
             </div>
 
             <!-- 1층 방 : 불 꺼진 방 (라인 일러스트 + 단색 빛) -->
             <div class="room room-a">
-              <!-- 1층 방 (vector + dot screen): the room in flat shapes; every object carries a fine dot screen in a deeper
-                   shade of its own colour (assets/rooms/room1-dots.png). The oreumi sits on the floor and tosses trash
-                   (story.js: roomToss); the phone's light on top -->
+              <!-- 1층 방 (dot matrix, like the apartment): the wall and floor are flat; every object and the phone light are
+                   4px colour dots (assets/rooms/room1-dots.png). The oreumi sits on the floor and tosses trash
+                   (story.js: roomToss) — the trash it throws is drawn in the same dots -->
               <svg class="flat" viewBox="0 0 960 540" role="img"
-                aria-label="불 꺼진 1층 방. 커튼이 완전히 닫혀 있고, 이불이 뭉쳐 있으며 바닥에 컵라면 용기와 페트병, 봉지, 택배 상자가 흩어져 있다. 휴대폰 불빛만 있다."><rect width="960" height="400" fill="#26211E"/><rect y="400" width="960" height="140" fill="#1F1B18"/><rect y="398" width="960" height="4" fill="#332D29"/><rect x="66" y="80" width="236" height="5" fill="#463F3A" rx="2"/><rect x="90" y="92" width="188" height="162" fill="#463F3A"/><rect x="100" y="102" width="168" height="142" fill="#141110"/><rect x="183" y="102" width="2" height="142" fill="#463F3A"/><rect x="100" y="172" width="168" height="2" fill="#463F3A"/><rect x="439" y="0" width="2" height="70" fill="#463F3A"/><path d="M410,98 Q410,68 440,68 Q470,68 470,98Z" fill="#463F3A"/><circle cx="440" cy="100" r="10" fill="#463F3A"/><rect x="64" y="326" width="18" height="110" fill="#463F3A" rx="4"/><rect x="70" y="390" width="280" height="40" fill="#463F3A"/><rect x="76" y="430" width="4" height="8" fill="#463F3A"/><rect x="340" y="430" width="4" height="8" fill="#463F3A"/><rect x="76" y="352" width="262" height="38" fill="#564D46" rx="8"/><rect x="430" y="352" width="120" height="8" fill="#564D46" rx="3"/><rect x="441" y="360" width="4" height="58" fill="#564D46"/><rect x="535" y="360" width="4" height="58" fill="#564D46"/><rect x="712" y="170" width="128" height="230" fill="#463F3A"/><rect x="720" y="178" width="112" height="222" fill="#302A27"/><rect x="734" y="196" width="84" height="80" fill="none" stroke="#463F3A" stroke-width="3"/><rect x="734" y="292" width="84" height="92" fill="none" stroke="#463F3A" stroke-width="3"/><circle cx="738" cy="290" r="6" fill="#8A4214"/><rect x="696" y="402" width="148" height="10" fill="#463F3A" rx="3"/><path d="M72,84 L186,84 L186,270 Q130,278 72,270Z" fill="#3E3631"/><path d="M180,84 L296,84 L296,270 Q238,278 180,270Z" fill="#3E3631"/><rect x="180" y="84" width="2" height="190" fill="#2A2420"/><g fill="#2A2420"><rect x="92" y="88" width="3" height="180"/><rect x="114" y="88" width="3" height="182"/><rect x="138" y="88" width="3" height="182"/><rect x="160" y="88" width="3" height="180"/><rect x="206" y="88" width="3" height="180"/><rect x="228" y="88" width="3" height="182"/><rect x="252" y="88" width="3" height="182"/><rect x="274" y="88" width="3" height="180"/></g><path d="M254,336 Q266,322 290,330 Q300,322 318,330 Q334,328 332,346 L330,352 L250,352Z" fill="#5C534D" transform="translate(-170 0) rotate(-9 290 340)"/><g transform="translate(160 0) scale(.82 1) translate(-80 0)"><path d="M82,374 C82,350 108,338 142,342 C180,334 228,338 262,346 C292,348 310,360 310,378 C312,392 306,400 300,404 C316,420 332,440 326,452 C318,464 292,462 282,448 C276,432 272,418 266,410 L104,412 C88,410 82,394 82,374Z" fill="#6A3814"/></g><rect x="440" y="330" width="14" height="22" fill="#6A6058" rx="2"/><rect x="458" y="336" width="12" height="16" fill="#8A5A2E" rx="2"/><path d="M482,340 L520,334 L524,352 L486,352Z" fill="#5C534D"/><g transform="translate(262 452)"><path d="M0,0 L30,0 L25,26 L5,26 Z" fill="#B77A4E"/><ellipse cx="15" cy="0" rx="15" ry="3.5" fill="#D9C2AE"/></g><g transform="translate(330 478) rotate(-78 15 13)"><path d="M0,0 L30,0 L25,26 L5,26 Z" fill="#B77A4E"/><ellipse cx="15" cy="0" rx="15" ry="3.5" fill="#D9C2AE"/></g><g transform="translate(610 470) rotate(8 15 13)"><path d="M0,0 L30,0 L25,26 L5,26 Z" fill="#B77A4E"/><ellipse cx="15" cy="0" rx="15" ry="3.5" fill="#D9C2AE"/></g><g transform="translate(196 488) rotate(-6 22 7)"><rect width="44" height="14" rx="7" fill="#8C9CA0"/><rect x="14" width="14" height="14" fill="#B8550F" opacity=".7"/><rect x="44" y="3" width="7" height="8" rx="1.5" fill="#B8550F"/></g><g transform="translate(552 494) rotate(16 22 7)"><rect width="44" height="14" rx="7" fill="#8C9CA0"/><rect x="14" width="14" height="14" fill="#B8550F" opacity=".7"/><rect x="44" y="3" width="7" height="8" rx="1.5" fill="#B8550F"/></g><g transform="translate(470 506) rotate(-30 22 7)"><rect width="40" height="13" rx="6.5" fill="#8C9CA0"/><rect x="40" y="3" width="6" height="7" rx="1.5" fill="#B8550F"/></g><path d="M150,462 C148,452 162,446 172,452 C182,448 194,456 190,466 C192,476 180,480 168,478 C154,480 146,472 150,462Z" fill="#5C534D"/><path d="M168,452 L166,444 M172,452 L176,445" stroke="#5C534D" stroke-width="2"/><path d="M686,488 C684,480 696,475 704,480 C712,477 722,483 719,491 C721,499 711,502 701,500 C690,502 684,495 686,488Z" fill="#4E4641"/><path d="M402,500 L436,494 L440,516 L404,520Z" fill="#C2492A"/><path d="M406,504 L434,499" stroke="#E8B27A" stroke-width="3"/><path d="M760,452 L826,446 L832,488 L764,494Z" fill="#7A5A3C"/><path d="M760,452 L794,436 L858,432 L826,446Z" fill="#8E6B49"/><rect x="790" y="452" width="10" height="38" fill="#C9A77E" opacity=".6" transform="rotate(-5 795 470)"/><path d="M856,488 L900,484 L904,512 L860,516Z" fill="#6E5034"/><rect x="300" y="414" width="8" height="18" rx="3" fill="#7E8C90" transform="rotate(70 304 423)"/><rect x="520" y="430" width="9" height="16" rx="3" fill="#A84220"/><rect x="610" y="440" width="22" height="4" fill="#D9C2AE" transform="rotate(-20 621 442)"/><rect x="230" y="512" width="26" height="4" fill="#D9C2AE" transform="rotate(12 243 514)"/><rect x="402" y="452" width="20" height="32" rx="4" fill="#E9F0F2" transform="rotate(-12 412 468)"/></svg>
+                aria-label="불 꺼진 1층 방. 커튼이 완전히 닫혀 있고, 이불이 뭉쳐 있으며 바닥에 컵라면 용기와 페트병, 봉지, 택배 상자가 흩어져 있다. 휴대폰 불빛만 있다."><rect width="960" height="400" fill="#26211E"/><rect y="400" width="960" height="140" fill="#1F1B18"/><rect y="398" width="960" height="4" fill="#332D29"/></svg>
               <img class="flat room-dots" src="assets/rooms/room1-dots.png" alt="">
               <div class="r-oru" id="roomOruA" role="img" aria-label="쓰레기가 널린 방바닥에 앉아 쓰레기를 아무렇게나 던지는 1단계 오르미"><svg viewBox="0 0 299 162" style="display:block;width:100%;height:auto;overflow:visible" aria-hidden="true"><g class="all"><g class="hair"><path d="M298.559 143.74C298.989 147.85 284.859 156.96 242.719 159.47C206.979 161.59 185.079 161.15 149.289 161.15C113.499 161.15 91.5995 161.59 55.8495 159.47C13.7095 156.96 -0.420518 147.85 0.00948151 143.74C0.369482 140.28 11.0695 138.5 16.3095 137.78C11.1695 133.3 -1.54052 120.17 0.389483 116.29C2.79948 111.46 18.3195 112.01 26.1395 113.12C17.0695 103.48 9.37948 88.51 12.8095 83.92C17.0195 78.33 43.3395 87.66 43.9795 87.88C39.7095 78.76 33.7895 51.33 40.0295 47.64C46.3895 43.88 66.6795 54.43 77.1595 62.66C76.0395 51.03 78.2595 22.61 87.0795 19.86C95.8995 17.11 116.839 34.6 123.649 43.96C122.879 32.42 139.359 0.31 149.289 0C159.209 0.31 175.689 32.42 174.929 43.96C181.729 34.6 202.679 17.11 211.489 19.86C220.309 22.61 222.539 51.03 221.409 62.66C231.889 54.43 252.189 43.88 258.549 47.64C264.78 51.33 258.859 78.76 254.589 87.88C255.229 87.66 281.559 78.33 285.759 83.92C289.199 88.51 281.509 103.48 272.439 113.12C280.259 112.01 295.78 111.46 298.18 116.29C300.12 120.17 287.409 133.3 282.259 137.78C287.499 138.5 298.209 140.28 298.559 143.74Z" fill="#FF6A00"/><path d="M297.179 146.5C292.699 151.05 276.949 157.43 242.729 159.47C206.989 161.59 185.089 161.15 149.299 161.15C113.509 161.15 91.6091 161.59 55.8591 159.47C19.9491 157.33 4.3691 150.4 0.829102 145.85C37.0591 161.83 89.3191 157.79 150.559 157.91C215.049 158.03 269.499 158.64 297.179 146.5Z" fill="#E04004"/><path d="M33.0096 140.95C26.9396 138.93 21.2496 137.65 16.3196 137.78C14.2996 136.02 11.1096 132.92 8.09961 129.58C17.7696 132.39 26.2496 136.06 33.0096 140.95Z" fill="#E04004"/><path d="M43.4791 117.66C37.5291 115.11 31.0791 113.02 26.1491 113.14L26.1191 113.12H26.1491C24.0191 110.86 21.9691 108.3 20.1191 105.66C29.4991 108.68 38.3991 112.91 43.4791 117.66Z" fill="#E04004"/><path d="M58.5898 98.2498C53.9298 93.7498 48.6498 89.4998 43.9998 87.8698L43.9498 87.7998L43.9298 87.7598C42.9098 85.5298 41.7898 82.2498 40.7598 78.5098C48.5598 84.7298 55.4998 91.9398 58.5898 98.2498Z" fill="#E04004"/><path d="M88.9797 76.8105C85.5297 71.1205 81.3796 65.5105 77.1696 62.6605C76.9296 60.1505 76.8396 56.8605 76.9396 53.2305C82.8296 61.2605 87.5897 69.9305 88.9797 76.8105Z" fill="#E04004"/><path d="M132.19 61.9704C130.12 55.0704 127.31 48.0604 123.69 43.9404L123.63 43.1904V43.1404C123.63 40.5004 124.38 36.9904 125.66 33.1104C129.82 43.4004 132.63 54.1604 132.19 61.9704Z" fill="#E04004"/><path d="M186.87 31.75C181.98 44.01 174.88 56.41 167.68 62.46C171.3 56.22 174.47 49.38 174.99 43.91L182.44 35.71C183.83 34.39 185.32 33.05 186.87 31.75Z" fill="#E04004"/><path d="M233.72 54.5898C227.21 65.1998 218.94 75.2798 211.42 79.8598C215.92 74.2498 220.09 67.9798 221.43 62.6498H221.44C224.79 60.0098 229.14 57.1498 233.72 54.5898Z" fill="#E04004"/><path d="M263.63 85.0596C257.48 92.5196 250.42 99.1096 244.26 102.04C248.73 97.5296 252.95 92.4096 254.63 87.8696C255.09 87.7096 258.84 86.3896 263.63 85.0596Z" fill="#E04004"/><path d="M285.279 112.39C275.679 117.67 264.989 121.78 257.249 122.02C263.179 119.67 269.129 116.65 272.479 113.13L273.019 113.04C276.369 112.6 280.939 112.27 285.279 112.39Z" fill="#E04004"/><path d="M291.469 139.51C282.989 142.48 274.069 144.33 267.779 143.6C273.269 142.31 278.859 140.43 282.249 137.78H282.269C284.689 138.11 288.279 138.67 291.469 139.51Z" fill="#E04004"/></g><g class="face"><g class="eyes"><path d="M189.4 131.09C189.4 136.13 183.82 140.21 176.93 140.21C170.04 140.21 164.46 136.13 164.46 131.09H189.4Z" fill="black"/><path d="M134.12 131.09C134.12 136.13 128.54 140.21 121.65 140.21C114.76 140.21 109.18 136.13 109.18 131.09H134.12Z" fill="black"/></g><path d="M149.29 148.4C152.874 148.4 155.78 146.493 155.78 144.14C155.78 141.787 152.874 139.88 149.29 139.88C145.705 139.88 142.8 141.787 142.8 144.14C142.8 146.493 145.705 148.4 149.29 148.4Z" fill="black"/></g></g></svg></div>
               <div class="toss" id="roomToss" aria-hidden="true">
-                <svg class="toss-i" viewBox="-12 -12 24 24"><path d="M-9,-2 C-10,-8 -3,-11 2,-9 C8,-10 11,-4 9,1 C10,7 4,10 -1,9 C-7,10 -10,4 -9,-2Z" fill="#E9DCCB"/><path d="M-5,-4 L1,-1 L-2,4 M3,-6 L5,1" fill="none" stroke="#B9A994" stroke-width="1.4" stroke-linecap="round"/></svg>
-                <svg class="toss-i" viewBox="-12 -12 24 24"><rect x="-6" y="-10" width="12" height="20" rx="3" fill="#A84220"/><rect x="-6" y="-4" width="12" height="6" fill="#E8B27A"/><rect x="-4" y="-11" width="8" height="2" rx="1" fill="#C9C1B8"/></svg>
-                <svg class="toss-i" viewBox="-12 -12 24 24"><path d="M-9,-10 L9,-10 L10,9 L-10,9Z" fill="#C2492A"/><path d="M-9,-10 L-7,-7 L-5,-10 L-3,-7 L-1,-10 L1,-7 L3,-10 L5,-7 L7,-10 L9,-10" fill="#E8B27A"/><rect x="-6" y="-1" width="12" height="4" fill="#E8B27A"/></svg>
+                <svg class="toss-i" viewBox="-12 -12 24 24"><circle cx="-2" cy="-10" r="2.00" fill="rgb(255,255,255)"/><circle cx="-6" cy="-6" r="2.00" fill="rgb(255,255,255)"/><circle cx="-2" cy="-6" r="2.00" fill="rgb(255,255,255)"/><circle cx="2" cy="-6" r="2.00" fill="rgb(255,255,255)"/><circle cx="6" cy="-6" r="2.00" fill="rgb(255,255,255)"/><circle cx="-6" cy="-2" r="2.00" fill="rgb(255,255,255)"/><circle cx="-2" cy="-2" r="2.00" fill="rgb(255,255,255)"/><circle cx="2" cy="-2" r="2.00" fill="rgb(255,255,255)"/><circle cx="6" cy="-2" r="2.00" fill="rgb(255,255,255)"/><circle cx="-6" cy="2" r="2.00" fill="rgb(255,255,255)"/><circle cx="-2" cy="2" r="2.00" fill="rgb(255,255,255)"/><circle cx="2" cy="2" r="2.00" fill="rgb(255,255,255)"/><circle cx="6" cy="2" r="2.00" fill="rgb(255,255,255)"/><circle cx="-6" cy="6" r="2.00" fill="rgb(255,255,255)"/><circle cx="-2" cy="6" r="2.00" fill="rgb(255,255,255)"/><circle cx="2" cy="6" r="2.00" fill="rgb(255,255,255)"/><circle cx="6" cy="6" r="2.00" fill="rgb(255,255,255)"/></svg>
+                <svg class="toss-i" viewBox="-12 -12 24 24"><circle cx="-2" cy="-10" r="2.00" fill="rgb(255,211,185)"/><circle cx="2" cy="-10" r="2.00" fill="rgb(255,211,185)"/><circle cx="-6" cy="-6" r="2.00" fill="rgb(243,95,46)"/><circle cx="-2" cy="-6" r="2.00" fill="rgb(243,95,46)"/><circle cx="2" cy="-6" r="2.00" fill="rgb(243,95,46)"/><circle cx="6" cy="-6" r="1.99" fill="rgb(242,94,46)"/><circle cx="-6" cy="-2" r="2.00" fill="rgb(255,201,133)"/><circle cx="-2" cy="-2" r="2.00" fill="rgb(255,255,176)"/><circle cx="2" cy="-2" r="2.00" fill="rgb(255,255,176)"/><circle cx="6" cy="-2" r="2.00" fill="rgb(255,201,133)"/><circle cx="-6" cy="2" r="2.00" fill="rgb(255,159,97)"/><circle cx="-2" cy="2" r="2.00" fill="rgb(255,176,111)"/><circle cx="2" cy="2" r="2.00" fill="rgb(255,176,111)"/><circle cx="6" cy="2" r="2.00" fill="rgb(255,159,97)"/><circle cx="-6" cy="6" r="2.00" fill="rgb(245,95,44)"/><circle cx="-2" cy="6" r="2.00" fill="rgb(243,95,46)"/><circle cx="2" cy="6" r="2.00" fill="rgb(243,95,46)"/><circle cx="6" cy="6" r="1.99" fill="rgb(243,94,43)"/><circle cx="-2" cy="10" r="1.99" fill="rgb(242,94,44)"/><circle cx="2" cy="10" r="1.99" fill="rgb(242,94,44)"/></svg>
+                <svg class="toss-i" viewBox="-12 -12 24 24"><circle cx="-6" cy="-10" r="2.00" fill="rgb(255,181,117)"/><circle cx="-2" cy="-10" r="2.00" fill="rgb(255,181,117)"/><circle cx="2" cy="-10" r="2.00" fill="rgb(255,181,117)"/><circle cx="6" cy="-10" r="2.00" fill="rgb(255,172,111)"/><circle cx="-6" cy="-6" r="2.00" fill="rgb(255,111,65)"/><circle cx="-2" cy="-6" r="2.00" fill="rgb(255,111,65)"/><circle cx="2" cy="-6" r="2.00" fill="rgb(255,111,65)"/><circle cx="6" cy="-6" r="2.00" fill="rgb(255,111,65)"/><circle cx="-6" cy="-2" r="2.00" fill="rgb(255,123,73)"/><circle cx="-2" cy="-2" r="2.00" fill="rgb(255,143,88)"/><circle cx="2" cy="-2" r="2.00" fill="rgb(255,143,88)"/><circle cx="6" cy="-2" r="2.00" fill="rgb(255,123,73)"/><circle cx="-10" cy="2" r="2.00" fill="rgb(255,102,60)"/><circle cx="-6" cy="2" r="2.00" fill="rgb(255,162,104)"/><circle cx="-2" cy="2" r="2.00" fill="rgb(255,220,146)"/><circle cx="2" cy="2" r="2.00" fill="rgb(255,220,146)"/><circle cx="6" cy="2" r="2.00" fill="rgb(255,162,104)"/><circle cx="10" cy="2" r="2.00" fill="rgb(255,102,60)"/><circle cx="-10" cy="6" r="2.00" fill="rgb(255,104,58)"/><circle cx="-6" cy="6" r="2.00" fill="rgb(255,105,60)"/><circle cx="-2" cy="6" r="2.00" fill="rgb(255,105,60)"/><circle cx="2" cy="6" r="2.00" fill="rgb(255,105,60)"/><circle cx="6" cy="6" r="2.00" fill="rgb(255,105,60)"/><circle cx="10" cy="6" r="2.00" fill="rgb(255,104,58)"/></svg>
               </div>
-              <svg class="flat room-glow" viewBox="0 0 960 540" aria-hidden="true"><defs><radialGradient id="room1Phone" cx="412" cy="468" r="90" gradientUnits="userSpaceOnUse"><stop offset="0" stop-color="#FFE9D9" stop-opacity=".55"/><stop offset="1" stop-color="#FFE9D9" stop-opacity="0"/></radialGradient></defs><circle cx="412" cy="468" r="90" fill="url(#room1Phone)"/></svg>
             </div>
 
 
             <!-- 2층 방 : 불이 켜진 방, 현관 앞에서 돌아서는 오르미 -->
             <div class="room room-b" id="roomB">
-              <!-- 2층 방 (vector + dot screen, assets/rooms/room2-dots.png); the lamp's light on top -->
-              <svg class="flat" viewBox="0 0 960 540" role="img" aria-label="불이 켜진 2층 방. 정돈된 침대와 화분이 놓인 탁자가 있고, 오른쪽에 현관문이 있다."><rect width="960" height="400" fill="#332E2A"/><rect y="400" width="960" height="140" fill="#2A2522"/><rect y="398" width="960" height="4" fill="#5C534D"/><rect x="66" y="80" width="236" height="5" fill="#5C534D" rx="2"/><rect x="90" y="92" width="188" height="162" fill="#5C534D"/><rect x="100" y="102" width="168" height="142" fill="#1C1917"/><rect x="183" y="102" width="2" height="142" fill="#5C534D"/><rect x="100" y="172" width="168" height="2" fill="#5C534D"/><rect x="439" y="0" width="2" height="70" fill="#5C534D"/><path d="M410,98 Q410,68 440,68 Q470,68 470,98Z" fill="#5C534D"/><circle cx="440" cy="100" r="10" fill="#FFF8F2"/><rect x="64" y="326" width="18" height="110" fill="#5C534D" rx="4"/><rect x="70" y="390" width="280" height="40" fill="#5C534D"/><rect x="76" y="430" width="4" height="8" fill="#5C534D"/><rect x="340" y="430" width="4" height="8" fill="#5C534D"/><rect x="76" y="352" width="262" height="38" fill="#FFE9D9" rx="8"/><rect x="430" y="352" width="120" height="8" fill="#FFE9D9" rx="3"/><rect x="441" y="360" width="4" height="58" fill="#FFE9D9"/><rect x="535" y="360" width="4" height="58" fill="#FFE9D9"/><rect x="712" y="170" width="128" height="230" fill="#5C534D"/><rect x="720" y="178" width="112" height="222" fill="#47413C"/><rect x="734" y="196" width="84" height="80" fill="none" stroke="#5C534D" stroke-width="3"/><rect x="734" y="292" width="84" height="92" fill="none" stroke="#5C534D" stroke-width="3"/><circle cx="738" cy="290" r="6" fill="#FF6A00"/><rect x="696" y="402" width="148" height="10" fill="#5C534D" rx="3"/><circle cx="236" cy="128" r="10" fill="#FFF8F2"/><rect x="72" y="84" width="38" height="184" fill="#B8550F"/><rect x="258" y="84" width="38" height="184" fill="#B8550F"/><rect x="88" y="330" width="74" height="26" fill="#FFF8F2" rx="13"/><rect x="180" y="346" width="164" height="46" fill="#FF6A00" rx="6"/><rect x="196" y="346" width="4" height="46" fill="#FFF8F2" opacity=".55"/><rect x="452" y="334" width="16" height="18" fill="#FFF8F2" rx="2"/><path d="M502,334 L526,334 L522,352 L506,352Z" fill="#FFF8F2"/><path d="M514,334 Q500,314 494,300 Q510,306 514,334" fill="#B8550F"/><path d="M514,334 Q512,306 518,292 Q526,312 514,334" fill="#B8550F"/><path d="M514,334 Q530,314 540,306 Q534,324 514,334" fill="#B8550F"/><rect x="736" y="390" width="26" height="12" fill="#FFF8F2" rx="6"/><rect x="766" y="390" width="26" height="12" fill="#FFF8F2" rx="6"/></svg>
+              <!-- 2층 방 (dot matrix, like the apartment): flat wall and floor; the objects and the lamp's light as 4px colour dots (assets/rooms/room2-dots.png) -->
+              <svg class="flat" viewBox="0 0 960 540" role="img" aria-label="불이 켜진 2층 방. 정돈된 침대와 화분이 놓인 탁자가 있고, 오른쪽에 현관문이 있다."><rect width="960" height="400" fill="#332E2A"/><rect y="400" width="960" height="140" fill="#2A2522"/><rect y="398" width="960" height="4" fill="#5C534D"/></svg>
               <img class="flat room-dots" src="assets/rooms/room2-dots.png" alt="">
-              <svg class="flat room-glow" viewBox="0 0 960 540" aria-hidden="true"><defs><radialGradient id="room2Bulb" cx="440" cy="100" r="60" gradientUnits="userSpaceOnUse"><stop offset="0" stop-color="#FFE9D9" stop-opacity=".6"/><stop offset="1" stop-color="#FFE9D9" stop-opacity="0"/></radialGradient></defs><polygon points="414,98 466,98 660,540 220,540" fill="#FFB682" opacity=".14"/><polygon points="414,98 466,98 760,540 120,540" fill="#FFB682" opacity=".12"/><polygon points="414,98 466,98 870,540 10,540" fill="#FFB682" opacity=".1"/><circle cx="440" cy="100" r="60" fill="url(#room2Bulb)"/></svg>
               <div class="r-oru" id="roomOru" role="img" aria-label="현관 앞까지 갔다가 돌아서는 2단계 오르미"><svg viewBox="0 0 299 162" style="display:block;width:100%;height:auto;overflow:visible" aria-hidden="true"><g class="all"><g class="hair"><path d="M298.56 143.74C298.99 147.85 284.859 156.96 242.719 159.47C206.979 161.59 185.079 161.15 149.289 161.15C113.499 161.15 91.5995 161.59 55.8495 159.47C13.7095 156.96 -0.420518 147.85 0.00948151 143.74C0.369482 140.28 11.0695 138.5 16.3095 137.78C11.1695 133.3 -1.54051 120.17 0.389486 116.29C2.79949 111.46 18.3195 112.01 26.1395 113.12C17.0695 103.48 9.37947 88.51 12.8095 83.92C17.0195 78.33 43.3395 87.66 43.9795 87.88C39.7095 78.76 33.7895 51.33 40.0295 47.64C46.3895 43.88 66.6795 54.43 77.1595 62.66C76.0395 51.03 78.2595 22.61 87.0795 19.86C95.8995 17.11 116.839 34.6 123.649 43.96C122.879 32.42 139.359 0.31 149.289 0C159.209 0.31 175.689 32.42 174.929 43.96C181.729 34.6 202.679 17.11 211.489 19.86C220.309 22.61 222.539 51.03 221.409 62.66C231.889 54.43 252.189 43.88 258.549 47.64C264.78 51.33 258.859 78.76 254.589 87.88C255.229 87.66 281.559 78.33 285.759 83.92C289.199 88.51 281.51 103.48 272.44 113.12C280.26 112.01 295.78 111.46 298.18 116.29C300.12 120.17 287.409 133.3 282.259 137.78C287.499 138.5 298.21 140.28 298.56 143.74Z" fill="#FF6A00"/><path d="M297.179 146.5C292.699 151.05 276.949 157.43 242.729 159.47C206.989 161.59 185.089 161.15 149.299 161.15C113.509 161.15 91.6091 161.59 55.8591 159.47C19.9491 157.33 4.3691 150.4 0.829102 145.85C37.0591 161.83 89.3191 157.79 150.559 157.91C215.049 158.03 269.499 158.64 297.179 146.5Z" fill="#E04004"/><path d="M33.0096 140.95C26.9396 138.93 21.2496 137.65 16.3196 137.78C14.2996 136.02 11.1096 132.92 8.09961 129.58C17.7696 132.39 26.2496 136.06 33.0096 140.95Z" fill="#E04004"/><path d="M43.4792 117.66C37.5292 115.11 31.0791 113.02 26.1491 113.14L26.1191 113.12H26.1491C24.0191 110.86 21.9691 108.3 20.1191 105.66C29.4991 108.68 38.3992 112.91 43.4792 117.66Z" fill="#E04004"/><path d="M58.5898 98.2498C53.9298 93.7498 48.6498 89.4998 43.9998 87.8698L43.9498 87.7998L43.9298 87.7598C42.9098 85.5298 41.7898 82.2498 40.7598 78.5098C48.5598 84.7298 55.4998 91.9398 58.5898 98.2498Z" fill="#E04004"/><path d="M88.9797 76.8105C85.5297 71.1205 81.3797 65.5105 77.1697 62.6605C76.9297 60.1505 76.8396 56.8605 76.9396 53.2305C82.8296 61.2605 87.5897 69.9305 88.9797 76.8105Z" fill="#E04004"/><path d="M132.19 61.9704C130.12 55.0704 127.31 48.0604 123.69 43.9404L123.63 43.1904V43.1404C123.63 40.5004 124.38 36.9904 125.66 33.1104C129.82 43.4004 132.63 54.1604 132.19 61.9704Z" fill="#E04004"/><path d="M186.87 31.75C181.98 44.01 174.88 56.41 167.68 62.46C171.3 56.22 174.47 49.38 174.99 43.91L182.44 35.71C183.83 34.39 185.32 33.05 186.87 31.75Z" fill="#E04004"/><path d="M233.72 54.5898C227.21 65.1998 218.94 75.2798 211.42 79.8598C215.92 74.2498 220.09 67.9798 221.43 62.6498H221.44C224.79 60.0098 229.14 57.1498 233.72 54.5898Z" fill="#E04004"/><path d="M263.63 85.0596C257.48 92.5196 250.42 99.1096 244.26 102.04C248.73 97.5296 252.95 92.4096 254.63 87.8696C255.09 87.7096 258.84 86.3896 263.63 85.0596Z" fill="#E04004"/><path d="M285.28 112.39C275.68 117.67 264.99 121.78 257.25 122.02C263.18 119.67 269.13 116.65 272.48 113.13L273.02 113.04C276.37 112.6 280.94 112.27 285.28 112.39Z" fill="#E04004"/><path d="M291.469 139.51C282.989 142.48 274.069 144.33 267.779 143.6C273.269 142.31 278.859 140.43 282.249 137.78H282.269C284.689 138.11 288.279 138.67 291.469 139.51Z" fill="#E04004"/></g><g class="face"><path d="M211.459 135.85C211.459 157.56 183.619 160.16 149.289 160.16C114.959 160.16 87.1191 157.56 87.1191 135.85C87.1191 114.14 114.959 96.54 149.289 96.54C183.619 96.54 211.459 114.14 211.459 135.85Z" fill="#F9EDDE"/><g class="eyes"><path d="M172.689 145.63C176.914 145.63 180.339 141.193 180.339 135.72C180.339 130.246 176.914 125.81 172.689 125.81C168.464 125.81 165.039 130.246 165.039 135.72C165.039 141.193 168.464 145.63 172.689 145.63Z" fill="black"/><path d="M125.889 145.63C130.114 145.63 133.539 141.193 133.539 135.72C133.539 130.246 130.114 125.81 125.889 125.81C121.664 125.81 118.239 130.246 118.239 135.72C118.239 141.193 121.664 145.63 125.889 145.63Z" fill="black"/></g><path d="M149.29 151.14C152.874 151.14 155.78 149.233 155.78 146.88C155.78 144.527 152.874 142.62 149.29 142.62C145.705 142.62 142.8 144.527 142.8 146.88C142.8 149.233 145.705 151.14 149.29 151.14Z" fill="black"/></g></g></svg></div>
               <div class="sigh" id="sigh"><span>하아…</span><i></i><i></i></div>
             </div>
@@ -490,8 +367,8 @@
             <!-- camera layer: zooms into 1·2단계 at the end so it hands over to the next scene -->
             <div class="cam" id="wallCam">
               <div class="ground"></div>
-              <!-- the apartment (temporary design): the building behind the youths, its balcony railings in front of them -->
-              <img class="apt apt-back" src="assets/building/apartment.svg" alt="">
+              <!-- the apartment as dots: the building behind the youths, its balcony railings in front of them -->
+              <img class="apt apt-dots" src="assets/building/apartment-wall-dots.png" alt="">
               <div class="corner">
                 <span class="cw lit" style="left:24px;top:17.0px"></span><span class="cw"
                   style="left:106px;top:17.0px"></span><span class="cw" style="left:24px;top:87.4px"></span><span
@@ -511,13 +388,15 @@
               <img src="assets/character/oreumi3.png" alt="" class="oru wall-oru w3" id="wallOru3">
               <img src="assets/character/oreumi2.png" alt="" class="oru wall-oru w2" id="wallOru2">
               <img src="assets/character/oreumi1.png" alt="" class="oru wall-oru w1" id="wallOru">
-              <img class="apt apt-rail" src="assets/building/apartment-rail.svg" alt="">
+              <img class="apt apt-dots" src="assets/building/apartment-wall-rail-dots.png" alt="">
               <div class="terrace" style="left:186px;top:470.0px"><i></i></div>
               <div class="terrace" style="left:186px;top:399.6px"><i></i></div>
               <div class="terrace" style="left:186px;top:329.2px"><i></i></div>
               <div class="terrace" style="left:186px;top:258.8px"><i></i></div>
               <div class="terrace" style="left:186px;top:188.4px"><i></i></div>
               <div class="blocks" id="blocks"></div>
+              <!-- the wall, its doors and the falling tiles as dots (drawn live on a 5px grid) -->
+              <canvas class="wall-dots" id="wallDots" width="3200" height="1080" aria-hidden="true"></canvas>
               <div class="stair-grain" id="stairGrain" aria-hidden="true"></div>
               <div class="wall-doors" id="wallDoors">
                 <div class="wall-door" style="left:638px"><span class="wd-open"></span><span

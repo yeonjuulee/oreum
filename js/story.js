@@ -519,6 +519,17 @@
   function updateHook(scene, p) {
     hookP = p;
     scene.classList.toggle('leaving', p >= LEAVE_AT);
+    // the next scene's title, placed exactly where it sits there
+    var ho = scene.querySelector('.hook-handoff'), hon = p >= LEAVE_AT;
+    if (ho) {
+      if (hon) {
+        var tgt = $('.scene-building .line.instant h2'), sr = scene.getBoundingClientRect();
+        if (tgt) { var tr = tgt.getBoundingClientRect(), hz = sr.width ? scene.offsetWidth / sr.width : 1;
+          ho.style.left = ((tr.left - sr.left) * hz).toFixed(1) + 'px'; ho.style.top = ((tr.top - sr.top) * hz).toFixed(1) + 'px'; ho.style.width = (tr.width * hz).toFixed(1) + 'px';
+          var tc = getComputedStyle(tgt), hh = ho.firstElementChild; hh.style.fontSize = tc.fontSize; hh.style.lineHeight = tc.lineHeight; hh.style.letterSpacing = tc.letterSpacing; hh.style.fontWeight = tc.fontWeight; hh.style.fontFamily = tc.fontFamily; hh.style.color = tc.color; }
+      }
+      ho.classList.toggle('on', hon);
+    }
     var st = stageOf(p);
     if (st !== hookStage) { hookStage = st; stageAt = performance.now(); la = 0; }
     if (st !== hkShown) { hkShown = st; hks.forEach(function (e) { e.classList.toggle('on', e.dataset.k === String(st)); }); }
@@ -538,8 +549,8 @@
      ====================================================== */
   var CAM = [
     { z: 1, tx: 0, ty: 10 },
-    { z: 6, tx: 480 - 480 * 6, ty: 270 - 452 * 6 },     // 1F window
-    { z: 6, tx: 480 - 480 * 6, ty: 270 - 364 * 6 }      // 2F window
+    { z: 6, tx: 480 - 482.7 * 6, ty: 270 - 445.2 * 6 },     // 1F centre window
+    { z: 6, tx: 480 - 482.7 * 6, ty: 270 - 346.7 * 6 }      // 2F centre window
   ];
   var roomOru = $('#roomOru'), sigh = $('#sigh');
   // 2층 방 바닥 위의 길: 방 안쪽 → 현관 앞 → 돌아서 몇 걸음 (stage px)
@@ -596,12 +607,8 @@
   requestAnimationFrame(pxLoop);
   function updatePrelude(p) {
     buildingP = p;
-    var t = seg(p, 0.08, 0.18);                       // 0 = pixel art, 1 = vector
-    var e = ease(t);
-    aptPx.style.opacity = (1 - seg(e, 0, 0.35)).toFixed(3);
-    aptUp.style.opacity = (seg(e, 0, 0.25) * (1 - seg(e, 0.85, 1))).toFixed(3);
-    aptArt.style.opacity = seg(e, 0.8, 1).toFixed(3);
-    if (t > 0 && t < 1) drawUp(e);
+    // the dots the hook gathered ARE the apartment picture now: no mosaic transition, the dot art is there from the start
+    aptPx.style.opacity = 0; aptUp.style.opacity = 0; aptArt.style.opacity = 1;
   }
   function updateBuilding(scene, p) {
     updatePrelude(p);
@@ -613,15 +620,19 @@
       apt.style.setProperty('--tx', CAM[ph].tx + 'px');
       apt.style.setProperty('--ty', CAM[ph].ty + 'px');
     }
-    // 2층 방: 현관 앞까지 걸어간 뒤(스크롤), 문 앞을 왔다 갔다 서성인다(실시간, roomPace)
+    // 2층 방: like 1층, it plays in real time — 1s after the room appears it walks to the door, then paces there (roomPace)
     RBS.p = p;
-    if (p >= 0.78) { if (RBS.t0 === null) RBS.t0 = performance.now(); return; }
+    if (ph === 2) { if (RBS.t0 === null) RBS.t0 = performance.now() + 1750; return; }
     RBS.t0 = null;
-    var walk = ease(seg(p, 0.68, 0.78));
-    var x = lerp(RB.start[0], RB.door[0], walk), y = RB.start[1];
-    var bob = walk > 0 && walk < 1 ? Math.abs(Math.sin(walk * Math.PI * 6)) * 5 : 0;
-    roomPose(x, y - bob, 1, 1);
+    roomPose(RB.start[0], RB.start[1], 1, 1); roomDroop(0);
     sigh.classList.remove('on');
+  }
+  // the sigh: the spikes sag, the face sinks a little, the body slumps
+  var RDROOP = (function () { var sv = roomOru.querySelector('svg'); return sv ? { hair: sv.querySelector('.hair'), face: sv.querySelector('.face') } : null; })();
+  function roomDroop(d) {
+    if (!RDROOP) return;
+    RDROOP.hair.setAttribute('transform', d ? 'translate(149 161) scale(' + (1 + .04 * d).toFixed(3) + ' ' + (1 - .14 * d).toFixed(3) + ') translate(-149 -161)' : '');
+    RDROOP.face.setAttribute('transform', d ? 'translate(0 ' + (4 * d).toFixed(2) + ')' : '');
   }
   function roomPose(x, y, flip, squash) {
     roomOru.style.setProperty('--x', x.toFixed(1) + 'px');
@@ -669,17 +680,28 @@
   /* pacing in front of the door: a few steps right to the door, a stop (a sigh), a few steps back, a short stop, again */
   var RBS = { p: 0, t0: null };
   var PACE = [[0, 1200, RB.door[0], RB.door[0] + 50], [1200, 2100, RB.door[0] + 50, RB.door[0] + 50], [2100, 3700, RB.door[0] + 50, RB.door[0] - 90], [3700, 4300, RB.door[0] - 90, RB.door[0] - 90], [4300, 5000, RB.door[0] - 90, RB.door[0]]];
+  var WALK_IN = 1800;                            // from the bed side to the door
   (function roomPace(now) {
     if (RBS.t0 !== null && $('.scene-building').classList.contains('active')) {
-      var t = reduced ? 1500 : (now - RBS.t0) % 5000, k = 0;
+      var e0 = now - RBS.t0;
+      if (e0 < 0) { roomPose(RB.start[0], RB.start[1], 1, 1 + Math.sin(now / 500) * .01); requestAnimationFrame(roomPace); return; }
+      if (e0 < WALK_IN && !reduced) {
+        var w = e0 / WALK_IN, ew = w < .5 ? 2 * w * w : 1 - 2 * (1 - w) * (1 - w), sp = w * (RB.door[0] - RB.start[0]) / 22 * Math.PI;
+        roomPose(lerp(RB.start[0], RB.door[0], ew), RB.start[1] - Math.abs(Math.sin(sp)) * 5, 1, 1 - Math.abs(Math.cos(sp)) * .04);
+        roomDroop(0); sigh.classList.remove('on');
+        requestAnimationFrame(roomPace); return;
+      }
+      var t = reduced ? 1500 : (e0 - WALK_IN) % 5000, k = 0;
       while (k < PACE.length - 1 && t >= PACE[k][1]) k++;
       var S = PACE[k], u = (t - S[0]) / (S[1] - S[0]), moving = S[2] !== S[3];
       var x = lerp(S[2], S[3], moving ? (u < .5 ? 2 * u * u : 1 - 2 * (1 - u) * (1 - u)) : 0);
       var steps = Math.abs(S[3] - S[2]) / 22, ph = u * steps * Math.PI;
       var bob = moving ? Math.abs(Math.sin(ph)) * 5 : 0;
       var flip = k === 2 || (k === 3) ? -1 : 1;                 // faces the way it walks; at the door it faces the door
-      var squash = moving ? 1 - Math.abs(Math.cos(ph)) * .04 : (k === 1 ? .94 + .02 * Math.sin(u * Math.PI) : 1 + Math.sin(now / 500) * .01);
-      roomPose(x, RB.door[1] - bob, flip, squash);
+      // at the door: a sigh — it slumps a little (ease in, hold, ease back up)
+      var droop = k === 1 ? Math.sin(Math.PI * Math.min(1, u * 1.15)) : 0;
+      var squash = moving ? 1 - Math.abs(Math.cos(ph)) * .04 : (k === 1 ? 1 - .08 * droop : 1 + Math.sin(now / 500) * .01);
+      roomPose(x, RB.door[1] - bob, flip, squash); roomDroop(droop);
       sigh.classList.toggle('on', k === 1 && u > .1 && u < .95);
     }
     requestAnimationFrame(roomPace);
@@ -738,6 +760,86 @@
       }
     }
   })();
+
+  /* the wall, its doors and the falling tiles as dots on a 5px grid (#wallDots, like the 문 밖의 벽 dot mockup).
+     While the wall rises it is drawn by coverage on the fixed grid, so its top edge and the shrinking doors grow and
+     shrink dot by dot; from the hit on, each tile carries the dots whose centres lie in it as it shakes and falls. */
+  var WDC = $('#wallDots'), WDX = WDC && WDC.getContext('2d'), DP = 5;
+  var WD = { glow: [0, 0, 0, 0], dirty: false, key: '', doors: [], fade: 1, wTop: TOP, broken: false, shake: 0 };
+  blocks.forEach(function (b) {
+    b.cells = [];
+    for (var gy = DP / 2; gy < GROUND; gy += DP) if (gy >= b.y && gy < b.y + B)
+      for (var gx = X0 + DP / 2; gx < X0 + NC * B; gx += DP) if (gx >= b.x && gx < b.x + B) b.cells.push([gx - b.x - B / 2, gy - b.y - B / 2, gy]);
+  });
+  function wdOv(a0, a1, b0, b1) { return Math.max(0, Math.min(a1, b1) - Math.max(a0, b0)); }
+  function wdWallCol(y, wTop) {
+    var lum = .28 + .1 * (1 - (y - wTop) / WALL_UP), m = 1.5 * lum / .38;
+    return ['rgb(' + (74 * m | 0) + ',' + (66 * m | 0) + ',' + (60 * m | 0) + ')', DP * (.2 + .2 * lum)];
+  }
+  function wallDotsDraw() {
+    var c = WDX; if (!c) return;
+    c.setTransform(2, 0, 0, 2, 0, 0); c.clearRect(0, 0, 1600, 540);
+    if (WD.fade <= 0) return;
+    c.globalAlpha = WD.fade;
+    var wTop = WD.wTop, x, y, k, d;
+    // the wall
+    if (!WD.broken) {
+      for (y = DP / 2; y < GROUND; y += DP) {
+        var cv = wdOv(y - DP / 2, y + DP / 2, wTop, GROUND) / DP; if (cv <= .02) continue;
+        var wc = wdWallCol(y, wTop), rr = wc[1] * Math.sqrt(cv);
+        c.fillStyle = wc[0]; c.beginPath();
+        for (x = X0 + DP / 2; x < X0 + NC * B; x += DP) { c.moveTo(x + rr, y); c.arc(x, y, rr, 0, 6.2832); }
+        c.fill();
+      }
+    } else {
+      blocks.forEach(function (b) {
+        if (b.hide || b.o <= 0) return;
+        var cs = Math.cos(b.rot * Math.PI / 180), sn = Math.sin(b.rot * Math.PI / 180);
+        c.setTransform(2 * cs, 2 * sn, -2 * sn, 2 * cs, 2 * (b.px + B / 2), 2 * (b.py + B / 2));
+        c.globalAlpha = WD.fade * b.o;
+        b.cells.forEach(function (q) { var wc = wdWallCol(q[2], TOP); c.fillStyle = wc[0]; c.beginPath(); c.arc(q[0], q[1], wc[1], 0, 6.2832); c.fill(); });
+      });
+      c.setTransform(2, 0, 0, 2, 0, 0); c.globalAlpha = WD.fade;
+    }
+    // the doors: white at the top to peach at the foot, by how much of each cell they cover; a soft glow of light dots around
+    var ds = WD.doors.filter(function (q) { return q.a > 0; }); if (!ds.length) return;
+    var x0 = 1e9, x1 = -1e9, y0 = 1e9, y1 = -1e9;
+    ds.forEach(function (q) { var g = 1 + .5 * q.g, w = q.r[2] - q.r[0], h = q.r[3] - q.r[1]; x0 = Math.min(x0, q.r[0] - w * g); x1 = Math.max(x1, q.r[2] + w * g); y0 = Math.min(y0, q.r[1] - h * g); y1 = Math.max(y1, q.r[3] + h * g); });
+    var gx0 = Math.max(DP / 2, Math.floor(x0 / DP) * DP + DP / 2), gy0 = Math.max(DP / 2, Math.floor(y0 / DP) * DP + DP / 2);
+    for (y = gy0; y < Math.min(y1, GROUND); y += DP) for (x = gx0; x < x1; x += DP) {
+      var cd = 0, dk = null, gl = 0;
+      for (k = 0; k < ds.length; k++) {
+        d = ds[k]; var cc = wdOv(x - DP / 2, x + DP / 2, d.r[0], d.r[2]) * wdOv(y - DP / 2, y + DP / 2, d.r[1], d.r[3]) / (DP * DP) * d.a;
+        if (cc > cd) { cd = cc; dk = d; }
+        var gs = 1 + .5 * d.g, mx = (d.r[0] + d.r[2]) / 2, my = (d.r[1] + d.r[3]) / 2, rx = (d.r[2] - d.r[0]) * .95 * gs, ry = (d.r[3] - d.r[1]) * .8 * gs;
+        gl = Math.max(gl, Math.max(0, 1 - Math.hypot((x - mx) / rx, (y - my) / ry)) * (.8 + .4 * d.g) * d.a);
+      }
+      if (cd > .02) {
+        var vy = (y - dk.r[1]) / (dk.r[3] - dk.r[1]);
+        c.fillStyle = 'rgb(255,' + (246 - 45 * vy | 0) + ',' + (238 - 78 * vy | 0) + ')'; c.beginPath(); c.arc(x, y, DP * .5 * Math.sqrt(cd), 0, 6.2832); c.fill(); continue;
+      }
+      if (y > wTop && !WD.broken) continue;              // the wall covers the glow
+      gl = Math.min(1, gl);
+      if (gl > .05) { c.fillStyle = 'rgb(' + (26 + 229 * gl | 0) + ',' + (22 + 195 * gl | 0) + ',' + (19 + 165 * gl | 0) + ')'; c.beginPath(); c.arc(x, y, DP * .5 * Math.pow(gl, .8), 0, 6.2832); c.fill(); }
+    }
+  }
+  (function wdLoop() { if (WD.dirty) { WD.dirty = false; wallDotsDraw(); } requestAnimationFrame(wdLoop); })();
+  /* the lit stairs in the same dots: each tread full and bright, its riser fading to small dots down to the ground */
+  function paintWallStep(el, s) {
+    var W = el.offsetWidth, H = el.offsetHeight; if (!W || !H) return;
+    var K = 4, cv = document.createElement('canvas'); cv.width = Math.ceil(W * K); cv.height = Math.ceil(H * K);
+    var c = cv.getContext('2d'); c.scale(K, K);
+    var hx = STEP_TONES[s][0], base = [parseInt(hx.slice(1, 3), 16), parseInt(hx.slice(3, 5), 16), parseInt(hx.slice(5, 7), 16)];
+    for (var y = DP / 2; y < H; y += DP) {
+      var f = 1 - .72 * Math.pow(Math.max(0, (y - DP / 2) / H), .8), col = base.map(function (v) { return Math.min(255, v * 1.1 * f) | 0; });
+      var lum = (col[0] * .3 + col[1] * .59 + col[2] * .11) / 255, rr = DP * Math.min(.5, .08 + .4 * Math.min(1, lum * 1.6));
+      c.fillStyle = 'rgb(' + col.join(',') + ')'; c.beginPath();
+      for (var x = DP / 2; x < W; x += DP) { c.moveTo(x + rr, y); c.arc(x, y, rr, 0, 6.2832); }
+      c.fill();
+    }
+    el.style.background = 'url(' + cv.toDataURL('image/png') + ') 0 0 / ' + W + 'px ' + H + 'px no-repeat';
+    el.classList.add('ht');
+  }
 
   /* sprite frames: preloaded so swapping src never flickers */
   function frames(prefix, n) { var a = []; for (var i = 1; i <= n; i++) { var im = new Image(); im.src = 'assets/character/sprites/' + prefix + i + '.png'; a.push('assets/character/sprites/' + prefix + i + '.png'); } return a; }
@@ -834,7 +936,8 @@
   var DOOR_X0 = [DOOR1, DOOR1 + DOOR_GAP];
   function doorGlow(k, g) {
     var d = doors[k]; if (!d) return;
-    d.style.filter = g > 0.01 ? 'brightness(' + (1 + .25 * g).toFixed(3) + ') drop-shadow(0 0 ' + (16 * g).toFixed(1) + 'px rgba(255, 190, 140, ' + (.85 * g).toFixed(2) + '))' : '';
+    g = Math.round((+g || 0) * 100) / 100;              // the dot doors (#wallDots) glow brighter and wider as someone walks in
+    if (g !== WD.glow[k]) { WD.glow[k] = g; if (WD.doors[k]) WD.doors[k].g = g; WD.dirty = true; }
   }
   /* one climber's frame e ms after the climb started (e < 0: not yet): jump J onto the wall, run R to the door, go in I.
      stride: px per half step (3F) / per full step (4F) */
@@ -858,8 +961,9 @@
     return { x: doorX, y: TOP, mode: 'idle', op: 0, sc: 1, glow: Math.max(0, 1 - (e - I[1]) / 700) * .4 };
   }
   // 4단계 오르미: legs, hands, body, big hair, eyes
-  function wallFour(st, now) {
-    var P = W4.P, S = 54 / 282, o;
+  function wallFour(st, now) { fourPose(W4, 54 / 282, st, now); }
+  function fourPose(W4, S, st, now) {
+    var P = W4.P, o;
     W4.el.style.opacity = st.op;
     if (!(st.op > 0)) return;
     if (st.mode === 'jump') {        // wind-up (arms back, knees bend) → spring with arms up, legs tucked → land with legs apart
@@ -963,17 +1067,12 @@
           o = 1 - seg(t, 0.5, 1);
         }
       }
-      b.el.style.transform = 'translate(' + x + 'px,' + y + 'px) rotate(' + r + 'deg)';
-      b.el.style.opacity = o;
-      if (b.keep) {
-        var lit = p > 0.81 + b.step * 0.008;
-        b.el.classList.toggle('lit', lit);
-        if (lit && wallHt[b.step]) b.el.style.opacity = 0;    // the halftone step takes over from its tiles
-      }
+      b.px = x; b.py = y; b.rot = r; b.o = o;
+      b.hide = b.keep && p > 0.81 + b.step * 0.008;          // the dot step takes over from its tiles
     });
     // the stairs as dots, like the next scenes: one halftone block per step (and the plateau), solid at the tread,
     // the dots shrinking down to the ground
-    if (!wallHtDone && p > 0.6) { wallHt.forEach(function (el, s2) { paintStep(el, s2); }); wallHtDone = true; }
+    if (!wallHtDone && p > 0.6) { wallHt.forEach(function (el, s2) { paintWallStep(el, s2); }); wallHtDone = true; }
     wallHt.forEach(function (el, s2) { el.style.opacity = p > 0.81 + s2 * 0.008 ? 1 : 0; /* stays through the zoom into the next scene */ });
 
     var sg = $('#stairGrain');
@@ -1001,7 +1100,12 @@
       var sg = d.querySelector('.ld-sign'); if (sg) sg.style.opacity = (1 - seg(dk, 0, .4)).toFixed(2);   // signs only on the big doors of "지원 프로그램"
       d.style.opacity = a * fadeOut;
       d.style.transform = 'translate(' + shake.toFixed(1) + 'px,' + (lift - (1 - a) * 14).toFixed(1) + 'px)';
+      var dl = lerp(436 + k * 124, DOOR_L + k * DOOR_GAP, dk) + shake, dt = TOP - dh + lift - (1 - a) * 14;
+      WD.doors[k] = { r: [dl, dt, dl + dw, dt + dh], a: a, g: WD.glow[k] };
     });
+    WD.fade = fadeOut; WD.wTop = TOP + lift; WD.broken = p >= 0.77; WD.shake = shake;
+    var wkey = p.toFixed(5) + '|' + fadeOut.toFixed(3) + '|' + WD.glow.join(',');
+    if (wkey !== WD.key) { WD.key = wkey; WD.dirty = true; }
 
     // 3F · 4F · 5F: they step out with the others, then (at "누군가에게는 쉽게 …") each hops onto the wall
     // and walks into a door of their own: 5F → door 3, 4F → door 2, 3F → door 1. 1F · 2F can't reach.
@@ -1255,10 +1359,21 @@
 
   var S1A = makeOru('c1', stepOru.parentNode, stepOru), S1B = makeOru('c2', stepOru.parentNode, stepOru);
   var hopK = -1, exitF = -1;
+  // 준호's speech bubble: it pops up only once he stands on a layer (after the hop has landed), one line per layer
+  var SAY = { n: 0, resting: false, p: 0, x: 0, y: 0 };
+  function sayUpdate() {
+    var say = $('#oruSay') || (function () { var d = document.createElement('div'); d.className = 'oru-say'; d.id = 'oruSay'; d.innerHTML = '<span></span>'; $('.scene-step1 .stage').appendChild(d); return d; })();
+    var n = SAY.n, sayTxt = SAY.resting || SAY.p >= 0.42 || n === 0 || hopK >= 0 ? '' : ['일상 붕괴형', '씻고, 정리하고, 기상 등', '작은 미션을 수행하며'][n - 1] || '일상 습관을 채우게 됩니다';
+    say.style.left = (SAY.x + 38) + 'px';
+    say.style.top = (SAY.y - 74) + 'px';
+    if (sayTxt) { var sp = say.firstChild; if (sp.textContent !== sayTxt) { sp.textContent = sayTxt; say.classList.remove('pop'); void say.offsetWidth; say.classList.add('pop'); } }
+    say.classList.toggle('on', !!sayTxt);
+  }
   // the SVG oreumi follows the (hidden) #stepOru box every frame, so the CSS move between layers still applies
   (function s1Loop(now) {
     var sc = $('.scene-step1');
     if (sc && sc.classList.contains('active')) {
+      sayUpdate();
       var cs = getComputedStyle(stepOru), L = parseFloat(cs.left) || 0, Tt = parseFloat(cs.top) || 0, w = stepOru.offsetWidth || 76;
       var two = lastStage1Img === 2, cur = two ? S1B : S1A, other = two ? S1A : S1B;
       var flip = parseFloat(stepOru.style.getPropertyValue('--flip')) || 1;
@@ -1397,11 +1512,7 @@
     zz.style.left = (x + 70) + 'px';
     zz.style.top = (y - 70) + 'px';
     // 준호's speech bubble while he climbs the first layers; gone once he rests
-    var say = $('#oruSay') || (function () { var d = document.createElement('div'); d.className = 'oru-say'; d.id = 'oruSay'; d.innerHTML = '<span></span>'; $('.scene-step1 .stage').appendChild(d); return d; })(), sayTxt = resting || p >= 0.42 ? '' : ['일상 붕괴형', '씻고, 정리하고, 기상 등', '작은 미션을 수행하며'][n] || '일상 습관을 채우게 됩니다';
-    say.style.left = (x + 38) + 'px';
-    say.style.top = (y - 74) + 'px';
-    if (sayTxt) { var sp = say.firstChild; if (sp.textContent !== sayTxt) { sp.textContent = sayTxt; say.classList.remove('pop'); void say.offsetWidth; say.classList.add('pop'); } }
-    say.classList.toggle('on', !!sayTxt);
+    SAY.n = n; SAY.resting = resting; SAY.p = p; SAY.x = x; SAY.y = y; sayUpdate();
 
 
     var days = n + (p >= 0.42 ? 1 : 0);
@@ -1473,8 +1584,21 @@
     return { sq: br, lift: 0, arms: 0, hair: -br * 4, spread: 0, blink: !reduced && (now % 3200) < 140 ? 1 : 0 };
   }
   (function m3Loop(now) {                        // breathing and blinking while it stands still
-    if (M3.on && !M3.jumping && $('.scene-montage').classList.contains('active')) m3Pose(M3.x, M3.y, m3Idle(now));
+    if (M3.on && !M3.jumping && !(M4 && M4.on) && $('.scene-montage').classList.contains('active')) m3Pose(M3.x, M3.y, m3Idle(now));
     requestAnimationFrame(m3Loop);
+  })(performance.now());
+  // 4단계 오르미 (계속 오름): replaces the 3단계 one once it has climbed onto the top flight (4단계)
+  var M4 = (function () {
+    var w = document.createElement('div'); w.className = 'm3-oru m4-oru'; w.setAttribute('aria-hidden', 'true'); w.innerHTML = O4_SVG;
+    w.style.width = (322 * 80 / 282).toFixed(1) + 'px';
+    M3.el.parentNode.insertBefore(w, M3.el.nextSibling);
+    var g = function (id) { return w.querySelector('#o4-' + id); };
+    return { el: w, P: { all: g('all'), hair: g('hair'), lL: g('legL'), lR: g('legR'), hL: g('handL'), hR: g('handR'), eyes: g('eyes') }, on: false, st: { x: 0, y: 0, mode: 'idle', op: 0 } };
+  })();
+  var M4S = 80 / 282;
+  (function m4Loop(now) {                        // breathing / walking pose every frame
+    if (M4.on && $('.scene-montage').classList.contains('active')) fourPose(M4, M4S, M4.st, now);
+    requestAnimationFrame(m4Loop);
   })(performance.now());
   var M2 = makeOru('c2', mOru.parentNode, mOru);
   var M2J = -1, M2X = 0, M2Y = 0, M2O = 0;
@@ -1569,9 +1693,19 @@
     }
     mOru.style.opacity = 0;                      // the sprite box only carries the position now
     M2O = use3 ? 0 : fade; M2X = pos[0] + 40; M2Y = pos[1]; M2J = pos[3];
-    M3.el.style.opacity = use3 ? fade : 0;
+    // 4층 (4단계): after the last hop of the second flight lands, the 4단계 SVG takes over
+    var use4 = p >= 0.818;
+    if (use4 !== M4.on) {
+      M4.el.classList.remove('pop'); void M4.el.offsetWidth;
+      if (use4 && !reduced) M4.el.classList.add('pop');
+      M4.on = use4;
+    }
+    var walking4 = p > 0.85 && p < 0.92;          // the walk to the door
+    M4.st = { x: pos[0] + 40, y: pos[1], mode: walking4 && !reduced ? 'run' : 'idle', ph: (pos[0] - 760) / 22 * Math.PI, k: 1, op: use4 ? fade : 0, sc: 1 };
+    M4.el.style.opacity = M4.st.op;
+    M3.el.style.opacity = use3 && !use4 ? fade : 0;
     M3.x = pos[0] + 40; M3.y = pos[1]; M3.jumping = pos[3] >= 0;
-    if (use3) m3Pose(M3.x, M3.y, M3.jumping ? m3Jump(pos[3]) : m3Idle(performance.now()));
+    if (use3 && !use4) m3Pose(M3.x, M3.y, M3.jumping ? m3Jump(pos[3]) : m3Idle(performance.now()));
     lastMImg = img;
     var name = p < 0.5 ? '2단계 둘러보기' : (p < 0.86 ? '3단계 마주하기' : '4단계 도전하기');
     var nameEl = $('#stageName');
@@ -1696,7 +1830,7 @@
     topbar.classList.toggle('on-intro', scene.dataset.scene === 'intro');
     ui.classList.toggle('on-light', onLight);
     var mode = onLight ? 'orange' : 'white';
-    if (mode !== logoMode) { logo.src = 'assets/brand/logo-' + mode + '.png'; logoMode = mode; }
+    logoMode = mode;   // (the logo is text now; its colour follows .topbar.on-light in the CSS)
     bar.style.width = (P / END * 100).toFixed(2) + '%';
     $('#prevBtn').disabled = T <= beats[0] + 1e-4;
     $('#nextBtn').disabled = T >= beats[beats.length - 1] - 1e-4;

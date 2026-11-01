@@ -15,6 +15,9 @@
     // vw / vh in the stylesheet follow the zoomed canvas, not the physical window
     root.style.setProperty('--vw', (w / z / 100).toFixed(4) + 'px');
     root.style.setProperty('--vh', (h / z / 100).toFixed(4) + 'px');
+    // the top bar should look the same size on every page: the story page fits the whole canvas (it can zoom less than
+    // the scrolling pages when the window is shorter than 16:9), so its bar is scaled back up to the width-based size
+    root.style.setProperty('--gnb', z === 1 ? '1' : ((w / BASE_W) / z).toFixed(5));
     root.classList.toggle('zoomed', z !== 1);
     window.__zoom = z;
   }

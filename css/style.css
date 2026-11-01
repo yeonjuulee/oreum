@@ -1,3 +1,4 @@
+@import url('https://fonts.googleapis.com/css2?family=Syncopate:wght@400;700&display=block');
 @font-face { font-family: "Pretendard"; font-weight: 400; font-display: swap; src: url("https://cdn.jsdelivr.net/npm/pretendard@1.3.9/dist/web/static/woff2/Pretendard-Regular.woff2") format("woff2"), url("../fonts/Pretendard-Regular.woff2") format("woff2"); }
 @font-face { font-family: "Pretendard"; font-weight: 500; font-display: swap; src: url("https://cdn.jsdelivr.net/npm/pretendard@1.3.9/dist/web/static/woff2/Pretendard-Medium.woff2") format("woff2"), url("../fonts/Pretendard-Medium.woff2") format("woff2"); }
 @font-face { font-family: "Pretendard"; font-weight: 600; font-display: swap; src: url("https://cdn.jsdelivr.net/npm/pretendard@1.3.9/dist/web/static/woff2/Pretendard-SemiBold.woff2") format("woff2"), url("../fonts/Pretendard-SemiBold.woff2") format("woff2"); }
@@ -2233,3 +2234,55 @@ body.info-page .hscroll .item .shot { display: block; width: 230px; height: auto
 .room-a .toss { left: 0; top: 0; width: 960px; height: 540px; pointer-events: none; }
 .room-a .toss-i { position: absolute; left: 0; top: 0; width: 24px; height: 24px; opacity: 0; will-change: transform, opacity; }
 .room .r-oru svg { display: block; width: 100%; height: auto; overflow: visible; }
+
+/* GNB logo: the wordmark as text in Syncopate. The page is laid out at 1440 wide and zoomed to the window,
+   so 17.25px here shows as 23px on a 1920-wide screen */
+.topbar .logo { display: block; height: auto; font-family: 'Syncopate', sans-serif; font-weight: 700; line-height: 1; letter-spacing: .02em; color: #fff; text-decoration: none; }
+.service-page .topbar .logo, .topbar.on-light .logo { color: var(--orange, #FF6A00); }
+.topbar .brand > a { text-decoration: none; align-items: center; }
+@media (max-width: 640px) { .topbar .logo { font-size: 15px; height: auto; } }
+
+/* GNB: the same bar on every page as on the story (INTRO) page — same logo / menu positions and sizes, text-only menu
+   (the current page in bold, no orange pill). Sizes × --gnb (fit.js) so the bar is the same size on every page even when
+   the story page zooms less (windows shorter than 16:9) */
+.topbar .logo { font-size: calc(17.25px * var(--gnb, 1)); }
+@media (min-width: 901px) and (min-aspect-ratio: 4/3) {
+  body .topbar { padding: calc(27px * var(--gnb, 1) + env(safe-area-inset-top, 0px)) calc(5.1 * var(--vw, 1vw)) calc(16px * var(--gnb, 1)) calc(5.2 * var(--vw, 1vw)) !important; }
+  body .topbar .brand { gap: calc(14px * var(--gnb, 1)) !important; }
+  body .topbar .slogan { font-size: calc(14px * var(--gnb, 1)) !important; padding-left: calc(14px * var(--gnb, 1)) !important; }
+  body .topbar nav { gap: calc(46.5px * var(--gnb, 1)) !important; }
+  body .topbar nav a, body .topbar .slogan { font-family: Pretendard, "Noto Sans KR", "Apple SD Gothic Neo", system-ui, sans-serif !important; }
+  body .topbar nav a, body .topbar nav a[aria-current="page"], body.info-page .topbar nav a, body.info-page .topbar nav a[aria-current="page"] {
+    padding: 0 !important; min-height: calc(40px * var(--gnb, 1)) !important; border-radius: 0 !important; background: none !important; font-size: calc(15px * var(--gnb, 1)) !important; font-weight: 400 !important; }
+  body .topbar nav a[aria-current="page"], body.info-page .topbar nav a[aria-current="page"] { font-weight: 600 !important; }
+  body .topbar nav a:hover, body .topbar nav a[aria-current="page"]:hover { background: none !important; }
+  /* dark bars (plan, design): grey menu, white current page — like INTRO */
+  body.info-page .topbar nav a { color: #BAB9B8 !important; }
+  body.info-page .topbar nav a[aria-current="page"], body.info-page .topbar nav a:hover { color: #fff !important; }
+  /* light bar (service): ink menu, the current page full strength */
+  .service-page .topbar nav a { color: var(--ink, #1C1917) !important; opacity: .7; }
+  .service-page .topbar nav a[aria-current="page"], .service-page .topbar nav a:hover { opacity: 1; }
+}
+@media (max-width: 640px) { .topbar .logo { font-size: 15px; } }
+
+/* the scrolling pages (service, plan, design) get no scrollbar gutter on desktop: with a 17px scrollbar their page — and
+   the top bar's menu — sat 17px narrower than the story page, so the menu jumped when switching pages. Scrolling still works. */
+@media (min-width: 901px) and (min-aspect-ratio: 4/3) {
+  html { scrollbar-width: none; }
+  html::-webkit-scrollbar, body::-webkit-scrollbar { display: none; width: 0; }
+}
+/* the dot apartment: the two centre windows keep their soft halo, but no white wash over the oreumi silhouettes */
+.scene-building[data-phase="0"] .u-a .w, .scene-building[data-phase="0"] .u-b .w { background: none; }
+
+/* hook → 두 개의 방: the title shows up with the dots already (no fade when the next scene takes over) */
+.hook-handoff { position: absolute; left: 0; top: 0; z-index: 3; opacity: 0; pointer-events: none; transition: opacity .45s ease; }
+.hook-handoff.on { opacity: 1; }
+.hook-handoff h2 { margin: 0; font-size: clamp(28px, calc(3.4 * var(--vw, 1vw)), 44px); font-weight: 900; line-height: 1.25; letter-spacing: -0.02em; color: #fff; white-space: nowrap; }
+.scene-building .line.instant { transition: none; transform: none; }
+
+/* 문 밖의 벽 as dots: the apartment (back + front railings) is a 5px dot PNG over the whole stage; the wall, doors and
+   falling tiles are drawn live on #wallDots (story.js); the tile divs only hold the motion */
+.scene-wall .apt.apt-dots { top: 0; width: 960px; height: 540px; }
+.wall-dots { position: absolute; left: 0; top: 0; width: 1600px; height: 540px; pointer-events: none; }
+.scene-wall .blocks { display: none; }
+.scene-wall .wall-door .wd-open { opacity: 0; }

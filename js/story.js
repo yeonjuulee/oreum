@@ -31,6 +31,8 @@
     $$('.stage-wrap').forEach(function (wrap) {
       var s = Math.min(wrap.clientWidth / 960, wrap.clientHeight / 540);
       var st = wrap.querySelector('.stage');
+      // 문 밖의 벽: drawn at full size on the desktop canvas (a little to the left of the column, so the doors get room)
+      if (wrap.closest('.scene-wall') && window.matchMedia('(min-width: 901px) and (min-aspect-ratio: 4/3)').matches) s = 1;
       st.style.setProperty('--s', Math.max(0.2, s).toFixed(4));
       /* bleed: the drawing runs on past the stage to the screen's right and bottom edges
          (top and left stay at the stage box, so nothing behind the copy shows) */
@@ -48,7 +50,10 @@
      ====================================================== */
   var cv = $('#dots'), ctx = cv.getContext('2d'), hks = $$('.hk'), hookN = $('#hookN');
   var hookScene = $('.scene-hook');
-  var MAXP = 7170;
+  /* the last stage hands over to "두 개의 방": every Jeju dot flies into the dot apartment of the next scene (js/dots.js) */
+  var OD = window.OreumDots, APT = OD ? OD.APT : [], NA = APT.length;
+  var MAXP = Math.max(7170, NA);
+  var aptU = new Float32Array(NA * 2), aptR = 2;
   var W = 0, H = 0, hookStage = 0, stageAt = 0, R = 14, la = 0, hookShownAt = 0;
   var seedH = 11;
   function rndH() { seedH = (seedH * 16807) % 2147483647; return seedH / 2147483647; }
@@ -62,7 +67,7 @@
     { n: 6700, r: 1.35, shape: 'jeju', label: '67만 명 · 제주도 전체 인구', legend: '● 1개 = 100명' },
     { n: 7170, r: 1.35, shape: 'jeju', spill: true, label: '67만 명 · 제주도 전체 인구', legend: '● 1개 = 100명' },
     { n: 7170, r: 1.35, shape: 'jeju', spill: true, dim: true },
-    { n: 1, r: 1.35, shape: 'jeju', leave: true }            // 점들이 흩어지고 준호만 창문으로 이동
+    { n: 1, r: 1.35, shape: 'jeju', leave: true }            // 점들이 아파트로 모이고, 준호·도희는 1·2층 창으로
   ];
   var LEAVE_AT = 0.9;
   function stageOf(p) { return p < 0.05 ? 0 : p < 0.17 ? 1 : p < 0.35 ? 2 : p < 0.57 ? 3 : p < 0.79 ? 4 : p < 0.85 ? 5 : p < LEAVE_AT ? 6 : 7; }
@@ -241,10 +246,11 @@
   var TERRAIN = ['#8A4A26', '#B0602F', '#D47838', '#F2924E', '#FFB682', '#FFDCC4'];
   var dsh = new Float32Array(MAXP);
   for (var dsi = 0; dsi < MAXP; dsi++) dsh[dsi] = .5;
-  function stageR(S) { return S.shape ? SHAPES[S.shape].spacing * HB * .54 : S.r * clamp(HB / 360, .6, 1); }
+  function stageR(S) { if (S.leave && NA) return aptR; return S.shape ? SHAPES[S.shape].spacing * HB * .54 : S.r * clamp(HB / 360, .6, 1); }
   function dotShade(i, st) {
     var S = STAGES[st];
     if (!S.shape) return .8;
+    if (S.leave && i < NA) return APT[i].s;
     if (S.spill && i >= 6700) return SHAPES.spill.shade[i - 6700];
     return SHAPES[S.shape].shade[i] || .5;
   }
@@ -271,14 +277,17 @@
     cv.width = W * dpr; cv.height = H * dpr;
     ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
     var wide = W > 760;
-    hcx = wide ? W * .725 : W / 2; hcy = wide ? H * .47 : H * .3;
+    hcx = wide ? W * .725 : W / 2; hcy = wide ? H * .52 : H * .3;
     HB = wide ? Math.min(W * .195, H * .35) : Math.min(W * .4, H * .2);
     for (var i = 0; i < MAXP; i++) if (dpa[i] < .01) { dpx[i] = hcx + outPos[i][0] * HB * 2; dpy[i] = hcy + outPos[i][1] * HB * 2; }
+    if (dpa[0] < .01) { dpx[0] = hcx; dpy[0] = hcy; }      // the first dot is born where the start screen's star shrinks to
+    if (window.OreumIntro) { window.OreumIntro.cx = hcx; window.OreumIntro.cy = hcy; }
     buildBg(dpr);
   }
   function dotTarget(i, st) {
     var S = STAGES[st];
-    if (S.leave) return (i === 0 || i === D2) ? SHAPES.jeju[i] : null;
+    if (S.leave) return (i === 0 || i === D2) ? SHAPES.jeju[i] : (i < NA ? [aptU[i * 2], aptU[i * 2 + 1]] : null);
+    if (st === 0 && i === 0) return [0, 0];      // the start screen's star lands here as this dot
     if (i >= S.n) return null;
     if (st === 1) return [0, 0];
     if (S.spill && i >= 6700) return SHAPES.spill[i - 6700];
@@ -402,7 +411,13 @@
     var S = STAGES[hookStage], hs = heroesOf(hookStage), isHero = {};
     hs.forEach(function (h) { isHero[h.i] = h; });
     // 떠나는 단계: 준호 → 1층 창, 도희 → 2층 창 (스크롤 진행도로 위치를 정한다)
-    var leaveT = 0;
+    var leaveT = 0, amap = null;
+    if (S.leave && NA) {                      // where the dot apartment sits on screen (hook canvas units → shape units)
+      var ar = $('#aptPx').getBoundingClientRect(), cr = cv.getBoundingClientRect(), cf = cr.width ? cv.clientWidth / cr.width : 1;
+      amap = { sk: ar.width / 960 * cf, L: (ar.left - cr.left) * cf, T: (ar.top - cr.top) * cf };
+      for (var ai = 0; ai < NA; ai++) { aptU[ai * 2] = (amap.L + APT[ai].x * amap.sk - hcx) / HB; aptU[ai * 2 + 1] = (amap.T + APT[ai].y * amap.sk - hcy) / HB; }
+      aptR = OD.AS * .54 * amap.sk;
+    }
     if (S.leave) {
       leaveT = ease(seg(hookP, LEAVE_AT + 0.02, 1));
       hs.forEach(function (h) {
@@ -416,6 +431,7 @@
     la += ((now - stageAt > 700 ? 1 : 0) - la) * .08;
     ctx.clearRect(0, 0, W, H);
     if (S.shape && !S.leave) drawContours(S, la * (S.dim ? .4 : 1));
+    if (S.leave && amap) OD.aptContours(ctx, function (x, y) { return [amap.L + x * amap.sk, amap.T + y * amap.sk]; }, la);
 
     // soft white light around each hero (breathing)
     hs.forEach(function (h, n) {
@@ -431,7 +447,7 @@
     });
 
     // dots, batched by terrain colour
-    var paths = TERRAIN.map(function () { return []; }), solo = [];
+    var paths = TERRAIN.map(function () { return []; }), solo = [], custom = {};
     for (var i = 0; i < MAXP; i++) {
       var tg = dotTarget(i, hookStage);
       var tx = hcx + (tg ? tg[0] : outPos[i][0]) * HB, ty = hcy + (tg ? tg[1] : outPos[i][1]) * HB;
@@ -439,8 +455,10 @@
       if (!(S.leave && isHero[i])) { dpx[i] += (tx - dpx[i]) * k; dpy[i] += (ty - dpy[i]) * k; }
       dpa[i] += ((tg ? 1 : 0) - dpa[i]) * (reduced ? 1 : .07);
       if (tg) dsh[i] += (dotShade(i, hookStage) - dsh[i]) * (reduced ? 1 : .08);
-      if (dpa[i] < .02 || isHero[i]) continue;
-      if (dpa[i] < .95 || S.dim || (S.spill && i >= 6700)) { solo.push(i); continue; }
+      if (dpa[i] < .02 || isHero[i] || (hookStage === 0 && i === 0)) continue;   // stage 0: the start screen's dot is still the one on show
+      if (dpa[i] < .95 || S.dim || (S.spill && i >= 6700 && !S.leave)) { solo.push(i); continue; }
+      if (S.leave && i < NA && APT[i].c) { var ap = APT[i], near = Math.abs(dsh[i] - ap.s) < .06;
+        if (near) { (custom[ap.c] = custom[ap.c] || []).push([i, OD.factor(ap)]); continue; } }
       paths[Math.min(TERRAIN.length - 1, Math.floor(dsh[i] * TERRAIN.length))].push(i);
     }
     paths.forEach(function (list, ci) {
@@ -449,9 +467,15 @@
       list.forEach(function (i) { var rd = R * (.42 + .58 * dsh[i]); ctx.moveTo(dpx[i] + rd, dpy[i]); ctx.arc(dpx[i], dpy[i], rd, 0, 6.2832); });
       ctx.fill();
     });
+    Object.keys(custom).forEach(function (col) {
+      ctx.fillStyle = col; ctx.beginPath();
+      custom[col].forEach(function (q) { var rd = R * q[1], i = q[0]; ctx.moveTo(dpx[i] + rd, dpy[i]); ctx.arc(dpx[i], dpy[i], rd, 0, 6.2832); });
+      ctx.fill();
+    });
     solo.forEach(function (si) {
       var a = dpa[si], col = TERRAIN[Math.min(TERRAIN.length - 1, Math.floor(dsh[si] * TERRAIN.length))];
       if (S.spill && si >= 6700) col = '#FFDCC4';
+      if (S.leave && si < NA && APT[si].c && Math.abs(dsh[si] - APT[si].s) < .06) col = APT[si].c;
       ctx.globalAlpha = S.dim ? a * .22 : a;
       ctx.fillStyle = col; ctx.beginPath(); ctx.arc(dpx[si], dpy[si], R * (.42 + .58 * dsh[si]), 0, 6.2832); ctx.fill();
     });
@@ -556,9 +580,17 @@
     var sc = small.getContext('2d'); sc.imageSmoothingEnabled = true; sc.clearRect(0, 0, w, h); sc.drawImage(upImg, 0, 0, w, h);
     upCtx.imageSmoothingEnabled = false; upCtx.clearRect(0, 0, 960, 540); upCtx.drawImage(small, 0, 0, w * b, h * b);
   }
+  var aptDrawn = '';
+  function drawAptDots() {                    // the same dots the hook's last stage lands on, in stage px
+    var r = aptPx.getBoundingClientRect(), hr = cv.getBoundingClientRect(), f = hr.width ? cv.clientWidth / hr.width : 1;
+    var sk = r.width / 960 * f || 1, key = sk.toFixed(3);
+    if (aptDrawn === key) return; aptDrawn = key;
+    pxCtx.setTransform(aptPx.width / 960, 0, 0, aptPx.height / 540, 0, 0);
+    OD.drawApt(pxCtx, OD.AS * .54, 10 / sk, 3 / sk);
+  }
   function pxLoop(now) {
     var sc = $('.scene-building');
-    if (sc.classList.contains('active') && buildingP < 0.2 && window.OreumPixel) window.OreumPixel.draw(pxCtx, now);
+    if (sc.classList.contains('active') && buildingP < 0.2 && OD) drawAptDots();
     requestAnimationFrame(pxLoop);
   }
   requestAnimationFrame(pxLoop);
@@ -604,15 +636,28 @@
   var GROUND = 500, B = 16, COLS = 38, ROWS = 15, X0 = 300, SW = 5, PLAT = 20;
   var NC = COLS + 40;                           // + plateau columns past the stage, out to the screen edge
   var TOP = GROUND - ROWS * B;                  // 260: top of the wall
-  var WALL_TONES = ['#2C2825', '#332E2A', '#3A3430', '#262220'];
-  var STEP_TONES = [                            // same ramp as the big steps: deep orange → orange → light orange → peach
-    ['#8E3E0A', '#96420C', '#883B09', '#9A450E'],
-    ['#FF6A00', '#F56500', '#FF7410', '#FA6A05'],
-    ['#FFAA70', '#FFA264', '#FFB27C', '#FCA468'],
-    ['#FFDCC4', '#FFD4B8', '#FFE2CC', '#FCD8BE'],
-    ['#FFF1E6', '#FFF8F2', '#FFEBDD', '#FFF4EA']
+  var WALL_TONES = ['#332E2A', '#332E2A', '#332E2A', '#332E2A'];   // one flat colour: the wall reads as a single slab
+  var STEP_TONES = [                            // the stairs' colours (design F: the population page's terrain dots)
+    ['#B0602F', '#AA5C2C', '#B66432', '#AD5E2E'],
+    ['#D47838', '#CE7434', '#DA7C3C', '#D17636'],
+    ['#F2924E', '#EC8E4A', '#F69652', '#EF904C'],
+    ['#FFB682', '#FAB27E', '#FFBA86', '#FCB480'],
+    ['#FFDCC4', '#FAD8C0', '#FFE0C8', '#FCDAC2']
   ];
   var blocksEl = $('#blocks');
+  var wallHt = [], wallHtDone = false;
+  (function () {                                 // four step blocks + the plateau, under the step labels
+    var host = $('#stairGrain'); if (!host) return;
+    for (var s2 = 0; s2 < 5; s2++) {
+      var d = document.createElement('div'), x = X0 + s2 * SW * B, top = s2 < 4 ? GROUND - 3 * B * (s2 + 1) : TOP;
+      d.className = 'wall-ht';
+      d.style.left = x + 'px'; d.style.top = top + 'px';
+      d.style.width = (s2 < 4 ? SW * B : (NC - PLAT) * B) + 'px'; d.style.height = (GROUND - top) + 'px';
+      d.dataset.fade = GROUND - top; d.dataset.pitch = 6;   // each step fades over its own height, down to the ground
+      host.parentNode.insertBefore(d, host);
+      wallHt.push(d);
+    }
+  })();
   var blocks = [];
   (function buildBlocks() {
     for (var r = 0; r < ROWS; r++) {
@@ -639,13 +684,17 @@
   /* sprite frames: preloaded so swapping src never flickers */
   function frames(prefix, n) { var a = []; for (var i = 1; i <= n; i++) { var im = new Image(); im.src = 'assets/character/sprites/' + prefix + i + '.png'; a.push('assets/character/sprites/' + prefix + i + '.png'); } return a; }
   var HOP1 = frames('hop1-', 7);     // 1단계 오르미: squash → stretch → land
-  var RUN4 = frames('run4-', 9);     // 4단계 오르미: 1–6 run cycle, 7 joy, 8 leap, 9 stand
+  var RUN4 = frames('run4-', 9);
+  var HOP2 = frames('climb3-', 7);
+  var HOP2_REST = HOP2[5];           // the standing (basic) figure is frame 6; frames 1 and 7 are the squash before / after a jump     // 2단계 오르미: squash → stretch → land (stepping up the montage stairs)     // 4단계 오르미: 1–6 run cycle, 7 joy, 8 leap, 9 stand
   function setSrc(el, src) { if (el.getAttribute('src') !== src) el.setAttribute('src', src); }
 
   var HIT = { x: 430, y: 330 };                 // where the symbol strikes the wall (left part, over the future stairs)
   var FLY_FROM = { x: -120, y: 40 };
   var doors = $$('.wall-door');
-  var DOOR1 = 656;                              // centre of the first door (3F walks in here)
+  var DOOR_L = 656, DOOR_W = 44, DOOR_GAP = 74;  // the four support doors (stage px): left edge of the first, width, pitch
+  var DOOR1 = DOOR_L + DOOR_W / 2;              // centre of the first door (3F walks in here)
+  doors.forEach(function (d, k) { d.style.left = (DOOR_L + k * DOOR_GAP) + 'px'; });
 
   // the youths: feet points on their terraces, and where they land on the stairs
   var TX = 222, FH = 70.4, FLOOR = [0, 1, 2, 3, 4].map(function (n) { return 494 - FH * n; });   // 1F–5F terrace floors (5-storey building)
@@ -666,6 +715,14 @@
   function updateWall(scene, p) {
     var zoom = ease(seg(p, 0.88, 1));            // zoom into 1·2단계: starts at 0.88 for transition to step1
     var cam = $('#wallCam');
+    if (zoom > 0) {                              // aim at the step-1 scene's stage as it sits on screen (its layout differs per screen size)
+      var wr = scene.querySelector('.stage').getBoundingClientRect(), sr = $('.scene-step1 .stage').getBoundingClientRect();
+      var sw = wr.width / 960, s1 = sr.width / 960;
+      if (sw > 0 && s1 > 0) {
+        var zs = 154 / (3 * B) * s1 / sw;
+        ZOOM = { s: zs, tx: (sr.left + S1.riser * s1 - wr.left) / sw - (X0 + SW * B) * zs, ty: (sr.top + 420 * s1 - wr.top) / sw - (GROUND - 3 * B) * zs };
+      }
+    }
     cam.style.transform = 'translate(' + (ZOOM.tx * zoom).toFixed(1) + 'px,' + (ZOOM.ty * zoom).toFixed(1) + 'px) scale(' + lerp(1, ZOOM.s, zoom).toFixed(4) + ')';
     var fadeOut = 1 - seg(zoom, 0, 0.5);
     $$('.corner, .terrace, .t-door', scene).forEach(function (el) { el.style.opacity = fadeOut; });
@@ -674,7 +731,7 @@
     // "정부에서도 …": only the four doors, standing on the ground. "하지만 … 대면": the wall grows up under them and lifts them
     // 벽과 문이 "누군가에게는 쉽게 올라갈 수 있는 높이지만,"에 맞춰 최종 높이까지 일치하여 도달하도록 타이밍 조정
     var doorIn = seg(p, 0.13, 0.19);
-    var rise = ease(seg(p, 0.27, 0.41));
+    var rise = ease(seg(p, 0.22, 0.31));       // the whole wall is up within "하지만 그 모든 지원은 …"
     var lift = (1 - rise) * WALL_UP;
     blocksEl.style.clipPath = rise < 1 ? 'polygon(-600px -600px, 3600px -600px, 3600px ' + GROUND + 'px, -600px ' + GROUND + 'px)' : '';
     var built = blocks.length;
@@ -697,10 +754,19 @@
       }
       b.el.style.transform = 'translate(' + x + 'px,' + y + 'px) rotate(' + r + 'deg)';
       b.el.style.opacity = o;
-      if (b.keep) b.el.classList.toggle('lit', p > 0.81 + b.step * 0.008);
+      if (b.keep) {
+        var lit = p > 0.81 + b.step * 0.008;
+        b.el.classList.toggle('lit', lit);
+        if (lit && wallHt[b.step]) b.el.style.opacity = 0;    // the halftone step takes over from its tiles
+      }
     });
+    // the stairs as dots, like the next scenes: one halftone block per step (and the plateau), solid at the tread,
+    // the dots shrinking down to the ground
+    if (!wallHtDone && p > 0.6) { wallHt.forEach(function (el, s2) { paintStep(el, s2); }); wallHtDone = true; }
+    wallHt.forEach(function (el, s2) { el.style.opacity = p > 0.81 + s2 * 0.008 ? 1 : 0; /* stays through the zoom into the next scene */ });
 
     var sg = $('#stairGrain');
+    sg.style.display = 'none';                   // (the grain overlay is replaced by the dots)
     if (!sg.dataset.ready) {
       var pts = [[X0, GROUND]];
       for (var st = 0; st < 4; st++) { pts.push([X0 + st * SW * B, GROUND - 3 * B * (st + 1)]); pts.push([X0 + (st + 1) * SW * B, GROUND - 3 * B * (st + 1)]); }
@@ -713,8 +779,15 @@
 
     // the four entrances rise with the wall's top row; the first glows as 3F walks in
     var enter = seg(p, 0.44, 0.475) * (1 - seg(p, 0.49, 0.53));
+    // on the ground the doors stand big (104 × 140, no signs); as the wall lifts them they shrink to their place on top
+    var dk = ease(seg(p, 0.22, 0.31));
     doors.forEach(function (d, k) {
       var a = clamp(doorIn * 1.6 - k * 0.2);
+      var dw = lerp(104, DOOR_W, dk), dh = lerp(140, 60, dk);
+      d.style.width = dw.toFixed(1) + 'px'; d.style.height = dh.toFixed(1) + 'px';
+      d.style.top = (TOP - dh).toFixed(1) + 'px';
+      d.style.left = lerp(436 + k * 124, DOOR_L + k * DOOR_GAP, dk).toFixed(1) + 'px';
+      var sg = d.querySelector('.ld-sign'); if (sg) sg.style.opacity = (1 - seg(dk, 0, .4)).toFixed(2);   // signs only on the big doors of "지원 프로그램"
       d.style.opacity = a * fadeOut;
       d.style.transform = 'translate(' + shake.toFixed(1) + 'px,' + (lift - (1 - a) * 14).toFixed(1) + 'px)';
     });
@@ -733,7 +806,7 @@
       put(el, pos[0], pos[1], op * fadeOut, sc);
       return { pos: pos, moving: moving, jumping: p >= jump && p < jump + 0.025, jt: seg(p, jump, jump + 0.025) };
     }
-    var DOOR_X = [DOOR1, DOOR1 + 72, DOOR1 + 144];
+    var DOOR_X = [DOOR1, DOOR1 + DOOR_GAP, DOOR1 + DOOR_GAP * 2];
     var c5 = climber(oru5, FLOOR[4], 0.41, 0.465, DOOR_X[2], 26);
     climber(oru4, FLOOR[3], 0.418, 0.47, DOOR_X[1], 30);
     climber(oru3, FLOOR[2], 0.426, 0.475, DOOR_X[0], 40);
@@ -837,7 +910,7 @@
      S05–S07 step 1: thin layers against the next step
      ====================================================== */
   var MISSIONS = ['창문 열고 환기', '양치하기', '8시 기상', '샤워하기', '방 정리', '간단한 요리', '가족과 사진'];
-  var S1 = { ground: 420, riser: 620, pitch: 22, left0: 140, dx: 62 };
+  var S1 = { ground: 420, riser: 680, pitch: 22, left0: 100, dx: 76 };   // wider layers: 1단계 runs to x 680, 2단계 starts there
   // one ramp, darkest at the bottom → lightest at the top (like light rising)
   /* one continuous colour ramp for the whole staircase (S05–S08).
      Level 0 = 1단계 tread, 1 = 2단계, 2 = 3단계, 3 = 4단계. Big steps and the thin layers between them
@@ -861,9 +934,43 @@
   }
   function layerColor(t, a) { var c = layerRGB(t); return a === undefined ? 'rgb(' + c.join(',') + ')' : 'rgba(' + c.join(',') + ',' + a + ')'; }
   function layerText(t) { var c = layerRGB(t); return (0.299 * c[0] + 0.587 * c[1] + 0.114 * c[2]) < 165 ? '#FFF8F2' : '#332E2A'; }
-  function paintStep(el, L) {                     // big step: its level colour, a touch darker toward the ground
-    el.style.background = 'var(--grain) 0 0 / 130px, linear-gradient(180deg, ' + rampColor(L) + ' 0%, ' + rampColor(L, 0.08) + ' 100%)';
+  /* stairs, design F: each big step is a round-dot halftone — solid at the tread, the dots shrinking all the way
+     down to the bottom of the screen — with a faint second print a hair off register in the mid-tones.
+     Colours are the population page's terrain dots. The mission layers are flat slabs (CSS .slab, --c). */
+  var HTONE = ['#B0602F', '#D47838', '#F2924E', '#FFB682', '#FFDCC4'];
+  function htLayerColor(L) { var i = Math.min(3, Math.floor(L)), f = L - Math.floor(L); return f > .5 ? HTONE[i + 1] : HTONE[i]; }
+  var htSteps = [];
+  function drawHalftone(el, L) {
+    var W = el.offsetWidth; if (!W) return;
+    var st = el.closest('.stage'), bb = st ? parseFloat(st.style.getPropertyValue('--bb')) || 0 : 0;
+    var top = el.offsetTop, fade = el.dataset.fade ? +el.dataset.fade : Math.max(140, 540 + bb - top);   // every step fades all the way to the bottom of the screen (or to its own data-fade)
+    if (!el.dataset.fade && el.offsetHeight < fade + 4) el.style.height = Math.ceil(fade + 4) + 'px';
+    var H = el.offsetHeight;
+    var key = W + 'x' + H + ':' + Math.round(fade); if (el.dataset.ht === key) return; el.dataset.ht = key;
+    var K = el.dataset.fade ? 5 : 2, cv = document.createElement('canvas');   // the wall's steps get zoomed in on: draw them sharper
+    cv.width = Math.ceil(W * K); cv.height = Math.ceil(H * K);
+    var c = cv.getContext('2d'); c.scale(K, K);
+    var i = Math.min(4, Math.round(L)), col = HTONE[i], ghost = [HTONE[i + 1], i ? HTONE[i - 1] : '#8A4A26'], P = +(el.dataset.pitch || 10);
+    function prof(y) { var k = clamp(1.1 - y / fade); return Math.max(.012, k * k * k); }   // never 0: the smallest dots reach the floor
+    var solidTo = 0;
+    for (var y = P / 2; y < H; y += P) { if (prof(y) >= .985) solidTo = y + P / 2; else break; }
+    c.fillStyle = col; c.fillRect(0, 0, W, solidTo);
+    [[col, 0, 0, 1]].forEach(function (ps) {        // one print: a single dot per grid point
+      c.globalAlpha = ps[3]; c.fillStyle = ps[0]; c.beginPath();
+      for (var y2 = solidTo + P / 2; y2 < H; y2 += P) {
+        var k = prof(y2);
+        if (ps[3] < 1 && (k < .08 || k > .7)) continue;
+        var rr = Math.max(.35, P * .72 * Math.sqrt(k));
+        for (var x = P / 2; x < W; x += P) { c.moveTo(x + ps[1] + rr, y2 + ps[2]); c.arc(x + ps[1], y2 + ps[2], rr, 0, 6.2832); }
+      }
+      c.fill();
+    });
+    c.globalAlpha = 1; c.fillStyle = HTONE[Math.min(4, i + 1)]; c.fillRect(0, 0, W, P / 5);        // the tread edge
+    el.style.background = 'url(' + cv.toDataURL('image/png') + ') 0 0 / ' + W + 'px ' + H + 'px no-repeat';
+    el.classList.add('ht');
   }
+  function paintStep(el, L) { htSteps.push([el, L]); drawHalftone(el, L); }
+  window.addEventListener('resize', function () { setTimeout(function () { htSteps.forEach(function (q) { drawHalftone(q[0], q[1]); }); }, 60); });
   var slabsEl = $('#slabs');
   MISSIONS.forEach(function (m, k) {
     var d = document.createElement('div');
@@ -872,7 +979,7 @@
     d.style.width = (S1.riser - S1.left0 - k * S1.dx) + 'px';
     d.style.top = (S1.ground - (k + 1) * S1.pitch) + 'px';
     var lv = (k + 1) / (MISSIONS.length + 1);      // between 1단계 (0) and 2단계 (1): the layers climb the gradient into the next step
-    d.style.setProperty('--c', rampColor(lv));
+    d.style.setProperty('--c', htLayerColor(lv));
     d.style.setProperty('--c2', rampColor(lv + .12));
     d.style.setProperty('--top', rampColor(lv + .55));
     d.style.setProperty('--tc', rampText(lv));
@@ -881,16 +988,35 @@
   });
   var slabEls = $$('.slab', slabsEl);
   var stepOru = $('#stepOru');
+  // the grown oreumi in 숨고르기 is drawn at the same on-screen size as in 계속 오름 (the stages are scaled differently)
+  function lv2Width() {
+    var a = $('.scene-step1 .stage').getBoundingClientRect().width, b = $('.scene-montage .stage').getBoundingClientRect().width;
+    var mw = 80;                                 // .m-oru.spr width (계속 오름's sprite size)
+    return a && b ? Math.round(mw * b / a) : 84;
+  }
+  window.addEventListener('resize', function () { if (stepOru.classList.contains('lv2')) stepOru.style.width = lv2Width() + 'px'; });
 
   var lastStage1Img = 1, lastSpot = null, hopRaf = 0;
   // the hop plays in time with the 0.8s move between layers (CSS transition on left/top)
   function stopHop() { if (hopRaf) cancelAnimationFrame(hopRaf); hopRaf = 0; }
-  function playHop() {
+  /* a jump onto the next layer: squash on the spot (frames 1–3), spring up along an arc (4–5), land (6–7) */
+  var HOP_MS = 900, HOP_H = 34;                 // jump length (ms) and height (stage px)
+  function jumpPos(a, b, k) {
+    var m = clamp((k - .3) / .5), e = m * m * (3 - 2 * m);
+    return [lerp(a[0], b[0], e), lerp(a[1], b[1], e) - HOP_H * Math.sin(Math.PI * m)];
+  }
+  function playHop(from, to) {
     stopHop();
-    var t0 = performance.now(), D = 760;
+    var t0 = performance.now();
+    stepOru.style.transition = 'none';
     (function tick(now) {
-      var k = (now - t0) / D;
-      if (k >= 1 || lastStage1Img !== 1) { hopRaf = 0; if (lastStage1Img === 1) setSrc(stepOru, 'assets/character/oreumi1.png'); return; }
+      var k = (now - t0) / HOP_MS;
+      if (k >= 1 || lastStage1Img !== 1) {
+        hopRaf = 0; stepOru.style.left = to[0] + 'px'; stepOru.style.top = to[1] + 'px'; stepOru.style.transition = '';
+        if (lastStage1Img === 1) setSrc(stepOru, 'assets/character/oreumi1.png'); return;
+      }
+      var q = jumpPos(from, to, k);
+      stepOru.style.left = q[0].toFixed(1) + 'px'; stepOru.style.top = q[1].toFixed(1) + 'px';
       setSrc(stepOru, HOP1[Math.min(HOP1.length - 1, Math.floor(k * HOP1.length))]);
       hopRaf = requestAnimationFrame(tick);
     })(t0);
@@ -912,6 +1038,19 @@
     var resting = p >= 0.42 && p < 0.58;
     var top = p >= 0.8;
     // the verification phone: camera shows the mission being done; a new layer = shutter flash + 인증 완료
+    // the phone beside the stairs: one app screen per layer (assets/app/step1/shot-N.png, N = layers climbed);
+    // a screen that isn't there yet falls back to shot-0
+    var shot = $('#stepShot img');
+    if (shot) {
+      var want = 'assets/app/step1/shot-' + n + '.png';
+      if (shot.dataset.want !== want) {
+        shot.dataset.want = want;
+        var probe = new Image();
+        probe.onload = function () { if (shot.dataset.want === want) shot.src = want; };
+        probe.onerror = function () { if (shot.dataset.want === want) shot.src = 'assets/app/step1/shot-0.png'; };
+        probe.src = want;
+      }
+    }
     var mp = $('#missionPhone');
     if (mp) {
       var mi = Math.max(0, n - 1);
@@ -930,28 +1069,59 @@
     lastN = n;
     slabEls.forEach(function (el, k) {
       el.classList.toggle('pending', k >= n);
-      el.classList.toggle('ghost', k >= n && k < n + 2 && !top);
       el.classList.toggle('today', k === n - 1 && !top);
-      el.classList.toggle('named', p >= 0.84);
     });
 
     var x, y;
-    if (top) { x = 700; y = S1.ground - 7 * S1.pitch; }
+    if (top) { x = S1.riser + 16; y = S1.ground - 7 * S1.pitch; }
     else if (n === 0) { x = 50; y = S1.ground; }
     else { x = S1.left0 + (n - 1) * S1.dx + 10; y = S1.ground - n * S1.pitch; }
-    stepOru.style.left = x + 'px';
-    stepOru.style.top = y + 'px';
     stepOru.style.setProperty('--flip', p >= 0.84 ? -1 : 1);
-
     var want = p >= 0.9 ? 2 : 1;
-    if (want !== lastStage1Img) { stopHop(); stepOru.src = 'assets/character/oreumi' + want + '.png'; lastStage1Img = want; }
+    if (want !== lastStage1Img) {
+      // reaching 2단계: the oreumi grows into the next stage's figure (the 계속 오름 scene's resting frame)
+      stopHop();
+      stepOru.src = want === 2 ? HOP2_REST : 'assets/character/oreumi1.png';
+      stepOru.classList.toggle('lv2', want === 2);
+      stepOru.style.width = want === 2 ? lv2Width() + 'px' : '';
+      stepOru.classList.remove('evolve'); void stepOru.offsetWidth;
+      if (want === 2 && lastStage1Img === 1 && !reduced) stepOru.classList.add('evolve');
+      lastStage1Img = want;
+    }
     var spot = x + ',' + y;
-    if (spot !== lastSpot) { if (lastSpot !== null && want === 1 && !reduced) playHop(); lastSpot = spot; }
+    if (spot !== lastSpot) {
+      var prev = lastSpot ? lastSpot.split(',').map(Number) : null;
+      // one layer up: jump there; anything else (going back, skipping, resting) just moves
+      if (prev && want === 1 && !reduced && y < prev[1] && prev[1] - y <= S1.pitch + 1) playHop(prev, [x, y]);
+      else if (!hopRaf) { stepOru.style.left = x + 'px'; stepOru.style.top = y + 'px'; }
+      lastSpot = spot;
+    }
+    // after growing: the next scroll sends the oreumi off to the right (toward the next stairs) before the page turns,
+    // in little hops along 2단계's tread
+    var exitT = seg(p, 0.965, 1);
+    if (exitT > 0 && want === 2) {
+      var br = parseFloat(scene.querySelector('.stage').style.getPropertyValue('--br')) || 0;
+      var hops = 4, hp = exitT * hops, f = hp - Math.floor(hp);
+      var ex = lerp(S1.riser + 16, 960 + br + 12, exitT), ey = y - 26 * Math.sin(Math.PI * f) * (exitT < 1 ? 1 : 0);
+      stepOru.style.transition = 'none';
+      stepOru.style.left = ex.toFixed(1) + 'px'; stepOru.style.top = ey.toFixed(1) + 'px';
+      stepOru.classList.remove('evolve');
+      setSrc(stepOru, HOP2[Math.min(HOP2.length - 1, Math.floor(f * HOP2.length))]);
+      lastSpot = 'exit';
+    } else if (lastSpot === 'exit') {
+      stepOru.style.transition = ''; stepOru.style.left = x + 'px'; stepOru.style.top = y + 'px'; setSrc(stepOru, want === 2 ? HOP2_REST : 'assets/character/oreumi1.png'); lastSpot = x + ',' + y;
+    }
 
     scene.classList.toggle('resting', resting);
     var zz = $('.zz', scene);
     zz.style.left = (x + 70) + 'px';
     zz.style.top = (y - 70) + 'px';
+    // 준호's speech bubble while he climbs the first layers; gone once he rests
+    var say = $('#oruSay') || (function () { var d = document.createElement('div'); d.className = 'oru-say'; d.id = 'oruSay'; d.innerHTML = '<span></span>'; $('.scene-step1 .stage').appendChild(d); return d; })(), sayTxt = resting || p >= 0.42 ? '' : ['일상 붕괴형', '씻고, 정리하고, 기상 등', '작은 미션을 수행하며'][n] || '일상 습관을 채우게 됩니다';
+    say.style.left = (x + 38) + 'px';
+    say.style.top = (y - 74) + 'px';
+    if (sayTxt) { var sp = say.firstChild; if (sp.textContent !== sayTxt) { sp.textContent = sayTxt; say.classList.remove('pop'); void say.offsetWidth; say.classList.add('pop'); } }
+    say.classList.toggle('on', !!sayTxt);
 
 
     var days = n + (p >= 0.42 ? 1 : 0);
@@ -962,16 +1132,16 @@
      S08 montage
      ====================================================== */
   var mSlabsEl = $('#mSlabs');
-  var M = [{ ground: 430, riser: 360, left0: 50, level: 1 }, { ground: 320, riser: 660, left0: 380, level: 2 }];
+  var M = [{ ground: 430, riser: 420, left0: 72, dx: 72, level: 1 }, { ground: 320, riser: 840, left0: 492, dx: 72, level: 2 }];   // 2·3단계 420 wide, 4단계 from 840; the first layer sits 72 in from its step's edge, each next one 72 further   // 2단계 starts at x 60 so all three big steps are 300 wide
   M.forEach(function (g) {
     for (var k = 0; k < 5; k++) {
       var d = document.createElement('div');
       d.className = 'slab pending';
-      d.style.left = (g.left0 + k * 54) + 'px';
-      d.style.width = (g.riser - g.left0 - k * 54) + 'px';
+      d.style.left = (g.left0 + k * g.dx) + 'px';
+      d.style.width = (g.riser - g.left0 - k * g.dx) + 'px';
       d.style.top = (g.ground - (k + 1) * 22) + 'px';
       var lv = g.level + (k + 1) / 6;              // 5 layers between two big steps
-      d.style.setProperty('--c', rampColor(lv));
+      d.style.setProperty('--c', htLayerColor(lv));
       d.style.setProperty('--c2', rampColor(lv + .12));
       d.style.setProperty('--top', rampColor(lv + .55));
       d.style.setProperty('--tc', rampText(lv));
@@ -992,36 +1162,41 @@
     return 'rgb(' + a.map(function (v, i) { return Math.round(lerp(v, b[i], u)); }).join(',') + ')';
   }
   // camera move at the end: the door grows and slides into place as the door scene's door
-  var MZ = { s: 2.3, tx: 415 - 840 * 2.3, ty: 70 - 110 * 2.3 };
+  var MZ = { s: 2.3, tx: 415 - 840 * 2.3, ty: 140 - 110 * 2.3 };   // lands on the door scene's door (415, 140)
   /* the climb as keyframes [p, x, y, hop]: a short arc onto each new layer right after it appears,
      a few steps along the tread between the two flights, then the walk to the door */
   var CLIMB = (function () {
     var k = [[0, 30, 430, 0]], x = 30, y = 430;
     function to(pa, pb, nx, ny, hop) { k.push([pa, x, y, 0]); k.push([pb, nx, ny, hop]); x = nx; y = ny; }
-    for (var i = 0; i < 5; i++) { var pi = 0.2 + i * 0.052; to(pi + 0.004, pi + 0.048, 58 + 54 * i, 430 - 22 * (i + 1), 7); }
-    to(0.47, 0.54, 400, 320, 0);
-    for (var j = 0; j < 5; j++) { var q = 0.56 + j * 0.056; to(q + 0.004, q + 0.05, 388 + 54 * j, 320 - 22 * (j + 1), 7); }
-    to(0.85, 0.92, 720, 210, 0);
+    for (var i = 0; i < 5; i++) { var pi = 0.2 + i * 0.052; to(pi + 0.004, pi + 0.048, 100 + 72 * i, 430 - 22 * (i + 1), 7); }
+    to(0.47, 0.54, 460, 320, 0);
+    for (var j = 0; j < 5; j++) { var q = 0.56 + j * 0.052; to(q + 0.004, q + 0.048, 520 + 72 * j, 320 - 22 * (j + 1), 7); }
+    to(0.85, 0.92, 836, 210, 0);
     return k;
   })();
   function climbAt(p) {
     var k = CLIMB;
-    if (p <= k[0][0]) return [k[0][1], k[0][2], 1];
+    if (p <= k[0][0]) return [k[0][1], k[0][2], 1, -1];
     for (var i = 1; i < k.length; i++) {
       if (p <= k[i][0]) {
         var a = k[i - 1], b = k[i], t = b[0] > a[0] ? (p - a[0]) / (b[0] - a[0]) : 1;
         var e = t * t * (3 - 2 * t);              // smoothstep: eases in and out
-        if (!b[3]) return [lerp(a[1], b[1], e), lerp(a[2], b[2], e), 1];   // walking along a tread
-        // stepping up: the body rises a little ahead of the forward move, with only a small lift over the edge
-        var up = Math.min(1, t * 1.6), eu = up * up * (3 - 2 * up);
-        return [lerp(a[1], b[1], e), lerp(a[2], b[2], eu) - b[3] * Math.sin(Math.PI * t), 1];
+        if (!b[3]) return [lerp(a[1], b[1], e), lerp(a[2], b[2], e), 1, -1];   // walking along a tread
+        // stepping up, like 숨고르기: squash on the spot, spring up along an arc, land
+        var q = jumpPos([a[1], a[2]], [b[1], b[2]], t);
+        return [q[0], q[1], 1, t];
       }
     }
-    var L = k[k.length - 1]; return [L[1], L[2], 1];
+    var L = k[k.length - 1]; return [L[1], L[2], 1, -1];
   }
   function updateMontage(scene, pRaw) {
     var p = clamp(pRaw / 0.85);                  // the climb runs on the first 85%
     var zoom = ease(seg(pRaw, 0.87, 1));
+    if (zoom > 0) {                              // land on the door scene's door (415, 140), measured on screen
+      var ms = scene.querySelector('.stage').getBoundingClientRect(), ds = $('.scene-door .stage').getBoundingClientRect();
+      var sm = ms.width / 960, sd = ds.width / 960;
+      if (sm > 0 && sd > 0) { var zs2 = 2.3 * sd / sm; MZ = { s: zs2, tx: (ds.left + 415 * sd - ms.left) / sm - 840 * zs2, ty: (ds.top + 140 * sd - ms.top) / sm - 110 * zs2 }; MZ.tx += 840 * zs2 - 880 * zs2; }
+    }
     var mc = $('#mCam'); mc.style.setProperty('--zs', lerp(1, MZ.s, zoom).toFixed(4)); mc.style.setProperty('--zy', (MZ.ty * zoom).toFixed(1) + 'px');
     $('#mCam').style.transform = 'translate(' + (MZ.tx * zoom).toFixed(1) + 'px,' + (MZ.ty * zoom).toFixed(1) + 'px) scale(' + lerp(1, MZ.s, zoom).toFixed(4) + ')';
     var fade = 1 - seg(zoom, 0, 0.4);
@@ -1041,12 +1216,20 @@
     });
 
     var pos = climbAt(p);
+    if (pRaw < 0.06) {                           // arriving from 숨고르기: three little hops in from the left edge
+      var et = pRaw / 0.06, hp2 = et * 3, f2 = hp2 - Math.floor(hp2);
+      pos = [lerp(-110, 30, et), 430 - 24 * Math.sin(Math.PI * f2), 1, et < 1 ? f2 : -1];
+    }
     mOru.style.left = pos[0].toFixed(1) + 'px';
     mOru.style.top = pos[1].toFixed(1) + 'px';
     mOru.style.setProperty('--sq', pos[2].toFixed(3));
 
-    var img = p >= 0.5 ? 3 : 2;
-    if (img !== lastMImg) { mOru.src = 'assets/character/oreumi' + img + '.png'; lastMImg = img; }
+    var img = 2;   // oreumi2.png throughout 2단계→3단계 (matching 숨고르기's climbing style)
+    // 2단계 & 3단계: the hop sprite plays through each step up (like 1단계's), and rests on its first frame
+    var src = pos[3] >= 0 ? HOP2[Math.min(HOP2.length - 1, Math.floor(pos[3] * HOP2.length))] : HOP2_REST;
+    setSrc(mOru, src);
+    mOru.classList.toggle('spr', true);
+    lastMImg = img;
     var name = p < 0.5 ? '2단계 둘러보기' : (p < 0.86 ? '3단계 마주하기' : '4단계 도전하기');
     var nameEl = $('#stageName');
     if (name !== lastName) {
@@ -1080,7 +1263,7 @@
      One-screen engine
      ====================================================== */
   var scenes = $$('.scene');
-  var handlers = { intro: function () {}, hook: updateHook, building: updateBuilding, wall: updateWall, step1: updateStep1, montage: updateMontage, door: updateDoor, epilogue: updateEpilogue };
+  var handlers = { intro: function (scene, p) { if (window.OreumIntro) window.OreumIntro.p = p; }, hook: updateHook, building: updateBuilding, wall: updateWall, step1: updateStep1, montage: updateMontage, door: updateDoor, epilogue: updateEpilogue };
   var starts = [], total = 0;
   scenes.forEach(function (s) { starts.push(total); total += parseFloat(s.dataset.len); });
   var END = total - 0.0001;
@@ -1122,10 +1305,19 @@
       cum.push(cum[i - 1] + Math.abs(x1 - x0) * weight((x0 + x1) / 2));
     }
     T = target;
-    tw = { from: P, to: target, t0: performance.now(), cum: cum, dur: reduced ? 0 : clamp(560 + 340 * cum[TN], 700, 6500) };
+    // data-pace on a scene: how much slower its moves play (1 = normal, 2 = twice as slow)
+    // data-even on a scene: play its moves at a steady speed (only the very start and end ease), so every jump takes the same time
+    var pace = 1, even = false; scenes.forEach(function (sc, si) { var lo = starts[si], hi = lo + parseFloat(sc.dataset.len); if (Math.max(P, target) > lo && Math.min(P, target) < hi) { pace = Math.max(pace, parseFloat(sc.dataset.pace) || 1); even = even || !!sc.dataset.even; } });
+    tw = { from: P, to: target, t0: performance.now(), cum: cum, even: even, dur: reduced ? 0 : clamp(560 + 340 * cum[TN], 700, 6500) * pace };
     kick();
   }
   // where along the tween we are, given the share of (weighted) distance covered
+  function evenEase(t) {                        // steady in the middle, a short ease at each end (8%)
+    var a = .08, v = 1 / (1 - a);              // speed in the middle
+    if (t < a) return v * t * t / (2 * a);
+    if (t > 1 - a) return 1 - v * (1 - t) * (1 - t) / (2 * a);
+    return v * (t - a / 2);
+  }
   function tweenAt(u) {
     var c = tw.cum, w = u * c[TN], i = 1;
     while (i < TN && c[i] < w) i++;
@@ -1153,6 +1345,7 @@
       var a = parseFloat(el.dataset.in), b = el.dataset.out ? parseFloat(el.dataset.out) : 1.01;
       el.classList.toggle('on', p >= a && p < b);
     });
+    if (window.OreumIntro && scene.dataset.scene !== 'intro') window.OreumIntro.p = 1;   // the start screen's star has become the hook's dot
     handlers[scene.dataset.scene](scene, p);
 
     var onLight = (scene.dataset.scene === 'door' && p > 0.56) || scene.dataset.scene === 'epilogue';
@@ -1170,7 +1363,7 @@
   function tick(now) {
     if (tw) {
       var k = tw.dur ? clamp((now - tw.t0) / tw.dur) : 1;
-      P = tweenAt(ease(k));
+      P = tweenAt(tw.even ? evenEase(k) : ease(k));
       if (k >= 1) { P = tw.to; tw = null; }
     }
     render();
@@ -1223,9 +1416,12 @@
   $('#prevBtn').addEventListener('click', function () { step(-1); });
   $('#homeLink').addEventListener('click', function (e) { e.preventDefault(); tweenTo(0); });
 
+  // jump straight to a point of the story (used by the review tool js/devnav.js; nothing else calls it)
+  window.OreumStory = { seek: function (x) { tw = null; T = P = clamp(x, 0, END); render(); }, now: function () { return T; } };
   window.addEventListener('resize', function () { fitStages(); sizeHook(); });
   if (document.fonts && document.fonts.ready) document.fonts.ready.then(fitStages);
   fitStages();
+  htSteps.forEach(function (q) { drawHalftone(q[0], q[1]); });   // again, now that the screen's bottom edge (--bb) is known
   sizeHook();
   render();
   requestAnimationFrame(hookLoop);

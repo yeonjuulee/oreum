@@ -2033,6 +2033,169 @@ body.info-page .hscroll .item .shot { display: block; width: 230px; height: auto
 .wall-oru.w4 { width: 48px; }
 .wall-oru.w5 { width: 50px; }
 
+/* dot drawings (js/dots.js) replace the pixel art: draw smooth, not pixelated */
+.scene-intro canvas, .apt-px.apt-dot { image-rendering: auto; }
+
 /* 문이 열린다 · 아직 방 안의 누군가: the three programs sit under the door, a little larger (same style) */
 .scene-door .programs, .scene-epilogue .programs { top: 346px; gap: 16px; }
 .scene-door .program, .scene-epilogue .program { padding: 7px 20px; font-size: 15px; }
+
+/* ===== start screen: the app's splash on a phone held in bed (js/intro.js places and scales it);
+   its star rounds off into the hook's first dot ===== */
+.scene-intro { overflow: hidden; }
+.intro-phone { position: absolute; left: 0; top: 0; width: 430px; height: 902px; border-radius: 68px; background: #0F0D0C; transform-origin: 0 0; box-shadow: inset 0 0 0 1.5px rgba(255, 248, 242, .14), 0 40px 120px rgba(0, 0, 0, .55), 0 0 160px rgba(255, 170, 110, .08); will-change: transform, opacity; }
+.ip-screen { position: absolute; inset: 14px; border-radius: 54px; overflow: hidden; background: #fff; }
+.ip-island { position: absolute; left: 153px; top: 25px; width: 124px; height: 36px; border-radius: 18px; background: #0F0D0C; }
+.ip-ui { position: absolute; left: 0; top: 0; width: 402px; height: 874px; color: #141414; font-family: -apple-system, BlinkMacSystemFont, "Pretendard", "Noto Sans KR", sans-serif; }
+.ip-ui > * { position: absolute; margin: 0; }
+.ip-time { left: 52px; top: 21px; font-size: 17px; font-weight: 600; letter-spacing: -.01em; }
+.ip-icons { left: 288px; top: 26px; width: 78px; height: 13px; fill: currentColor; }
+.ip-word { left: 142px; top: 444px; width: 116px; height: auto; filter: brightness(0); opacity: .9; }
+.ip-tag, .ip-login { left: 0; width: 100%; text-align: center; font-size: 13px; color: #85807C; }
+.ip-tag { top: 473px; }
+.ip-btn { left: 30px; top: 714px; width: 342px; height: 56px; border-radius: 12px; background: var(--orange); color: #fff; display: flex; align-items: center; justify-content: center; font-size: 14px; font-weight: 700; }
+.ip-login { top: 789px; }
+.ip-login b { margin-left: 6px; color: #222; }
+.ip-home { left: 112px; top: 841px; width: 178px; height: 5px; border-radius: 3px; background: #CFCFCF; }
+.intro-photo { display: none; position: absolute; left: 0; top: 0; max-width: none; transform-origin: 0 0; will-change: transform, opacity; filter: brightness(.52) saturate(.85); }
+.scene-intro.held .intro-photo { display: block; }
+.scene-intro.held .intro-phone { width: 402px; height: 874px; border-radius: 48px; background: none; box-shadow: none; }
+.scene-intro.held .ip-screen { inset: 0; border-radius: 48px; }
+.scene-intro.held .ip-island { left: 139px; top: 10px; width: 124px; height: 34px; }
+.scene-intro #introStar { z-index: 1; pointer-events: none; image-rendering: auto; }
+
+/* slogan beside the logo in the top bar */
+.topbar .brand { display: flex; align-items: center; gap: 14px; min-width: 0; }
+.topbar .brand > a { display: flex; }
+.topbar .slogan { padding-left: 14px; border-left: 1px solid currentColor; font-size: 14px; font-weight: 500; line-height: 1; letter-spacing: -.01em; white-space: nowrap; opacity: .75; }
+@media (max-width: 640px) { .topbar .brand { gap: 10px; } .topbar .slogan { padding-left: 10px; font-size: 12px; } }
+@media (max-width: 480px) { .topbar .slogan { display: none; } }
+
+/* ===== 1단계 숨고르기: copy top-left, the camera phone in the middle, the stairs low on the right ===== */
+.oru-say { position: absolute; left: 0; top: 0; z-index: 4; transform: translate(-22px, -100%) scale(.9); transform-origin: 22px 100%; opacity: 0; pointer-events: none;
+  transition: left .8s cubic-bezier(.4, 0, .2, 1), top .8s cubic-bezier(.4, 0, .2, 1), opacity .3s ease, transform .3s ease; }
+.oru-say span { display: block; padding: 9px 16px; border-radius: 18px 18px 18px 4px; background: #FFF8F2; color: #1C1917; font: 700 16px/1.3 var(--font-body); white-space: nowrap; box-shadow: 0 6px 18px rgba(0, 0, 0, .3); }
+.oru-say.on { opacity: 1; transform: translate(-22px, -100%) scale(1); }
+.oru-say.pop span { animation: sayPop .35s ease-out; }
+@keyframes sayPop { 0% { transform: scale(.85); } 70% { transform: scale(1.04); } 100% { transform: none; } }
+@media (min-width: 901px) and (min-aspect-ratio: 4/3) {
+  .scene-step1 .stage-wrap.bleed { position: absolute; left: 758px; top: 359px; width: 662px; height: 373px; }
+  .scene-step1 .mission-phone { position: absolute; left: 432px; top: 191px; zoom: 1.153 !important; }
+  .scene-step1 .line h2 { font-size: 32px; white-space: nowrap; }
+  .scene-step1 .dday { display: none; }
+}
+@media (prefers-reduced-motion: reduce) { .oru-say, .oru-say.pop span { transition: none; animation: none; } }
+
+/* 문 밖의 벽: one flat wall (no tile seams until it breaks), bigger support doors with clearer signs */
+.blk:not(.lit) { width: 16px; height: 16px; border-radius: 0; }
+.wall-door { top: 200px; width: 44px; height: 60px; }
+.wall-door .wd-open { border-radius: 3px 3px 0 0; }
+.wall-door .ld-sign { bottom: calc(100% + 10px); padding: 5px 10px; border-radius: 9px; font: 800 12px/1.3 var(--font-body); color: #1C1917; background: #FFF8F2; border: 0; box-shadow: 0 4px 14px rgba(0, 0, 0, .35); }
+@media (min-width: 901px) and (min-aspect-ratio: 4/3) { .scene-wall .stage { left: calc(50% - 30px); } .scene-wall > .copy { position: relative; z-index: 3; } }
+.m-oru.spr { width: 80px; }   /* 2단계 hop sprite frames (380 × 200, feet on the bottom edge) */
+
+/* ===== stairs, design F: halftone big steps (drawn by story.js), flat mission slabs ===== */
+.solid.ht, .m-s2.ht, .m-s3.ht, .m-s4.ht, .door-floor.ht { -webkit-mask-image: none; mask-image: none; box-shadow: none; background-blend-mode: normal; }
+.solid.ht::before { content: none; }
+.slab:not(.ghost), .slab { background: var(--c); background-blend-mode: normal; border-radius: 0; box-shadow: inset 0 -1px 0 rgba(28, 25, 23, .28); }
+.slab.today:not(.pending) { background: #FFDCC4; }
+.slab .habit { color: #2A1608; }
+
+/* story controls: the chapter name and the ↑ ↓ buttons are gone from the bottom (wheel, swipe and keys still move the story);
+   the progress bar runs along the bottom edge of the top bar */
+.story-ui .chapter, .story-ui .ui-btns { display: none; }
+.story-ui { pointer-events: none; padding: 0; }
+.story-page .topbar .track { position: absolute; left: 0; right: 0; bottom: 0; height: 2px; border-radius: 0; flex: none; background: color-mix(in srgb, currentColor 16%, transparent); }
+
+/* ===== 1단계 숨고르기 (desktop): title top-left, the app screen in the middle, the stairs to the right ===== */
+.step-shot { display: none; }
+@media (min-width: 901px) and (min-aspect-ratio: 4/3) {
+  .scene-step1 .mission-phone { display: none; }
+  .scene-step1 .step-shot { display: block; position: absolute; left: 454px; top: 238px; width: 256px; z-index: 2; }
+  .scene-step1 .step-shot img { display: block; width: 100%; height: auto; filter: drop-shadow(0 30px 50px rgba(0, 0, 0, .45)); }
+  .scene-step1 .line .kicker { display: none; }
+  .scene-step1 .line h2 { font-size: 36px; font-weight: 600; line-height: 1.4; }
+  .scene-step1 .stage-wrap.bleed { left: 850px; top: 305px; width: 500px; height: 281px; }
+}
+@media (max-width: 900px), (max-aspect-ratio: 4/3) { .step-shot { display: none !important; } }
+
+/* the bottom progress bar is gone: give its room back, so each picture sits in the middle of the free screen
+   instead of riding high (the titles keep their place at 20% from the top) */
+@media (min-width: 901px) and (min-aspect-ratio: 4/3) {
+  .story-page .scene { padding-bottom: calc(24px + env(safe-area-inset-bottom, 0px)); }
+  .hint { bottom: calc(22px + env(safe-area-inset-bottom, 0px)); }
+  /* 1단계 숨고르기: bigger stairs; the gap to the phone stays, 2단계 runs off the right edge so 1단계 gets the room */
+  .scene-step1 .stage-wrap.bleed { left: 850px; top: 262px; width: 736px; height: 414px; }
+  .scene-step1 .step-shot { top: 252px; }
+  .oru-say span { font-size: 18px; padding: 10px 18px; }
+}
+
+/* 계속 오름: three big steps of the same width (300); no stage name at the top */
+.m-s2 { left: 60px; width: 300px; }
+.stage-name { display: none; }
+
+/* 문이 열린다 · 아직 방 안의 누군가: the door and its programs sit 70px lower (the picture is centred in the free screen),
+   and the stage is no longer cut off at its top edge, so the door's glow fades out softly all round */
+.big-door { top: 140px; }
+.scene-door .programs, .scene-epilogue .programs { top: 416px; }
+.scene-door .stage-wrap.bleed .stage, .scene-epilogue .stage-wrap.bleed .stage { clip-path: inset(-400px calc(-1px * var(--br, 0)) calc(-1px * var(--bb, 0)) 0); }
+
+/* 쉬었음 인구: the numbers in the titles in orange */
+.scene-hook .hook-q2 em { color: var(--orange) !important; }
+
+/* 1단계 숨고르기: the oreumi sits on the layer (its image has a little empty space under it) */
+.step-oru { margin-top: 6px; }
+/* reaching 2단계: a small grow-and-settle into the next figure */
+.step-oru.lv2 { width: 84px; }
+.step-oru.evolve { animation: oruEvolve .9s cubic-bezier(.3, 1.4, .5, 1) both; transform-origin: 50% 100%; }
+@keyframes oruEvolve {
+  0% { transform: translateY(-100%) scaleX(var(--flip, 1)) scale(.55); filter: brightness(2.2); opacity: .2; }
+  45% { transform: translateY(-100%) scaleX(var(--flip, 1)) scale(1.12); filter: brightness(1.5); opacity: 1; }
+  100% { transform: translateY(-100%) scaleX(var(--flip, 1)) scale(1); filter: none; opacity: 1; }
+}
+@media (prefers-reduced-motion: reduce) { .step-oru.evolve { animation: none; } }
+
+/* the bottom bar is gone: everything that was laid out above it comes down by about half its height (36px),
+   titles included, so the screen is balanced top to bottom again */
+@media (min-width: 901px) and (min-aspect-ratio: 4/3) {
+  .scene > .copy { margin-top: calc(20.2 * var(--vh, 1vh) - 52px - env(safe-area-inset-top, 0px)); }
+  .scene-intro .intro-copy { top: calc(19.8 * var(--vh, 1vh) + 36px); }
+  .scene-hook .hook-copy { top: calc(20.2 * var(--vh, 1vh) + 36px) !important; }
+  .scene-step1 .step-shot { top: 278px; left: 462px; width: 240px; }
+  .scene-step1 .stage-wrap.bleed { top: 298px; }
+}
+
+/* 문 밖의 벽: the stairs left after the wall breaks, drawn as halftone dots (painted by story.js) */
+.wall-ht { position: absolute; opacity: 0; transition: opacity .5s ease; pointer-events: none; }
+
+/* 1단계 숨고르기: 1단계 is wider (to x 680) so the seven layers step back 76px each; 2단계 is narrower */
+.solid-1 { width: 680px; }
+.solid-2 { left: 680px; }
+
+/* 계속 오름: no light band above the steps (as in 숨고르기) */
+.tiles.ht::before, .tiles::before { content: none; }
+
+/* doors: the dark frame runs round the top and sides only, not along the floor */
+.wd-open { inset: -2px -2px 0 -2px; border: 2px solid #332E2A; border-bottom: 0; box-sizing: border-box;
+  box-shadow: 0 0 14px 2px rgba(255, 233, 217, calc(.25 + var(--lit, 0) * .5)); }
+.arch-door .wd-open { box-shadow: 0 0 calc(12px + var(--open, 0) * 46px) calc(var(--open, 0) * 10px) rgba(255, 233, 217, calc(.25 + var(--open, 0) * .45)); }
+.big-door .wd-open { inset: -3px -3px 0 -3px; border-width: 3px 3px 0; box-shadow: 0 0 calc(20px + var(--open, 0) * 90px) calc(var(--open, 0) * 24px) rgba(255, 233, 217, calc(.25 + var(--open, 0) * .5)); }
+.scene-door.flooded .big-door .wd-open, .scene-epilogue .big-door .wd-open { border-color: rgba(51, 46, 42, .25); box-shadow: 0 0 60px 20px rgba(255, 182, 130, .35); }
+@media (min-width: 901px) and (min-aspect-ratio: 4/3) {
+  /* a touch smaller, so more of 2단계 shows at the right edge now that 1단계 is wider (ground stays at the same height) */
+  .scene-step1 .stage-wrap.bleed { top: 314px; width: 700px; height: 394px; }
+}
+
+/* 계속 오름: three big steps 360 wide (0 / 360 / 720) so the layers can step back 72px each;
+   the picture sits 60px further left on wide screens so 4단계 still shows as wide as the others */
+.m-s2 { left: 0; width: 360px; }
+.m-s3 { left: 360px; width: 360px; }
+.m-s4 { left: 720px; }
+@media (min-width: 901px) and (min-aspect-ratio: 4/3) { .scene-montage .stage { left: calc(50% - 60px); } }
+
+/* 계속 오름: 2·3단계 wider (420), 4단계 narrower (from 840), so the five layers on each step can step back 72px,
+   starting 72px in from the step's own edge; the door moves onto 4단계 with it */
+.m-s2 { left: 0; width: 420px; }
+.m-s3 { left: 420px; width: 420px; }
+.m-s4 { left: 840px; }
+.m-door { left: 880px; }

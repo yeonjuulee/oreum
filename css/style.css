@@ -2199,3 +2199,37 @@ body.info-page .hscroll .item .shot { display: block; width: 230px; height: auto
 .m-s3 { left: 420px; width: 420px; }
 .m-s4 { left: 840px; }
 .m-door { left: 880px; }
+
+/* 계속 오름: the 3단계 오르미 (SVG, animated by story.js) */
+.m3-oru { position: absolute; left: 0; top: 0; width: calc(361px * 84 / 321); opacity: 0; pointer-events: none; will-change: transform; }
+.m3-oru svg { display: block; width: 100%; height: auto; overflow: visible; }
+.m3-oru.pop svg { animation: m3Grow .9s cubic-bezier(.3, 1.4, .5, 1) both; transform-origin: 50% 92%; }
+@keyframes m3Grow { 0% { transform: scale(.6); filter: brightness(2.2); opacity: .2; } 45% { transform: scale(1.12); filter: brightness(1.5); opacity: 1; } 100% { transform: none; filter: none; opacity: 1; } }
+@media (prefers-reduced-motion: reduce) { .m3-oru.pop svg { animation: none; } }
+
+/* 1·2단계 SVG 오르미 (숨고르기, 계속 오름 2단계) — the img boxes stay for positioning only */
+.step-oru { visibility: hidden; }
+.svg-oru { position: absolute; left: 0; top: 0; opacity: 0; pointer-events: none; will-change: transform; z-index: 3; }
+.svg-oru svg { display: block; width: 100%; height: auto; overflow: visible; transform-origin: 50% 92%; }
+.svg-oru.pop svg { animation: m3Grow .9s cubic-bezier(.3, 1.4, .5, 1) both; }
+@media (prefers-reduced-motion: reduce) { .svg-oru.pop svg { animation: none; } }
+
+/* 문 밖의 벽: signs above the doors styled like the 문이 열린다 door sign (size kept) */
+.wall-door .ld-sign { font: 900 12px/1.4 var(--font-body); color: var(--navy); background: var(--sand); border: 1px solid transparent; border-radius: 999px; padding: 3px 10px; box-shadow: none; }
+
+/* 문 밖의 벽: 1F–3F are SVG oreumi now (the imgs only hold their places) */
+.scene-wall .wall-oru.w1, .scene-wall .wall-oru.w2, .scene-wall .wall-oru.w3 { visibility: hidden; }
+.scene-wall .svg-oru, .scene-wall .wall-m3 { position: absolute; left: 0; top: 0; z-index: auto; }
+.scene-wall .wall-oru.w4, .scene-wall .wall-oru.w5 { visibility: hidden; }   /* 4F is the 4단계 SVG; 5F left out for now */
+.scene-wall .wall-o4 { position: absolute; left: 0; top: 0; }
+
+/* 문 밖의 벽: the 4-storey apartment SVG (temporary) replaces the old building; the old pieces stay in the markup, hidden */
+.scene-wall .corner, .scene-wall .terrace, .scene-wall .t-door { display: none; }
+.scene-wall .apt { position: absolute; left: 0; top: calc(500px - 4192px * 256 / 3042); width: 256px; height: auto; pointer-events: none; }
+
+/* 두 개의 방: vector rooms with a fine dot screen; the 1·2단계 SVG oreumi */
+.room .room-glow { mix-blend-mode: screen; pointer-events: none; }
+.room-a .r-oru { left: 425px; top: auto; bottom: calc(540px - 482px); width: 110px; }   /* sitting on the floor */
+.room-a .toss { left: 0; top: 0; width: 960px; height: 540px; pointer-events: none; }
+.room-a .toss-i { position: absolute; left: 0; top: 0; width: 24px; height: 24px; opacity: 0; will-change: transform, opacity; }
+.room .r-oru svg { display: block; width: 100%; height: auto; overflow: visible; }

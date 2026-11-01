@@ -543,7 +543,7 @@
   ];
   var roomOru = $('#roomOru'), sigh = $('#sigh');
   // 2층 방 바닥 위의 길: 방 안쪽 → 현관 앞 → 돌아서 몇 걸음 (stage px)
-  var RB = { start: [330, 424], door: [630, 424], back: [540, 424] };
+  var RB = { start: [330, 438], door: [630, 438], back: [540, 438] };   // y: where the bed frame's legs meet the floor
   /* pixel prelude → vector: the apartment first appears as pixel art, then on scroll it "resolves" into
      the vector drawing through a mosaic whose blocks shrink from 24px to 1px */
   var aptPx = $('#aptPx'), aptUp = $('#aptUp'), aptArt = $('.apt-art'), pxCtx = aptPx.getContext('2d'), upCtx = aptUp.getContext('2d');
@@ -613,19 +613,77 @@
       apt.style.setProperty('--tx', CAM[ph].tx + 'px');
       apt.style.setProperty('--ty', CAM[ph].ty + 'px');
     }
-    // 2층 방: 현관까지 걸어가서 → 멈춰 한숨 → 돌아선다
-    var walk = ease(seg(p, 0.68, 0.78)), back = ease(seg(p, 0.92, 1));
-    var x = lerp(lerp(RB.start[0], RB.door[0], walk), RB.back[0], back);
-    var y = lerp(lerp(RB.start[1], RB.door[1], walk), RB.back[1], back);
-    var sighing = p >= 0.8 && p < 0.94;
+    // 2층 방: 현관 앞까지 걸어간 뒤(스크롤), 문 앞을 왔다 갔다 서성인다(실시간, roomPace)
+    RBS.p = p;
+    if (p >= 0.78) { if (RBS.t0 === null) RBS.t0 = performance.now(); return; }
+    RBS.t0 = null;
+    var walk = ease(seg(p, 0.68, 0.78));
+    var x = lerp(RB.start[0], RB.door[0], walk), y = RB.start[1];
+    var bob = walk > 0 && walk < 1 ? Math.abs(Math.sin(walk * Math.PI * 6)) * 5 : 0;
+    roomPose(x, y - bob, 1, 1);
+    sigh.classList.remove('on');
+  }
+  function roomPose(x, y, flip, squash) {
     roomOru.style.setProperty('--x', x.toFixed(1) + 'px');
     roomOru.style.setProperty('--y', y.toFixed(1) + 'px');
-    roomOru.style.setProperty('--flip', p >= 0.92 ? -1 : 1);
-    roomOru.style.setProperty('--squash', sighing ? 0.93 : 1);
+    roomOru.style.setProperty('--flip', flip);
+    roomOru.style.setProperty('--squash', squash.toFixed(3));
     sigh.style.setProperty('--x', (x - 40).toFixed(1) + 'px');
     sigh.style.setProperty('--y', (y - 124).toFixed(1) + 'px');
-    sigh.classList.toggle('on', sighing);
   }
+  /* 1층: sitting on the floor, the oreumi tosses a piece of trash over its shoulder every few seconds (real time).
+     Its body winds up (squash, lean back, spikes in), flings (stretch, lean forward, spikes out), settles; the trash flies
+     in an arc, lands with a little bounce, lies there a moment, fades. */
+  var TOSS = { svg: $('#roomOruA svg'), items: $$('#roomToss .toss-i'), t0: null, CYC: 3400 };
+  if (TOSS.svg) { TOSS.all = TOSS.svg.querySelector('.all'); TOSS.hair = TOSS.svg.querySelector('.hair'); TOSS.face = TOSS.svg.querySelector('.face'); }
+  var TOSS_TO = [[690, 512], [742, 524], [612, 524]];
+  function tossPose(o) {
+    var sx = 1 - o.sq * .55, sy = 1 + o.sq;
+    TOSS.all.setAttribute('transform', 'translate(149 161) skewX(' + o.lean.toFixed(2) + ') scale(' + sx.toFixed(3) + ' ' + sy.toFixed(3) + ') translate(-149 -161)');
+    TOSS.hair.setAttribute('transform', 'translate(149 161) scale(' + (1 + o.fluff * .08).toFixed(3) + ' ' + (1 + o.fluff * .05).toFixed(3) + ') translate(-149 -161)');
+    TOSS.face.setAttribute('transform', 'translate(' + (o.look || 0).toFixed(1) + ' ' + (o.face || 0).toFixed(1) + ')');
+  }
+  (function roomToss(now) {
+    var sc = $('.scene-building');
+    if (TOSS.svg && sc.classList.contains('active') && sc.dataset.phase === '1' && !reduced) {
+      if (TOSS.t0 === null) TOSS.t0 = now + 1750;   // the room fades in after .75s; the first toss starts 1s after that
+      if (now < TOSS.t0) { tossPose({ sq: Math.sin(now / 760) * .02, lean: 0, fluff: 0, face: 0, look: 0 }); TOSS.items.forEach(function (el) { el.style.opacity = 0; }); requestAnimationFrame(roomToss); return; }
+      var e = now - TOSS.t0, n = Math.floor(e / TOSS.CYC), t = e % TOSS.CYC, o = { sq: Math.sin(now / 760) * .02, lean: 0, fluff: 0, face: 0, look: 0 };
+      var eo = function (v) { return 1 - Math.pow(1 - v, 3); };
+      if (t < 380) { var w = eo(t / 380); o.sq = -.16 * w; o.lean = -5 * w; o.fluff = -.4 * w; o.face = 2 * w; o.look = -4 * w; }
+      else if (t < 560) { var u = (t - 380) / 180; o.sq = -.16 + .3 * Math.sin(Math.PI * u * .5); o.lean = lerp(-5, 9, eo(u)); o.fluff = Math.sin(Math.PI * u); o.look = lerp(-4, 6, u); }
+      else if (t < 1200) { var v = (t - 560) / 640, b = Math.exp(-4 * v) * Math.cos(9 * v); o.sq = .12 * b; o.lean = 9 * Math.pow(1 - v, 2); o.fluff = .3 * b; o.look = 6 * (1 - v); }
+      tossPose(o);
+      var it = TOSS.items[n % TOSS.items.length], to = TOSS_TO[n % TOSS_TO.length], from = [492, 436];
+      TOSS.items.forEach(function (el) { if (el !== it) el.style.opacity = 0; });
+      if (t < 470) it.style.opacity = 0;
+      else {
+        var f = Math.min(1, (t - 470) / 650), x = lerp(from[0], to[0], f), y = lerp(from[1], to[1], f) - 110 * Math.sin(Math.PI * f), rot = 620 * f;
+        if (f >= 1) { var g = (t - 1120) / 160; y = to[1] - (g < 1 ? 10 * Math.sin(Math.PI * g) : 0); rot = 620; }
+        it.style.transform = 'translate(' + (x - 12).toFixed(1) + 'px,' + (y - 12).toFixed(1) + 'px) rotate(' + rot.toFixed(0) + 'deg)';
+        it.style.opacity = t > 3000 ? Math.max(0, 1 - (t - 3000) / 300) : 1;
+      }
+    } else if (TOSS.svg) TOSS.t0 = null;
+    requestAnimationFrame(roomToss);
+  })(performance.now());
+  /* pacing in front of the door: a few steps right to the door, a stop (a sigh), a few steps back, a short stop, again */
+  var RBS = { p: 0, t0: null };
+  var PACE = [[0, 1200, RB.door[0], RB.door[0] + 50], [1200, 2100, RB.door[0] + 50, RB.door[0] + 50], [2100, 3700, RB.door[0] + 50, RB.door[0] - 90], [3700, 4300, RB.door[0] - 90, RB.door[0] - 90], [4300, 5000, RB.door[0] - 90, RB.door[0]]];
+  (function roomPace(now) {
+    if (RBS.t0 !== null && $('.scene-building').classList.contains('active')) {
+      var t = reduced ? 1500 : (now - RBS.t0) % 5000, k = 0;
+      while (k < PACE.length - 1 && t >= PACE[k][1]) k++;
+      var S = PACE[k], u = (t - S[0]) / (S[1] - S[0]), moving = S[2] !== S[3];
+      var x = lerp(S[2], S[3], moving ? (u < .5 ? 2 * u * u : 1 - 2 * (1 - u) * (1 - u)) : 0);
+      var steps = Math.abs(S[3] - S[2]) / 22, ph = u * steps * Math.PI;
+      var bob = moving ? Math.abs(Math.sin(ph)) * 5 : 0;
+      var flip = k === 2 || (k === 3) ? -1 : 1;                 // faces the way it walks; at the door it faces the door
+      var squash = moving ? 1 - Math.abs(Math.cos(ph)) * .04 : (k === 1 ? .94 + .02 * Math.sin(u * Math.PI) : 1 + Math.sin(now / 500) * .01);
+      roomPose(x, RB.door[1] - bob, flip, squash);
+      sigh.classList.toggle('on', k === 1 && u > .1 && u < .95);
+    }
+    requestAnimationFrame(roomPace);
+  })(performance.now());
 
   /* ======================================================
      S03–S04 wall: the youths step out onto their terraces. Support doors stand on top of the wall.
@@ -697,7 +755,9 @@
   doors.forEach(function (d, k) { d.style.left = (DOOR_L + k * DOOR_GAP) + 'px'; });
 
   // the youths: feet points on their terraces, and where they land on the stairs
-  var TX = 222, FH = 70.4, FLOOR = [0, 1, 2, 3, 4].map(function (n) { return 494 - FH * n; });   // 1F–5F terrace floors (5-storey building)
+  // the 4-storey apartment (assets/building/apartment.svg, 3042 × 4236 drawn at 256px wide, its base on the ground):
+  // balcony floors 1F–4F (FLOOR[4] only keeps the unused 5F code quiet)
+  var TX = 226, APT_S = 256 / 3042, FLOOR = [3882.93, 2951.61, 2020.29, 1089.96].map(function (y) { return 500 - (4192 - y) * APT_S; }).concat([160]);
   var oru1 = $('#wallOru'), oru2 = $('#wallOru2'), oru3 = $('#wallOru3'), oru4 = $('#wallOru4'), oru5 = $('#wallOru5');
   var WALL_UP = GROUND - TOP;                   // the wall (and its doors) start below the ground and rise this far
   function put(el, x, y, o, sc) {
@@ -712,6 +772,157 @@
   var ZS = 154 / (3 * B);
   var ZOOM = { s: ZS, tx: 620 - (X0 + SW * B) * ZS, ty: 420 - (GROUND - 3 * B) * ZS };
 
+  /* 1F · 2F (1·2단계 SVG) and 3F (3단계 SVG) on the wall scene. updateWall sets where each one is and what it is doing;
+     this loop draws them every frame, so breathing, blinking and the shiver keep going while the page rests. */
+  var W1 = null, W2 = null, W3 = null, W4 = null, WS = { p: 0, fade: 1, o: 0 }, WT = { climb: null, tryT: null };
+  var O4_SVG = "<svg viewBox=\"-20 -20 322 322\" aria-hidden=\"true\"><g id=\"o4-all\"><g id=\"o4-hair\"><path d=\"M258.207 173.217C258.837 177.087 258.947 182.897 256.157 189.217C250.877 201.187 238.557 205.717 236.897 206.277C236.767 206.317 236.707 206.337 236.707 206.337C236.707 206.337 237.247 207.477 237.737 209.377C238.647 212.937 239.397 219.147 236.127 225.497C231.117 235.227 218.807 237.377 218.807 237.377V237.397C218.817 237.537 218.827 238.367 218.297 239.497C217.037 242.187 212.667 246.537 197.717 247.017C196.997 247.037 196.217 247.067 195.367 247.107C179.517 247.727 142.347 250.047 142.347 250.047C142.347 250.047 116.507 251.297 101.307 249.767C98.0468 249.437 95.2768 248.987 93.3568 248.367C83.0268 245.037 78.9568 237.127 78.5568 236.297C78.5268 236.247 78.5168 236.227 78.5168 236.227C78.5168 236.227 77.1568 236.407 74.8968 236.507C66.8368 236.877 47.3768 236.307 38.2268 223.307C27.4568 208.027 34.7568 195.597 35.0268 195.147H35.0368C35.0368 195.147 34.9968 195.137 34.9268 195.117H34.8968C34.2468 195.027 31.4168 194.577 27.6168 193.127C18.1468 189.507 2.67676 179.647 0.236764 153.567C-3.02324 118.647 28.4168 111.087 30.9368 110.537C31.0468 110.517 31.0967 110.507 31.0967 110.507C31.0967 110.507 29.0669 107.267 27.2069 102.057C23.5469 91.8467 20.5568 74.0867 34.8168 58.3267C58.8268 31.7867 91.0268 52.2867 91.0268 52.2867C91.0268 52.2867 91.0268 52.2367 91.0168 52.1467C90.9568 51.1367 90.6668 45.2567 92.1268 37.7867C94.8468 23.9367 103.607 4.60668 131.007 0.686679C178.007 -6.02332 192.207 38.5867 193.017 41.2867C193.017 41.2867 193.017 41.3167 193.027 41.3267C193.047 41.3867 193.057 41.4167 193.057 41.4167C193.057 41.4167 193.127 41.2967 193.277 41.0767C194.157 39.7567 197.677 34.9367 203.787 32.3567C208.257 30.4767 214.097 29.7967 221.287 32.5667C249.877 43.5867 250.127 86.9267 250.127 86.9267C250.127 86.9267 250.147 86.9267 250.197 86.9267C250.697 86.8667 253.847 86.5467 257.997 87.3267C264.157 88.4667 272.517 91.9967 277.687 102.337C293.907 134.777 256.907 168.377 256.907 168.377H256.917C256.977 168.547 257.737 170.357 258.207 173.227V173.217Z\" fill=\"#FF6A00\"/><path d=\"M219.477 206.176C227.277 222.616 218.057 230.126 218.057 230.126L207.097 231.996C205.617 240.716 200.067 245.006 195.367 247.106C179.517 247.726 142.347 250.046 142.347 250.046C142.347 250.046 116.507 251.296 101.307 249.766C101.627 248.466 101.857 246.956 101.487 246.096C100.727 244.376 91.5471 246.306 85.6571 237.356C75.0271 221.196 92.417 200.246 102.717 197.316C89.537 189.546 87.2871 167.176 87.2871 167.176L223.537 142.516C234.807 169.946 205.327 192.476 205.327 192.476C205.327 192.476 215.547 197.876 219.477 206.176Z\" fill=\"#E04004\"/><path d=\"M203.787 32.3555C201.597 47.1855 197.757 61.4055 192.127 74.9555C194.017 62.6255 194.807 51.0755 193.027 41.3255C193.017 41.3255 193.017 41.2955 193.017 41.2855L203.787 32.3555Z\" fill=\"#E04004\"/><path d=\"M257.997 87.3165C253.647 96.3165 248.477 104.727 242.447 112.517C246.477 103.467 249.497 94.7665 250.197 86.9165C250.697 86.8565 253.847 86.5365 257.997 87.3165Z\" fill=\"#E04004\"/><path d=\"M256.917 168.377C252.787 172.007 247.087 174.947 240.697 177.587C246.637 176.687 252.467 175.217 258.207 173.217L256.917 168.377Z\" fill=\"#E04004\"/><path d=\"M237.738 209.378C233.568 209.708 229.438 209.628 225.348 209.128C229.698 208.608 233.698 207.778 236.828 206.258L236.898 206.278L237.738 209.378Z\" fill=\"#E04004\"/><path d=\"M218.297 239.496C216.237 237.706 214.407 235.726 212.807 233.566C214.837 235.256 216.847 236.656 218.807 237.396L218.297 239.496Z\" fill=\"#E04004\"/><path d=\"M111.227 76.3771C104.907 66.5271 98.3065 57.9071 91.0165 52.1471C90.9565 51.1371 90.6665 45.2571 92.1265 37.7871C100.197 49.9971 106.607 62.8471 111.227 76.3771Z\" fill=\"#E04004\"/><path d=\"M59.507 111.707C49.097 109.987 39.3369 109.217 31.0869 110.637L30.937 110.537C31.047 110.517 31.0969 110.507 31.0969 110.507C31.0969 110.507 29.067 107.267 27.207 102.057C38.427 104.107 49.197 107.287 59.507 111.707Z\" fill=\"#E04004\"/><path d=\"M35.0272 195.147L35.1172 195.127C38.7372 189.627 44.4272 184.427 51.0072 179.367C42.7572 182.997 34.9672 187.607 27.6172 193.127L35.0272 195.147Z\" fill=\"#E04004\"/><path d=\"M78.5964 236.226L78.5565 236.296L78.5165 236.226C78.5165 236.226 77.1565 236.406 74.8965 236.506C75.7065 231.796 76.9665 227.236 78.6865 222.836C78.0365 227.766 77.8064 232.366 78.5964 236.226Z\" fill=\"#E04004\"/></g><path d=\"M109.986 196.176L196.756 192.236C199.2 205 199.2 222 197.416 235.136L194 258.2L103 258.2L103.466 245.326L103.636 242.506C102.4 226 104 210 109.986 196.176Z\" fill=\"#F9EDDE\"/><path d=\"M162.677 253.906C155.917 257.636 154.007 261.036 152.467 268.636L151.217 258.096L146.587 258.566L143.037 268.356L146.417 255.876L162.677 253.906Z\" fill=\"#F8D5B7\"/><g id=\"o4-legL\"><path d=\"M143.037 268.356L146.587 258.566L148.5 248L103.467 245.326L102.267 265.136C102.267 265.136 100.637 267.346 100.097 269.296C99.5266 271.346 99.5667 274.736 101.707 277.136C103.847 279.536 108.217 280.476 110.917 280.886C116.797 281.786 125.237 282.416 133.867 281.126C136.407 280.756 138.717 280.066 140.907 278.676C144.277 276.546 145.017 271.866 143.037 268.356Z\" fill=\"#F9EDDE\"/></g><g id=\"o4-legR\"><path d=\"M190.727 263.907C193.947 254.987 196.197 245.417 197.417 235.137L151.217 249V258.097L152.467 268.637C150.597 272.987 152.707 277.427 157.117 279.097C161.667 280.827 166.517 281.357 171.497 281.367C178.317 281.387 187.787 281.247 192.937 277.367C195.907 275.127 197.037 270.647 194.887 267.467C193.627 265.607 190.727 263.907 190.727 263.907Z\" fill=\"#F9EDDE\"/></g><g id=\"o4-handR\"><path d=\"M217.266 232.016C224.336 225.196 222.996 213.946 216.976 205.226C210.966 196.516 196.756 192.236 196.756 192.236C194.004 195.824 188.5 204 188.5 208C188.5 213 192 227.5 193.5 231C194.7 233.8 196.611 234.924 197.416 235.136C197.416 235.136 198.906 235.706 201.196 236.106C205.356 236.816 212.136 236.956 217.266 232.016Z\" fill=\"#F9EDDE\"/><path d=\"M197.416 235.135C197.626 231.735 197.325 224.715 196.105 218.805C197.905 222.065 200.066 230.635 201.196 236.105C198.906 235.705 197.416 235.135 197.416 235.135Z\" fill=\"#F8D5B7\"/></g><g id=\"o4-handL\"><path d=\"M89.7062 237.686C95.3762 243.636 103.636 242.506 103.636 242.506C105.5 242.506 107.496 241.77 109.5 241C111.741 240.139 113.607 237.34 114.493 236.011L114.5 236C116.5 233 118.5 228 124 224L109.986 196.176C109.986 196.176 96.2261 199.986 88.7161 212.596C82.6361 222.796 84.0362 231.736 89.7062 237.686Z\" fill=\"#F9EDDE\"/><path d=\"M123.935 223.977C123.725 224.157 120.245 227.217 117.495 233.537C115.185 238.847 113.795 240.267 109.755 243.077C107.685 244.517 105.295 245.097 103.465 245.327L103.635 242.507C103.635 242.507 111.295 243.007 116.055 233.647C119.995 225.917 123.705 224.077 123.935 223.977Z\" fill=\"#F8D5B7\"/></g><path d=\"M86.137 161.165C85.687 188.105 109.987 196.175 109.987 196.175C112.325 196.784 118.535 197.971 122.5 198.5C130 199.5 134 200 159 200C179 200 192.505 194.157 196.757 192.235C204.447 188.245 227.827 175.485 226.807 147.825C225.787 120.165 197.267 94.2054 154.997 101.145C114.747 107.765 86.587 134.215 86.137 161.165Z\" fill=\"#F9EDDE\"/><path d=\"M196.755 192.234C193.425 193.884 189.275 194.744 185.125 195.614C189.935 195.464 196.555 195.464 202.165 194.314L196.755 192.234Z\" fill=\"#F8D5B7\"/><path d=\"M109.946 196.186H109.986C113.606 197.376 118.006 197.916 122.576 198.316C112.556 199.086 108.156 198.916 104.426 198.436L109.946 196.186Z\" fill=\"#F8D5B7\"/><g id=\"o4-face\"><g id=\"o4-eyes\"><path d=\"M189.666 156.207C193.891 156.207 197.316 151.77 197.316 146.297C197.316 140.824 193.891 136.387 189.666 136.387C185.441 136.387 182.016 140.824 182.016 146.297C182.016 151.77 185.441 156.207 189.666 156.207Z\" fill=\"black\"/><path d=\"M141.867 160.207C146.092 160.207 149.517 155.77 149.517 150.297C149.517 144.824 146.092 140.387 141.867 140.387C137.642 140.387 134.217 144.824 134.217 150.297C134.217 155.77 137.642 160.207 141.867 160.207Z\" fill=\"black\"/></g><path d=\"M173.757 157.457C173.757 159.807 170.847 162.007 167.267 162.377C163.687 162.747 160.777 161.127 160.777 158.777C160.777 156.427 163.687 154.227 167.267 153.857C170.847 153.487 173.757 155.107 173.757 157.457Z\" fill=\"black\"/><path d=\"M178.867 165.488C178.887 168.878 178.447 171.938 176.837 174.888C176.587 175.338 176.337 175.788 176.067 176.208C173.897 179.648 170.977 181.938 165.267 181.598C158.937 181.218 156.147 176.828 154.867 173.938C154.417 172.908 154.087 171.858 153.867 170.818C153.497 169.008 153.477 167.238 153.717 165.748C153.897 164.618 155.157 164.668 156.347 165.128C160.497 166.738 164.137 166.558 168.317 164.618C171.977 166.208 174.847 165.428 177.117 163.928C178.397 163.078 178.867 164.268 178.867 165.488Z\" fill=\"#F84621\"/><path d=\"M176.067 176.208C173.897 179.648 170.977 181.938 165.267 181.598C158.937 181.218 156.147 176.828 154.867 173.938C154.417 172.908 154.087 171.858 153.867 170.818C158.267 170.008 165.657 170.308 176.067 176.208Z\" fill=\"#FB5E3C\"/></g></g></svg>";
+  function wallSvgInit() {
+    if (W1) return;
+    var cam = $('#wallCam');
+    W1 = { o: makeOru('c1', cam, $('#wallOru')), st: { mode: 'idle', op: 0, x: 0, y: 0 }, sh0: 0 };
+    W2 = { o: makeOru('c2', cam, $('#wallOru2')), st: { mode: 'idle', op: 0, x: 0, y: 0 }, sh0: 0 };
+    var w = M3.el.cloneNode(true); w.className = 'm3-oru wall-m3'; w.style.cssText = 'width:' + (361 * 58 / 321).toFixed(1) + 'px';
+    cam.insertBefore(w, $('#wallOru3').nextSibling);
+    var g = function (id) { return w.querySelector('#m3-' + id); };
+    W3 = { el: w, P: { all: g('all'), hair: g('hair'), hL: g('handL'), hR: g('handR'), fL: g('footL'), fR: g('footR'), eyes: g('eyes'), face: g('face') }, st: { mode: 'idle', op: 0, x: 0, y: 0, sc: 1 } };
+    var w4 = document.createElement('div'); w4.className = 'm3-oru wall-o4'; w4.setAttribute('aria-hidden', 'true'); w4.innerHTML = O4_SVG;
+    w4.style.cssText = 'width:' + (322 * 54 / 282).toFixed(1) + 'px';
+    cam.insertBefore(w4, $('#wallOru4').nextSibling);
+    var g4 = function (id) { return w4.querySelector('#o4-' + id); };
+    W4 = { el: w4, P: { all: g4('all'), hair: g4('hair'), lL: g4('legL'), lR: g4('legR'), hL: g4('handL'), hR: g4('handR'), eyes: g4('eyes') } };
+    (function wallSvgLoop(now) {
+      if ($('.scene-wall').classList.contains('active')) {
+        var e = WT.climb === null ? -1 : now - WT.climb;
+        var f4 = climbFrame(e, now, FLOOR[3], [450, 1250], [1330, 3150], [3150, 3650], DOOR_X0[1], 58, 360 / Math.PI / 2, true);
+        wallFour(f4, now);
+        W3.st = climbFrame(e, now, FLOOR[2], [1400, 2350], [2480, 4350], [4350, 4850], DOOR_X0[0], 62, 24 / Math.PI, false);
+        wallBig(now);
+        doorGlow(0, W3.st.glow); doorGlow(1, f4.glow);
+        wallSmall(W1, now, 56); wallSmall(W2, now, 54);
+      }
+      requestAnimationFrame(wallSvgLoop);
+    })(performance.now());
+  }
+  function wallSmall(W, now, w) {
+    var st = W.st, o, cfg = W.o.cfg;
+    W.o.el.style.opacity = st.op;
+    if (!(st.op > 0)) return;
+    if (st.mode === 'hop') { o = W.o.jump(st.k); o.lean = 0; }
+    else if (st.mode === 'try') {
+      // real time from the moment the scroll reaches them: two hops straight up (the second lower),
+      // then a light, slow tremble with the eyes half shut — 2.6s, a short rest (eyes still heavy), again
+      var t = WT.tryT === null ? 0 : now - WT.tryT - st.delay, gap = 380, j2 = st.jt + gap, shAt = j2 + st.jt + 120;
+      if (t < 0 || reduced) { o = W.o.idle(now); W.o.pose(st.x, st.y, w, o, 1); return; }
+      if (t < st.jt || (t >= j2 && t < j2 + st.jt)) {
+        var hk = t < st.jt ? t / st.jt : (t - j2) / st.jt, hh = t < st.jt ? st.H : st.H * .62;
+        o = W.o.jump(hk); o.lean = 0;
+        W.o.pose(st.x, st.y - hh * Math.sin(Math.PI * seg(hk, cfg.pre, .8)), w, o, 1); return;
+      }
+      if (t < shAt) { W.o.pose(st.x, st.y, w, W.o.idle(now), 1); return; }
+      var u = (t - shAt) % 4000, k = seg(u, 0, 220) * (1 - seg(u, 2300, 2600));
+      o = W.o.idle(now);
+      o.sq = -.05 * k + Math.sin(u * .068) * .012 * k; o.lean = Math.sin(u * .047) * .5 * k; o.fluff = Math.sin(u * .083) * .15 * k;
+      var heavy = Math.max(k, seg(t - shAt, 0, 220) * .6);
+      o.face = -3 * heavy; o.drop = 1.5 * heavy; o.look = 0; o.blink = Math.max(o.blink, .55 * seg(t - shAt, 0, 220));
+      var jit = (Math.sin(u * .04) * .5 + Math.sin(u * .096) * .2) * k;
+      W.o.pose(st.x + jit, st.y, w, o, 1); return;
+    }
+    else o = W.o.idle(now);
+    W.o.pose(st.x, st.y, w, o, 1);
+  }
+  function m3T(el, t) { if (el) el.setAttribute('transform', t); }
+  var DOOR_X0 = [DOOR1, DOOR1 + DOOR_GAP];
+  function doorGlow(k, g) {
+    var d = doors[k]; if (!d) return;
+    d.style.filter = g > 0.01 ? 'brightness(' + (1 + .25 * g).toFixed(3) + ') drop-shadow(0 0 ' + (16 * g).toFixed(1) + 'px rgba(255, 190, 140, ' + (.85 * g).toFixed(2) + '))' : '';
+  }
+  /* one climber's frame e ms after the climb started (e < 0: not yet): jump J onto the wall, run R to the door, go in I.
+     stride: px per half step (3F) / per full step (4F) */
+  function climbFrame(e, now, base, J, R, I, doorX, H, stride, full) {
+    var op = WS.fade, eof = function (t) { return 1 - Math.pow(1 - t, 3); };
+    if (e < 0 || e < J[0]) return { x: lerp(200, TX, WS.o), y: base, mode: 'idle', op: WS.o * op, sc: 1 };
+    if (e < J[1]) {
+      var k = (e - J[0]) / (J[1] - J[0]), fly = seg(k, full ? .32 : .3, .8), ef = ease(fly);
+      return { x: lerp(TX, 322, ef), y: lerp(base, TOP, ef) - H * Math.sin(Math.PI * fly), mode: 'jump', k: k, op: op, sc: 1 };
+    }
+    if (e < R[0]) return { x: 322, y: TOP, mode: 'idle', op: op, sc: 1 };
+    if (e < R[1]) {
+      var u = e - R[0], d = R[1] - R[0], w = u / d, A = .12, v = 1 / (1 - A);
+      var ew = w < A ? v * w * w / (2 * A) : (w > 1 - A ? 1 - v * (1 - w) * (1 - w) / (2 * A) : v * (w - A / 2));
+      var kk = Math.min(1, u / (full ? 160 : 180)) * (1 - seg(w, full ? .9 : .92, 1) * (full ? .75 : .7));
+      var ph = full ? u / 360 * 2 * Math.PI : u / 260 * Math.PI;
+      var bob = full ? Math.abs(Math.cos(ph)) * 6 * kk : Math.abs(Math.sin(ph)) * 5 * kk;
+      return { x: lerp(322, doorX, ew), y: TOP - bob, mode: 'run', ph: ph, k: kk, op: op, sc: 1 };
+    }
+    if (e < I[1]) { var g = seg(e, I[0], I[1]); return { x: doorX, y: TOP - 2, mode: 'idle', op: (1 - eof(g)) * op, sc: 1 - .35 * g, glow: Math.sin(Math.PI * Math.min(1, g * 1.2)) }; }
+    return { x: doorX, y: TOP, mode: 'idle', op: 0, sc: 1, glow: Math.max(0, 1 - (e - I[1]) / 700) * .4 };
+  }
+  // 4단계 오르미: legs, hands, body, big hair, eyes
+  function wallFour(st, now) {
+    var P = W4.P, S = 54 / 282, o;
+    W4.el.style.opacity = st.op;
+    if (!(st.op > 0)) return;
+    if (st.mode === 'jump') {        // wind-up (arms back, knees bend) → spring with arms up, legs tucked → land with legs apart
+      var t = st.k, pre = seg(t, 0, .32), fly = seg(t, .32, .8), land = seg(t, .8, 1);
+      o = { sq: 0, spread: 0, hair: 0, lean: 0 };
+      if (t < .32) { var w = 1 - Math.pow(1 - pre, 3); o.sq = -.16 * w; o.armL = 38 * w; o.armR = -38 * w; o.lean = -3 * w; o.hair = .6 * w; o.spread = .4 * w; }
+      else if (t < .8) {
+        var up = Math.sin(Math.PI * fly);
+        o.sq = lerp(.14, -.02, fly) * (1 - fly * .4); o.armL = lerp(-70, -20, fly); o.armR = lerp(70, 20, fly);
+        o.tL = up * .8; o.tR = up * .6; o.legL = -18 * up; o.legR = 10 * up; o.lean = 6 * up; o.hair = lerp(-.9, .5, fly); o.hairRot = -4 * up;
+      } else { var b = Math.exp(-5 * land) * Math.cos(land * 9); o.sq = -.15 * b; o.spread = .8 * b; o.hair = .5 * b; o.armL = -10 * b; o.armR = 10 * b; }
+    } else if (st.mode === 'run') {  // legs and arms swing opposite, the hair bounces each step
+      var s = Math.sin(st.ph), c2 = Math.cos(st.ph * 2), k = st.k;
+      // seen from the front: the body stays upright; one foot lifts at a time (tipping a little toward the way it runs),
+      // the opposite hand rises with it, and the hair bounces each step
+      var tL = Math.max(0, -s) * .7 * k, tR = Math.max(0, s) * .7 * k;
+      o = { sq: .03 * c2 * k, spread: 0, tL: tL, tR: tR, legL: -9 * tL, legR: -9 * tR, hLy: -9 * tR, hRy: -9 * tL,
+        armL: 6 * tR, armR: -6 * tL, lean: 0, hair: (.45 * c2 - .08) * k, hairRot: 0 };
+    } else {
+      var br = reduced ? 0 : Math.sin(now / 560) * .015;
+      o = { sq: br, spread: 0, hair: -br * 4, blink: !reduced && (now % 3400) < 140 ? 1 : 0 };
+    }
+    var sc = st.sc || 1;
+    W4.el.style.transform = 'translate(' + (st.x - 161 * S).toFixed(1) + 'px,' + (st.y - 301 * S).toFixed(1) + 'px)';
+    m3T(P.all, 'translate(141 281) skewX(' + (-(o.lean || 0)).toFixed(2) + ') scale(' + ((1 - o.sq * .5) * sc).toFixed(3) + ' ' + ((1 + o.sq) * sc).toFixed(3) + ') translate(-141 -281)');
+    m3T(P.lL, 'translate(' + (o.spread * -8) + ' ' + (-(o.tL || 0) * 16) + ') rotate(' + (o.legL || 0).toFixed(1) + ' 124 250)');
+    m3T(P.lR, 'translate(' + (o.spread * 8) + ' ' + (-(o.tR || 0) * 16) + ') rotate(' + (o.legR || 0).toFixed(1) + ' 172 250)');
+    m3T(P.hL, 'translate(0 ' + (o.hLy || 0).toFixed(1) + ') rotate(' + (o.armL || 0).toFixed(1) + ' 112 204)');
+    m3T(P.hR, 'translate(0 ' + (o.hRy || 0).toFixed(1) + ') rotate(' + (o.armR || 0).toFixed(1) + ' 194 200)');
+    m3T(P.hair, 'rotate(' + (o.hairRot || 0).toFixed(2) + ' 141 200) translate(141 200) scale(' + (1 + (o.hair || 0) * .03).toFixed(3) + ' ' + (1 - (o.hair || 0) * .05).toFixed(3) + ') translate(-141 -200)');
+    m3T(P.eyes, 'translate(0 148) scale(1 ' + (1 - (o.blink || 0) * .88).toFixed(3) + ') translate(0 -148)');
+  }
+  function wallBig(now) {
+    var st = W3.st, P = W3.P, S = 58 / 321, o;
+    W3.el.style.opacity = st.op;
+    if (!(st.op > 0)) return;
+    if (st.mode === 'jump') {
+      var t = st.k, pre = seg(t, 0, .3), fly = seg(t, .3, .8), land = seg(t, .8, 1);
+      o = { sq: 0, lift: 0, arms: 0, hair: 0, spread: 0, lean: 0 };
+      if (t < .3) { o.sq = -.2 * (1 - Math.pow(1 - seg(pre, .3, 1), 3)); o.arms = .55 * Math.sin(Math.PI * Math.min(1, pre / .75)) - .35 * seg(pre, .75, 1); o.spread = seg(pre, .3, 1); o.hair = .5 * seg(pre, .3, 1); }
+      else if (t < .8) { o.sq = lerp(.18, -.02, fly) * (1 - fly * .4); o.lift = Math.sin(Math.PI * Math.min(1, fly * 1.15)); o.arms = -.35 * (1 - fly) - .1 * Math.sin(Math.PI * fly); o.hair = lerp(-.8, .4, fly); o.lean = 6 * Math.sin(Math.PI * fly); }
+      else { var b = Math.exp(-5 * land) * Math.cos(land * 9); o.sq = -.16 * b; o.spread = .6 * b; o.hair = .4 * b; }
+    } else if (st.mode === 'run') {
+      // one foot at a time, both arms up and down together each step, face steady, the spikes sway
+      var s = Math.sin(st.ph), k = st.k, arms = .32 * (.5 - .5 * Math.cos(st.ph * 2)) * k;
+      o = { sq: 0, lL: Math.max(0, s) * .9 * k, lR: Math.max(0, -s) * .9 * k, aL: arms, aR: arms, hair: .45 * Math.cos(st.ph * 2) * k, hairRot: 3.2 * s * k, spread: 0, lean: 0 };
+    } else {
+      var br = reduced ? 0 : Math.sin(now / 520) * .018;
+      o = { sq: br, lift: 0, arms: 0, hair: -br * 4, spread: 0, blink: !reduced && (now % 3200) < 140 ? 1 : 0 };
+    }
+    var sc = st.sc || 1;
+    W3.el.style.transform = 'translate(' + (st.x - 180 * S).toFixed(1) + 'px,' + (st.y - 237 * S).toFixed(1) + 'px)';
+    m3T(P.all, 'translate(160 217) skewX(' + (o.lean || 0).toFixed(2) + ') scale(' + ((1 - o.sq * .55) * sc).toFixed(3) + ' ' + ((1 + o.sq) * sc).toFixed(3) + ') translate(-160 -217)');
+    var lL = o.lL === undefined ? o.lift : o.lL, lR = o.lR === undefined ? o.lift : o.lR;
+    m3T(P.fL, 'translate(' + (-o.spread * 10 + lL * 8) + ' ' + (-lL * 14) + ') rotate(' + (lL * 18) + ' 135 200)');
+    m3T(P.fR, 'translate(' + (o.spread * 10 - lR * 8) + ' ' + (-lR * 14) + ') rotate(' + (-lR * 18) + ' 185 200)');
+    var aL = o.aL === undefined ? o.arms : o.aL, aR = o.aR === undefined ? o.arms : o.aR;
+    m3T(P.hL, 'rotate(' + (aL * 62) + ' 118 178) translate(' + (-aL * 6) + ' ' + (-Math.abs(aL) * 10) + ')');
+    m3T(P.hR, 'rotate(' + (-aR * 62) + ' 202 178) translate(' + (aR * 6) + ' ' + (-Math.abs(aR) * 10) + ')');
+    m3T(P.hair, 'rotate(' + (o.hairRot || 0).toFixed(2) + ' 160 150) translate(160 112) scale(' + (1 + o.hair * .025).toFixed(3) + ' ' + (1 - o.hair * .05).toFixed(3) + ') translate(-160 -112)');
+    m3T(P.eyes, 'translate(0 149) scale(1 ' + (1 - (o.blink || 0) * .88).toFixed(3) + ') translate(0 -149)');
+  }
+
   function updateWall(scene, p) {
     var zoom = ease(seg(p, 0.88, 1));            // zoom into 1·2단계: starts at 0.88 for transition to step1
     var cam = $('#wallCam');
@@ -725,7 +936,7 @@
     }
     cam.style.transform = 'translate(' + (ZOOM.tx * zoom).toFixed(1) + 'px,' + (ZOOM.ty * zoom).toFixed(1) + 'px) scale(' + lerp(1, ZOOM.s, zoom).toFixed(4) + ')';
     var fadeOut = 1 - seg(zoom, 0, 0.5);
-    $$('.corner, .terrace, .t-door', scene).forEach(function (el) { el.style.opacity = fadeOut; });
+    $$('.corner, .terrace, .t-door, .apt', scene).forEach(function (el) { el.style.opacity = fadeOut; });
     $('#stepLabels').style.opacity = (p > 0.82 ? 1 : 0) * fadeOut;
 
     // "정부에서도 …": only the four doors, standing on the ground. "하지만 … 대면": the wall grows up under them and lifts them
@@ -796,7 +1007,7 @@
     // and walks into a door of their own: 5F → door 3, 4F → door 2, 3F → door 1. 1F · 2F can't reach.
     function climber(el, base, jump, walkEnd, doorX, h) {
       var o = seg(p, 0.02, 0.08), pos, op = o, sc = 1, moving = false;
-      if (p < jump) { pos = [lerp(190, TX, o), base]; moving = o > 0 && o < 1; }
+      if (p < jump) { pos = [lerp(200, TX, o), base]; moving = o > 0 && o < 1; }
       else if (p < jump + 0.025) pos = arc([TX, base], [322, TOP], ease(seg(p, jump, jump + 0.025)), h);
       else if (p < walkEnd) {
         var w = ease(seg(p, jump + 0.025, walkEnd)); pos = [lerp(322, doorX, w), TOP]; moving = true;
@@ -804,12 +1015,20 @@
       }
       else { var g = seg(p, walkEnd, walkEnd + 0.015); pos = [doorX, TOP]; op = 1 - g; sc = 1 - 0.3 * g; }
       put(el, pos[0], pos[1], op * fadeOut, sc);
-      return { pos: pos, moving: moving, jumping: p >= jump && p < jump + 0.025, jt: seg(p, jump, jump + 0.025) };
+      return { pos: pos, op: op * fadeOut, sc: sc, moving: moving, jumping: p >= jump && p < jump + 0.025, jt: seg(p, jump, jump + 0.025) };
     }
     var DOOR_X = [DOOR1, DOOR1 + DOOR_GAP, DOOR1 + DOOR_GAP * 2];
     var c5 = climber(oru5, FLOOR[4], 0.41, 0.465, DOOR_X[2], 26);
     climber(oru4, FLOOR[3], 0.418, 0.47, DOOR_X[1], 30);
-    climber(oru3, FLOOR[2], 0.426, 0.475, DOOR_X[0], 40);
+    var c3 = climber(oru3, FLOOR[2], 0.426, 0.475, DOOR_X[0], 40);
+    // 4F (4단계 SVG) and 3F (3단계 SVG) jump onto the wall and run into doors 2 and 1. They play in real time, like the
+    // mockup, from the moment the scroll reaches "누군가에게는 쉽게 …" (p 0.40); past 0.49 they are already inside.
+    wallSvgInit();
+    WS.p = p; WS.fade = fadeOut; WS.o = seg(p, 0.02, 0.08);
+    var nowT = performance.now();
+    if (p < 0.40) WT.climb = null; else if (p >= 0.49) WT.climb = -1e9; else if (WT.climb === null) WT.climb = nowT;
+    if (p >= 0.49 && p < 0.60) { if (WT.tryT === null) WT.tryT = nowT; } else WT.tryT = null;
+    oru4.style.opacity = 0; oru5.style.opacity = 0;   // 5F is left out for now (the building will become 4 storeys)
     // 5F runs with the sprite frames: a leap on the jump, running while it moves, standing when still
     var f5 = 'assets/character/oreumi4.png';
     if (c5.jumping) f5 = RUN4[c5.jt < 0.5 ? 7 : 6];
@@ -818,32 +1037,25 @@
 
     // 1F · 2F: step out, try hops, wait for help, then hop onto their own stair
     function youth(el, base, peaks, land, t0, isOru1) {
-      var o = seg(p, 0.02, 0.08), pos;
-      var jt = seg(p, t0, t0 + 0.035);
+      var o = seg(p, 0.02, 0.08), pos, W = isOru1 ? W1 : W2, cfg = W.o.cfg, st;
+      var jt = seg(p, t0, t0 + 0.025);
       var sc = 1;
-      if (p < 0.49) pos = [lerp(190, TX, o), base];
-      else if (p < 0.59) {                      // three small hops toward the wall that barely leave the floor
-        var hp = seg(p, 0.49, 0.585);
-        pos = [TX + 6 * Math.sin(Math.PI * Math.min(1, hp * 1.2)), base - peaks[0] * Math.abs(Math.sin(hp * Math.PI * 3)) * (1 - hp * .35)];
-      }
-      else if (p < t0) pos = [TX + 6 * (1 - seg(p, 0.59, 0.62)), base];
+      // two hops straight up at the wall (the second lower), then a gentle shiver with half-shut eyes; later the hop onto their stair
+      // (0.49–0.60 plays in real time like the mockup: see wallSmall)
+      if (p < 0.49) st = { x: lerp(200, TX, o), y: base, mode: 'idle' };
+      else if (p < 0.60) st = { x: TX, y: base, mode: 'try', H: peaks[0], delay: isOru1 ? 250 : 0, jt: isOru1 ? 1050 : 900 };
+      else if (p < t0) st = { x: TX, y: base, mode: 'idle' };
       else {
-        pos = arc([TX, base], land, ease(jt), 46);
-        if (jt > 0 && jt < 1) sc = 1 + Math.sin(jt * Math.PI) * 0.15;
+        pos = arc([TX, base], land, ease(seg(jt, cfg.pre, .8)), 46);
+        st = { x: pos[0], y: pos[1], mode: jt < 1 ? 'hop' : 'idle', k: jt };
       }
-      put(el, pos[0], pos[1], o * fadeOut, sc);
-      if (isOru1) {
-        if (p >= t0 && p < t0 + 0.035) {
-          setSrc(el, HOP1[Math.min(HOP1.length - 1, Math.floor(jt * HOP1.length))]);
-        } else {
-          setSrc(el, 'assets/character/oreumi1.png');
-        }
-      }
+      st.op = o * fadeOut; W.st = st;
+      put(el, st.x, st.y, 0, 1);
     }
-    youth(oru1, FLOOR[0], [14], [X0 + 46, GROUND - 3 * B], 0.805, true);         // → 1단계 (완전 안착 at 0.840)
-    youth(oru2, FLOOR[1], [12], [X0 + SW * B + 46, GROUND - 6 * B], 0.815, false); // → 2단계 (완전 안착 at 0.850)
-    var shiver = p >= 0.49 && p < 0.60;          // they can't reach it: shivering while they feel trapped
-    oru1.classList.toggle('shiver', shiver); oru2.classList.toggle('shiver', shiver);
+    // they hop on only once the stairs have formed and all four have turned to their colour (last step lit at 0.834)
+    youth(oru1, FLOOR[0], [20], [X0 + 46, GROUND - 3 * B], 0.845, true);         // → 1단계 (lands at 0.870)
+    youth(oru2, FLOOR[1], [26], [X0 + SW * B + 46, GROUND - 6 * B], 0.853, false); // → 2단계 (lands at 0.878)
+    oru3.style.opacity = 0;                      // 1F–3F are drawn by the SVG oreumi (wallSvgLoop); the imgs only hold their place
 
     // oreum symbol:
     // 1) "오름이 도와줄게요" (0.60 ~ 0.73): 아파트 위쪽 상공에 등장하여 머묾
@@ -988,6 +1200,74 @@
   });
   var slabEls = $$('.slab', slabsEl);
   var stepOru = $('#stepOru');
+
+  /* 1·2단계 SVG 오르미: hair (spikes), face and eyes move separately — same motion as the jump mockup.
+     x = centre, y = the feet line, w = drawn width of the spikes (stage px). */
+  var ORU_SVG = {"c1": "<svg viewBox=\"-20 -30 339 202\" aria-hidden=\"true\"><g class=\"all\"><g class=\"hair\"><path d=\"M298.559 143.74C298.989 147.85 284.859 156.96 242.719 159.47C206.979 161.59 185.079 161.15 149.289 161.15C113.499 161.15 91.5995 161.59 55.8495 159.47C13.7095 156.96 -0.420518 147.85 0.00948151 143.74C0.369482 140.28 11.0695 138.5 16.3095 137.78C11.1695 133.3 -1.54052 120.17 0.389483 116.29C2.79948 111.46 18.3195 112.01 26.1395 113.12C17.0695 103.48 9.37948 88.51 12.8095 83.92C17.0195 78.33 43.3395 87.66 43.9795 87.88C39.7095 78.76 33.7895 51.33 40.0295 47.64C46.3895 43.88 66.6795 54.43 77.1595 62.66C76.0395 51.03 78.2595 22.61 87.0795 19.86C95.8995 17.11 116.839 34.6 123.649 43.96C122.879 32.42 139.359 0.31 149.289 0C159.209 0.31 175.689 32.42 174.929 43.96C181.729 34.6 202.679 17.11 211.489 19.86C220.309 22.61 222.539 51.03 221.409 62.66C231.889 54.43 252.189 43.88 258.549 47.64C264.78 51.33 258.859 78.76 254.589 87.88C255.229 87.66 281.559 78.33 285.759 83.92C289.199 88.51 281.509 103.48 272.439 113.12C280.259 112.01 295.78 111.46 298.18 116.29C300.12 120.17 287.409 133.3 282.259 137.78C287.499 138.5 298.209 140.28 298.559 143.74Z\" fill=\"#FF6A00\"/><path d=\"M297.179 146.5C292.699 151.05 276.949 157.43 242.729 159.47C206.989 161.59 185.089 161.15 149.299 161.15C113.509 161.15 91.6091 161.59 55.8591 159.47C19.9491 157.33 4.3691 150.4 0.829102 145.85C37.0591 161.83 89.3191 157.79 150.559 157.91C215.049 158.03 269.499 158.64 297.179 146.5Z\" fill=\"#E04004\"/><path d=\"M33.0096 140.95C26.9396 138.93 21.2496 137.65 16.3196 137.78C14.2996 136.02 11.1096 132.92 8.09961 129.58C17.7696 132.39 26.2496 136.06 33.0096 140.95Z\" fill=\"#E04004\"/><path d=\"M43.4791 117.66C37.5291 115.11 31.0791 113.02 26.1491 113.14L26.1191 113.12H26.1491C24.0191 110.86 21.9691 108.3 20.1191 105.66C29.4991 108.68 38.3991 112.91 43.4791 117.66Z\" fill=\"#E04004\"/><path d=\"M58.5898 98.2498C53.9298 93.7498 48.6498 89.4998 43.9998 87.8698L43.9498 87.7998L43.9298 87.7598C42.9098 85.5298 41.7898 82.2498 40.7598 78.5098C48.5598 84.7298 55.4998 91.9398 58.5898 98.2498Z\" fill=\"#E04004\"/><path d=\"M88.9797 76.8105C85.5297 71.1205 81.3796 65.5105 77.1696 62.6605C76.9296 60.1505 76.8396 56.8605 76.9396 53.2305C82.8296 61.2605 87.5897 69.9305 88.9797 76.8105Z\" fill=\"#E04004\"/><path d=\"M132.19 61.9704C130.12 55.0704 127.31 48.0604 123.69 43.9404L123.63 43.1904V43.1404C123.63 40.5004 124.38 36.9904 125.66 33.1104C129.82 43.4004 132.63 54.1604 132.19 61.9704Z\" fill=\"#E04004\"/><path d=\"M186.87 31.75C181.98 44.01 174.88 56.41 167.68 62.46C171.3 56.22 174.47 49.38 174.99 43.91L182.44 35.71C183.83 34.39 185.32 33.05 186.87 31.75Z\" fill=\"#E04004\"/><path d=\"M233.72 54.5898C227.21 65.1998 218.94 75.2798 211.42 79.8598C215.92 74.2498 220.09 67.9798 221.43 62.6498H221.44C224.79 60.0098 229.14 57.1498 233.72 54.5898Z\" fill=\"#E04004\"/><path d=\"M263.63 85.0596C257.48 92.5196 250.42 99.1096 244.26 102.04C248.73 97.5296 252.95 92.4096 254.63 87.8696C255.09 87.7096 258.84 86.3896 263.63 85.0596Z\" fill=\"#E04004\"/><path d=\"M285.279 112.39C275.679 117.67 264.989 121.78 257.249 122.02C263.179 119.67 269.129 116.65 272.479 113.13L273.019 113.04C276.369 112.6 280.939 112.27 285.279 112.39Z\" fill=\"#E04004\"/><path d=\"M291.469 139.51C282.989 142.48 274.069 144.33 267.779 143.6C273.269 142.31 278.859 140.43 282.249 137.78H282.269C284.689 138.11 288.279 138.67 291.469 139.51Z\" fill=\"#E04004\"/></g><g class=\"face\"><g class=\"eyes\"><path d=\"M189.4 131.09C189.4 136.13 183.82 140.21 176.93 140.21C170.04 140.21 164.46 136.13 164.46 131.09H189.4Z\" fill=\"black\"/><path d=\"M134.12 131.09C134.12 136.13 128.54 140.21 121.65 140.21C114.76 140.21 109.18 136.13 109.18 131.09H134.12Z\" fill=\"black\"/></g><path d=\"M149.29 148.4C152.874 148.4 155.78 146.493 155.78 144.14C155.78 141.787 152.874 139.88 149.29 139.88C145.705 139.88 142.8 141.787 142.8 144.14C142.8 146.493 145.705 148.4 149.29 148.4Z\" fill=\"black\"/></g></g></svg>", "c2": "<svg viewBox=\"-20 -30 339 202\" aria-hidden=\"true\"><g class=\"all\"><g class=\"hair\"><path d=\"M298.56 143.74C298.99 147.85 284.859 156.96 242.719 159.47C206.979 161.59 185.079 161.15 149.289 161.15C113.499 161.15 91.5995 161.59 55.8495 159.47C13.7095 156.96 -0.420518 147.85 0.00948151 143.74C0.369482 140.28 11.0695 138.5 16.3095 137.78C11.1695 133.3 -1.54051 120.17 0.389486 116.29C2.79949 111.46 18.3195 112.01 26.1395 113.12C17.0695 103.48 9.37947 88.51 12.8095 83.92C17.0195 78.33 43.3395 87.66 43.9795 87.88C39.7095 78.76 33.7895 51.33 40.0295 47.64C46.3895 43.88 66.6795 54.43 77.1595 62.66C76.0395 51.03 78.2595 22.61 87.0795 19.86C95.8995 17.11 116.839 34.6 123.649 43.96C122.879 32.42 139.359 0.31 149.289 0C159.209 0.31 175.689 32.42 174.929 43.96C181.729 34.6 202.679 17.11 211.489 19.86C220.309 22.61 222.539 51.03 221.409 62.66C231.889 54.43 252.189 43.88 258.549 47.64C264.78 51.33 258.859 78.76 254.589 87.88C255.229 87.66 281.559 78.33 285.759 83.92C289.199 88.51 281.51 103.48 272.44 113.12C280.26 112.01 295.78 111.46 298.18 116.29C300.12 120.17 287.409 133.3 282.259 137.78C287.499 138.5 298.21 140.28 298.56 143.74Z\" fill=\"#FF6A00\"/><path d=\"M297.179 146.5C292.699 151.05 276.949 157.43 242.729 159.47C206.989 161.59 185.089 161.15 149.299 161.15C113.509 161.15 91.6091 161.59 55.8591 159.47C19.9491 157.33 4.3691 150.4 0.829102 145.85C37.0591 161.83 89.3191 157.79 150.559 157.91C215.049 158.03 269.499 158.64 297.179 146.5Z\" fill=\"#E04004\"/><path d=\"M33.0096 140.95C26.9396 138.93 21.2496 137.65 16.3196 137.78C14.2996 136.02 11.1096 132.92 8.09961 129.58C17.7696 132.39 26.2496 136.06 33.0096 140.95Z\" fill=\"#E04004\"/><path d=\"M43.4792 117.66C37.5292 115.11 31.0791 113.02 26.1491 113.14L26.1191 113.12H26.1491C24.0191 110.86 21.9691 108.3 20.1191 105.66C29.4991 108.68 38.3992 112.91 43.4792 117.66Z\" fill=\"#E04004\"/><path d=\"M58.5898 98.2498C53.9298 93.7498 48.6498 89.4998 43.9998 87.8698L43.9498 87.7998L43.9298 87.7598C42.9098 85.5298 41.7898 82.2498 40.7598 78.5098C48.5598 84.7298 55.4998 91.9398 58.5898 98.2498Z\" fill=\"#E04004\"/><path d=\"M88.9797 76.8105C85.5297 71.1205 81.3797 65.5105 77.1697 62.6605C76.9297 60.1505 76.8396 56.8605 76.9396 53.2305C82.8296 61.2605 87.5897 69.9305 88.9797 76.8105Z\" fill=\"#E04004\"/><path d=\"M132.19 61.9704C130.12 55.0704 127.31 48.0604 123.69 43.9404L123.63 43.1904V43.1404C123.63 40.5004 124.38 36.9904 125.66 33.1104C129.82 43.4004 132.63 54.1604 132.19 61.9704Z\" fill=\"#E04004\"/><path d=\"M186.87 31.75C181.98 44.01 174.88 56.41 167.68 62.46C171.3 56.22 174.47 49.38 174.99 43.91L182.44 35.71C183.83 34.39 185.32 33.05 186.87 31.75Z\" fill=\"#E04004\"/><path d=\"M233.72 54.5898C227.21 65.1998 218.94 75.2798 211.42 79.8598C215.92 74.2498 220.09 67.9798 221.43 62.6498H221.44C224.79 60.0098 229.14 57.1498 233.72 54.5898Z\" fill=\"#E04004\"/><path d=\"M263.63 85.0596C257.48 92.5196 250.42 99.1096 244.26 102.04C248.73 97.5296 252.95 92.4096 254.63 87.8696C255.09 87.7096 258.84 86.3896 263.63 85.0596Z\" fill=\"#E04004\"/><path d=\"M285.28 112.39C275.68 117.67 264.99 121.78 257.25 122.02C263.18 119.67 269.13 116.65 272.48 113.13L273.02 113.04C276.37 112.6 280.94 112.27 285.28 112.39Z\" fill=\"#E04004\"/><path d=\"M291.469 139.51C282.989 142.48 274.069 144.33 267.779 143.6C273.269 142.31 278.859 140.43 282.249 137.78H282.269C284.689 138.11 288.279 138.67 291.469 139.51Z\" fill=\"#E04004\"/></g><g class=\"face\"><path d=\"M211.459 135.85C211.459 157.56 183.619 160.16 149.289 160.16C114.959 160.16 87.1191 157.56 87.1191 135.85C87.1191 114.14 114.959 96.54 149.289 96.54C183.619 96.54 211.459 114.14 211.459 135.85Z\" fill=\"#F9EDDE\"/><g class=\"eyes\"><path d=\"M172.689 145.63C176.914 145.63 180.339 141.193 180.339 135.72C180.339 130.246 176.914 125.81 172.689 125.81C168.464 125.81 165.039 130.246 165.039 135.72C165.039 141.193 168.464 145.63 172.689 145.63Z\" fill=\"black\"/><path d=\"M125.889 145.63C130.114 145.63 133.539 141.193 133.539 135.72C133.539 130.246 130.114 125.81 125.889 125.81C121.664 125.81 118.239 130.246 118.239 135.72C118.239 141.193 121.664 145.63 125.889 145.63Z\" fill=\"black\"/></g><path d=\"M149.29 151.14C152.874 151.14 155.78 149.233 155.78 146.88C155.78 144.527 152.874 142.62 149.29 142.62C145.705 142.62 142.8 144.527 142.8 146.88C142.8 149.233 145.705 151.14 149.29 151.14Z\" fill=\"black\"/></g></g></svg>"};
+  var ORU_CFG = {
+    c1: { jt: 1050, pre: .38, H: 28, squash: .22, duck: 0, peek: 5, damp: 4, eyeY: 135, breath: 760, blinks: false, look: false },
+    c2: { jt: 900, pre: .3, H: 40, squash: .16, duck: 8, peek: 7, damp: 5, eyeY: 135, breath: 520, blinks: true, look: true, hairLead: true, keepFaceW: true }
+  };
+  function makeOru(key, parent, after) {
+    var box = document.createElement('div'); box.className = 'svg-oru'; box.setAttribute('aria-hidden', 'true');
+    box.innerHTML = ORU_SVG[key];
+    if (after) parent.insertBefore(box, after.nextSibling); else parent.appendChild(box);
+    var q = function (c) { return box.querySelector('.' + c); }, cfg = ORU_CFG[key];
+    var P = { all: q('all'), hair: q('hair'), face: q('face'), eyes: q('eyes'), svg: box.querySelector('svg') };
+    function T(el, t) { if (el) el.setAttribute('transform', t); }
+    function pose(x, y, w, o, flip) {
+      var S = w / 299;
+      box.style.width = (339 * S).toFixed(1) + 'px';
+      box.style.transform = 'translate(' + (x - 169.5 * S).toFixed(1) + 'px,' + (y - 191 * S).toFixed(1) + 'px)';
+      P.svg.style.transform = flip === -1 ? 'scaleX(-1)' : '';
+      var bodySq = cfg.hairLead ? o.sq * .45 : o.sq, sx = 1 - bodySq * .55, sy = 1 + bodySq;
+      T(P.all, 'translate(149 161) skewX(' + o.lean.toFixed(2) + ') scale(' + sx.toFixed(3) + ' ' + sy.toFixed(3) + ') translate(-149 -161)');
+      var hx = 1 + o.fluff * (cfg.hairLead ? .05 : .08), hy = 1 + o.fluff * .05;
+      if (cfg.hairLead) hy = 1 + o.fluff * .14 + Math.max(0, o.sq) * 1.4 - Math.max(0, -o.sq) * .5;
+      T(P.hair, 'translate(149 161) scale(' + hx.toFixed(3) + ' ' + hy.toFixed(3) + ') translate(-149 -161)');
+      var fy = o.face > 0 ? -o.face : 0, fsy = o.face < 0 ? 1 + o.face * .03 : 1, fsx = cfg.keepFaceW ? 1 / sx : (o.face < 0 ? fsy : 1);
+      if (cfg.keepFaceW) fsy = fsy / sy * (1 + bodySq * .35);
+      T(P.face, 'translate(' + (o.look || 0).toFixed(1) + ' ' + (fy + (o.drop || 0)).toFixed(1) + ') translate(149 159) scale(' + fsx.toFixed(3) + ' ' + fsy.toFixed(3) + ') translate(-149 -159)');
+      T(P.eyes, 'translate(0 ' + cfg.eyeY + ') scale(1 ' + (1 - (o.blink || 0) * .85).toFixed(3) + ') translate(0 ' + (-cfg.eyeY) + ')');
+    }
+    function jump(t) {                           // body pose through one jump, t 0–1
+      var pe = cfg.pre, pre = seg(t, 0, pe), fly = seg(t, pe, .8), land = seg(t, .8, 1), eo = function (v) { return 1 - Math.pow(1 - v, 3); };
+      var o = { sq: 0, lean: 0, fluff: 0, face: 0, look: 0 };
+      if (t < pe) { o.sq = -cfg.squash * eo(pre); o.lean = -4 * pre; o.fluff = -.5 * pre; o.face = -cfg.duck * eo(pre); }
+      else if (t < .8) {
+        o.sq = lerp(.16, -.02, fly) * (1 - fly * .4); o.lean = 8 * Math.sin(Math.PI * fly) * (1 - fly * .5);
+        o.fluff = Math.sin(Math.PI * Math.min(1, fly * 1.2)); o.face = cfg.peek * Math.sin(Math.PI * fly);
+      } else { var b2 = Math.exp(-cfg.damp * land) * Math.cos(land * 9); o.sq = -cfg.squash * .85 * b2; o.fluff = -.4 * b2; o.face = -cfg.duck * .6 * b2; }
+      return o;
+    }
+    function jumpXY(a, b, t) {                   // where it is through one jump (arc between two spots)
+      var fly = seg(t, cfg.pre, .8), e = fly * fly * (3 - 2 * fly);
+      return [lerp(a[0], b[0], e), lerp(a[1], b[1], e) - cfg.H * Math.sin(Math.PI * fly)];
+    }
+    function idle(now) {
+      var br = reduced ? 0 : Math.sin(now / cfg.breath) * .02;
+      var look = cfg.look && !reduced ? 5 * Math.sin(now / 1700) * (Math.sin(now / 900) > .3 ? 1 : .2) : 0;
+      return { sq: br, lean: 0, fluff: br * 3, face: 0, look: look, blink: cfg.blinks && !reduced && (now % 3100) < 140 ? 1 : 0 };
+    }
+    function pop() { box.classList.remove('pop'); void box.offsetWidth; if (!reduced) box.classList.add('pop'); }
+    return { el: box, cfg: cfg, pose: pose, jump: jump, jumpXY: jumpXY, idle: idle, pop: pop };
+  }
+
+  var S1A = makeOru('c1', stepOru.parentNode, stepOru), S1B = makeOru('c2', stepOru.parentNode, stepOru);
+  var hopK = -1, exitF = -1;
+  // the SVG oreumi follows the (hidden) #stepOru box every frame, so the CSS move between layers still applies
+  (function s1Loop(now) {
+    var sc = $('.scene-step1');
+    if (sc && sc.classList.contains('active')) {
+      var cs = getComputedStyle(stepOru), L = parseFloat(cs.left) || 0, Tt = parseFloat(cs.top) || 0, w = stepOru.offsetWidth || 76;
+      var two = lastStage1Img === 2, cur = two ? S1B : S1A, other = two ? S1A : S1B;
+      var flip = parseFloat(stepOru.style.getPropertyValue('--flip')) || 1;
+      var k = two ? exitF : hopK;
+      cur.el.style.opacity = cs.opacity; other.el.style.opacity = 0;
+      cur.pose(L + w / 2, Tt + (two ? 6 : 4), two ? w * 360 / 380 : w * 74 / 76, k >= 0 ? cur.jump(k) : cur.idle(now), flip < 0 ? -1 : 1);
+    }
+    requestAnimationFrame(s1Loop);
+  })(performance.now());
   // the grown oreumi in 숨고르기 is drawn at the same on-screen size as in 계속 오름 (the stages are scaled differently)
   function lv2Width() {
     var a = $('.scene-step1 .stage').getBoundingClientRect().width, b = $('.scene-montage .stage').getBoundingClientRect().width;
@@ -998,7 +1278,7 @@
 
   var lastStage1Img = 1, lastSpot = null, hopRaf = 0;
   // the hop plays in time with the 0.8s move between layers (CSS transition on left/top)
-  function stopHop() { if (hopRaf) cancelAnimationFrame(hopRaf); hopRaf = 0; }
+  function stopHop() { if (hopRaf) cancelAnimationFrame(hopRaf); hopRaf = 0; hopK = -1; }
   /* a jump onto the next layer: squash on the spot (frames 1–3), spring up along an arc (4–5), land (6–7) */
   var HOP_MS = 900, HOP_H = 34;                 // jump length (ms) and height (stage px)
   function jumpPos(a, b, k) {
@@ -1010,14 +1290,13 @@
     var t0 = performance.now();
     stepOru.style.transition = 'none';
     (function tick(now) {
-      var k = (now - t0) / HOP_MS;
+      var k = (now - t0) / S1A.cfg.jt;
       if (k >= 1 || lastStage1Img !== 1) {
-        hopRaf = 0; stepOru.style.left = to[0] + 'px'; stepOru.style.top = to[1] + 'px'; stepOru.style.transition = '';
+        hopRaf = 0; hopK = -1; stepOru.style.left = to[0] + 'px'; stepOru.style.top = to[1] + 'px'; stepOru.style.transition = '';
         if (lastStage1Img === 1) setSrc(stepOru, 'assets/character/oreumi1.png'); return;
       }
-      var q = jumpPos(from, to, k);
+      var q = S1A.jumpXY(from, to, k); hopK = k;
       stepOru.style.left = q[0].toFixed(1) + 'px'; stepOru.style.top = q[1].toFixed(1) + 'px';
-      setSrc(stepOru, HOP1[Math.min(HOP1.length - 1, Math.floor(k * HOP1.length))]);
       hopRaf = requestAnimationFrame(tick);
     })(t0);
   }
@@ -1085,7 +1364,7 @@
       stepOru.classList.toggle('lv2', want === 2);
       stepOru.style.width = want === 2 ? lv2Width() + 'px' : '';
       stepOru.classList.remove('evolve'); void stepOru.offsetWidth;
-      if (want === 2 && lastStage1Img === 1 && !reduced) stepOru.classList.add('evolve');
+      if (want === 2 && lastStage1Img === 1 && !reduced) S1B.pop();
       lastStage1Img = want;
     }
     var spot = x + ',' + y;
@@ -1106,9 +1385,10 @@
       stepOru.style.transition = 'none';
       stepOru.style.left = ex.toFixed(1) + 'px'; stepOru.style.top = ey.toFixed(1) + 'px';
       stepOru.classList.remove('evolve');
-      setSrc(stepOru, HOP2[Math.min(HOP2.length - 1, Math.floor(f * HOP2.length))]);
+      exitF = exitT < 1 ? f : -1;
       lastSpot = 'exit';
     } else if (lastSpot === 'exit') {
+      exitF = -1;
       stepOru.style.transition = ''; stepOru.style.left = x + 'px'; stepOru.style.top = y + 'px'; setSrc(stepOru, want === 2 ? HOP2_REST : 'assets/character/oreumi1.png'); lastSpot = x + ',' + y;
     }
 
@@ -1154,6 +1434,57 @@
   paintStep($('.m-s4'), 3);
   $$('.door-floor').forEach(function (el) { paintStep(el, 3); });
   var mOru = $('#mOru');
+  /* 3단계 오르미 (계속 오름, 3단계 → 4단계): one SVG with its feet, hands, body, hair and eyes moving separately.
+     The jump follows the same timing as the sprite jump (wind-up with the arms .0–.3, flight .3–.8, landing .8–1). */
+  var M3 = (function () {
+    var w = document.createElement('div'); w.className = 'm3-oru'; w.setAttribute('aria-hidden', 'true');
+    w.innerHTML = '<svg viewBox="-20 -20 361 257" aria-hidden="true"><g id="m3-all"><g id="m3-footL"><path d="M154.813 191.16C154.813 191.16 152.663 193.95 152.783 200.33C152.873 205.34 153.543 208.13 153.543 210.25C153.543 212.37 153.263 216.96 135.493 216.96C117.723 216.96 115.273 215.12 113.103 210.53C110.933 205.95 113.383 200.42 114.803 195.79C116.223 191.16 115.273 181.81 115.273 181.81L154.813 191.16Z" fill="#F9EDDE"/><path d="M152.923 203.49C152.923 203.55 152.923 203.6 152.933 203.66C147.643 198.57 141.123 194.51 131.773 195.36C124.573 196.02 121.953 203.47 112.433 204.1C112.873 201.27 113.993 198.39 114.793 195.8C116.213 191.17 115.263 181.81 115.263 181.81L154.803 191.17C154.803 191.17 152.653 193.95 152.773 200.33C152.783 200.93 152.803 201.49 152.833 202.03V202.19C152.863 202.65 152.893 203.08 152.923 203.49Z" fill="#F8D5B7"/></g><g id="m3-footR"><path d="M165.992 191.16C165.992 191.16 168.142 193.95 168.022 200.33C167.932 205.34 167.262 208.13 167.262 210.25C167.262 212.38 167.542 216.96 185.312 216.96C203.072 216.96 205.532 215.12 207.702 210.53C209.872 205.95 207.422 200.42 206.002 195.79C204.582 191.16 205.532 181.81 205.532 181.81L165.992 191.16Z" fill="#F9EDDE"/><path d="M167.882 203.49C167.882 203.55 167.882 203.6 167.872 203.66C173.162 198.57 179.682 194.51 189.032 195.36C196.232 196.02 198.852 203.47 208.372 204.1C207.932 201.27 206.812 198.39 206.012 195.8C204.592 191.17 205.542 181.81 205.542 181.81L166.002 191.17C166.002 191.17 168.152 193.95 168.032 200.33C168.022 200.93 168.002 201.49 167.972 202.03V202.19C167.942 202.65 167.912 203.08 167.882 203.49Z" fill="#F8D5B7"/></g><g id="m3-body"><path d="M230.703 151.76C230.703 177.04 199.233 194.54 160.403 194.54C121.573 194.54 90.1025 177.04 90.1025 151.76C90.1025 126.48 121.573 105.98 160.403 105.98C199.233 105.98 230.703 126.48 230.703 151.76Z" fill="#F9EDDE"/><g id="m3-hair"><path d="M37.0831 135.72C31.3631 142.62 28.6831 148.54 26.2231 154.02C26.2231 154.02 24.3731 152.76 21.6631 150.63L37.0831 135.72Z" fill="#E04004"/><path d="M124.833 61.7799C118.203 55.7999 112.413 52.8699 107.053 50.1899C107.253 49.7799 108.223 47.8299 109.843 44.9199L124.833 61.7799Z" fill="#E04004"/><path d="M221.223 70.2004C219.453 61.4204 216.533 55.6104 213.812 50.2604C214.032 50.1404 216.043 49.1104 219.213 47.6504L221.223 70.2004Z" fill="#E04004"/><path d="M283.243 109.05C285.483 100.47 285.443 94 285.353 88.04C285.833 88.29 287.663 89.26 290.253 90.76L283.243 109.05Z" fill="#E04004"/><path d="M296.153 159.6L275.663 163.88C284.173 161.1 289.603 157.52 294.603 154.2H294.643C294.843 154.82 295.493 156.86 296.153 159.6Z" fill="#E04004"/><path d="M270.133 184.12C269.993 184.09 269.913 184.07 269.913 184.07C269.913 184.07 269.033 185.54 267.563 187.54L255.143 176.98C260.883 180.86 265.643 182.48 270.043 183.95L270.133 184.12Z" fill="#E04004"/><path d="M65.8031 177.05L53.3231 187.66C51.7931 185.6 50.8831 184.07 50.8831 184.07H50.873L50.9031 184.02C55.3031 182.55 60.0631 180.93 65.8031 177.05Z" fill="#E04004"/><path d="M294.583 154.02C294.583 154.02 301.183 173.42 295.683 180.59C289.763 188.32 269.913 184.07 269.913 184.07C269.913 184.07 262.263 196.82 254.303 198.4C245.583 200.12 233.173 193.73 233.173 193.73C239.783 181.92 233.143 165.57 215.043 165.43C217.843 158.96 223.603 154.52 228.803 151.08L228.593 147.58C227.053 131.53 212.963 119.77 198.283 113.53C186.263 108.41 173.363 106.04 160.403 106.22C147.443 106.04 134.543 108.41 122.523 113.53C107.843 119.77 93.7528 131.53 92.2128 147.58L92.0028 151.08C97.1928 154.52 102.963 158.96 105.763 165.43C87.6528 165.57 81.0128 181.92 87.6328 193.73C87.6328 193.73 75.2228 200.12 66.5028 198.4C58.5328 196.82 50.8828 184.07 50.8828 184.07C50.8828 184.07 31.0428 188.32 25.1128 180.59C19.6228 173.42 26.2228 154.02 26.2228 154.02C26.2228 154.02 -2.47716 134.48 0.172836 118.89C2.50284 105.1 35.5728 87.97 35.5728 87.97C35.5728 87.97 35.8928 45.92 51.1928 37.6C66.5028 29.29 107.013 50.27 107.013 50.27C107.013 50.27 131.303 0 160.403 0C189.503 0 213.793 50.27 213.793 50.27C213.793 50.27 254.293 29.29 269.603 37.6C284.913 45.92 285.223 87.97 285.223 87.97C285.223 87.97 318.293 105.1 320.633 118.89C323.273 134.48 294.583 154.02 294.583 154.02Z" fill="#FF6A00"/><path d="M56.2833 81.9697C47.4033 83.1497 41.4132 85.6697 35.8932 88.0197L35.5732 87.9097C35.5832 87.5397 35.6133 85.4897 35.7933 82.4197L56.2833 81.9697Z" fill="#E04004"/><path d="M37.0831 135.72C31.3631 142.62 28.6831 148.54 26.2231 154.02C26.2231 154.02 24.3731 152.76 21.6631 150.63L37.0831 135.72Z" fill="#E04004"/><path d="M56.2833 81.9697C47.4033 83.1497 41.4132 85.6697 35.8932 88.0197L35.5732 87.9097C35.5832 87.5397 35.6133 85.4897 35.7933 82.4197L56.2833 81.9697Z" fill="#E04004"/><path d="M65.8031 177.05L53.3231 187.66C51.7931 185.6 50.8831 184.07 50.8831 184.07H50.873L50.9031 184.02C55.3031 182.55 60.0631 180.93 65.8031 177.05Z" fill="#E04004"/><path d="M241.913 144.07L228.543 147.06C228.733 149.35 228.803 151.03 228.803 151.03L228.853 151.04C232.283 148.66 236.023 146.11 241.913 144.06V144.07Z" fill="#E04004"/><path d="M78.8926 144.07L92.2626 147.06C92.0726 149.35 92.0026 151.03 92.0026 151.03L91.9526 151.04C88.5226 148.66 84.7826 146.11 78.8926 144.06V144.07Z" fill="#E04004"/><path d="M124.833 61.7799C118.203 55.7999 112.413 52.8699 107.053 50.1899C107.253 49.7799 108.223 47.8299 109.843 44.9199L124.833 61.7799Z" fill="#E04004"/><path d="M221.224 70.2004C219.454 61.4204 216.533 55.6104 213.813 50.2604C214.033 50.1404 216.044 49.1104 219.214 47.6504L221.224 70.2004Z" fill="#E04004"/><path d="M270.133 184.119C269.993 184.089 269.913 184.069 269.913 184.069C269.913 184.069 269.033 185.539 267.563 187.539L255.143 176.979C260.883 180.859 265.643 182.479 270.043 183.949L270.133 184.119Z" fill="#E04004"/><path d="M283.243 109.05C285.483 100.47 285.443 94 285.353 88.04C285.833 88.29 287.663 89.26 290.253 90.76L283.243 109.05Z" fill="#E04004"/><path d="M296.153 159.6L275.663 163.88C284.173 161.1 289.603 157.52 294.603 154.2H294.643C294.843 154.82 295.493 156.86 296.153 159.6Z" fill="#E04004"/></g><g id="m3-handR"><path d="M191.434 184.36C191.434 194.9 200.264 203.45 213.624 203.45C226.984 203.45 235.814 194.9 235.814 184.36C235.814 173.82 226.984 165.27 213.624 165.27C200.264 165.27 191.434 173.82 191.434 184.36Z" fill="#F9EDDE"/></g><g id="m3-handL"><path d="M129.373 184.36C129.373 194.9 120.543 203.45 107.183 203.45C93.8232 203.45 84.9932 194.9 84.9932 184.36C84.9932 173.82 93.8232 165.27 107.183 165.27C120.543 165.27 129.373 173.82 129.373 184.36Z" fill="#F9EDDE"/></g><g id="m3-face"><g id="m3-eyes"><path d="M183.802 159.15C188.027 159.15 191.452 154.713 191.452 149.24C191.452 143.767 188.027 139.33 183.802 139.33C179.577 139.33 176.152 143.767 176.152 149.24C176.152 154.713 179.577 159.15 183.802 159.15Z" fill="black"/><path d="M137.003 159.15C141.227 159.15 144.653 154.713 144.653 149.24C144.653 143.767 141.227 139.33 137.003 139.33C132.778 139.33 129.353 143.767 129.353 149.24C129.353 154.713 132.778 159.15 137.003 159.15Z" fill="black"/></g><path d="M160.403 164.65C163.987 164.65 166.893 162.743 166.893 160.39C166.893 158.037 163.987 156.13 160.403 156.13C156.819 156.13 153.913 158.037 153.913 160.39C153.913 162.743 156.819 164.65 160.403 164.65Z" fill="black"/><path d="M165.783 173.86C165.783 174.33 165.733 174.77 165.643 175.18C165.093 177.65 162.953 178.91 160.403 178.91C157.853 178.91 155.703 177.65 155.153 175.18C155.063 174.77 155.013 174.33 155.013 173.86C155.013 170.52 157.423 168.81 160.403 168.81C163.383 168.81 165.783 170.52 165.783 173.86Z" fill="#F84621"/><path d="M165.642 175.179C165.092 177.649 162.952 178.909 160.402 178.909C157.852 178.909 155.702 177.649 155.152 175.179C155.702 172.709 157.842 171.449 160.402 171.449C162.962 171.449 165.092 172.709 165.642 175.179Z" fill="#FB5E3C"/></g></g></g></svg>';
+    mOru.parentNode.insertBefore(w, mOru.nextSibling);
+    var g = function (id) { return w.querySelector('#m3-' + id); };
+    return { el: w, all: g('all'), hair: g('hair'), hL: g('handL'), hR: g('handR'), fL: g('footL'), fR: g('footR'), eyes: g('eyes'), x: 0, y: 0, on: false, jumping: false };
+  })();
+  var M3S = 84 / 321;                            // svg units → stage px (≈ the 2단계 sprite's size)
+  function m3Set(el, t) { el.setAttribute('transform', t); }
+  function m3Pose(cx, y, o) {
+    M3.el.style.transform = 'translate(' + (cx - 180 * M3S).toFixed(1) + 'px,' + (y - 237 * M3S).toFixed(1) + 'px)';
+    var sx = 1 - o.sq * .5, sy = 1 + o.sq;
+    m3Set(M3.all, 'translate(160 217) scale(' + sx.toFixed(3) + ' ' + sy.toFixed(3) + ') translate(-160 -217)');
+    m3Set(M3.fL, 'translate(' + (-o.spread * 10 + o.lift * 8) + ' ' + (-o.lift * 14) + ') rotate(' + (o.lift * 18) + ' 135 200)');
+    m3Set(M3.fR, 'translate(' + (o.spread * 10 - o.lift * 8) + ' ' + (-o.lift * 14) + ') rotate(' + (-o.lift * 18) + ' 185 200)');
+    m3Set(M3.hL, 'rotate(' + (o.arms * 62) + ' 118 178) translate(' + (-o.arms * 6) + ' ' + (-o.arms * 10) + ')');
+    m3Set(M3.hR, 'rotate(' + (-o.arms * 62) + ' 202 178) translate(' + (o.arms * 6) + ' ' + (-o.arms * 10) + ')');
+    m3Set(M3.hair, 'translate(160 112) scale(' + (1 + o.hair * .025).toFixed(3) + ' ' + (1 - o.hair * .05).toFixed(3) + ') translate(-160 -112)');
+    m3Set(M3.eyes, 'translate(0 149) scale(1 ' + (1 - (o.blink || 0) * .88).toFixed(3) + ') translate(0 -149)');
+  }
+  function m3Jump(t) {
+    var pre = seg(t, 0, .3), fly = seg(t, .3, .8), land = seg(t, .8, 1), o = { sq: 0, lift: 0, arms: 0, hair: 0, spread: 0 };
+    if (t < .3) {
+      o.sq = -.16 * (1 - Math.pow(1 - seg(pre, .3, 1), 3));
+      o.arms = .5 * Math.sin(Math.PI * Math.min(1, pre / .75)) - .3 * seg(pre, .75, 1);
+      o.spread = seg(pre, .3, 1); o.hair = .4 * seg(pre, .3, 1);
+    } else if (t < .8) {
+      o.sq = lerp(.14, -.02, fly) * (1 - fly * .4); o.lift = Math.sin(Math.PI * Math.min(1, fly * 1.15));
+      o.arms = -.3 * (1 - fly) - .1 * Math.sin(Math.PI * fly); o.hair = lerp(-.7, .4, fly);
+    } else { var b2 = Math.exp(-5 * land) * Math.cos(land * 9); o.sq = -.14 * b2; o.spread = .6 * b2; o.hair = .4 * b2; }
+    return o;
+  }
+  function m3Idle(now) {
+    var br = reduced ? 0 : Math.sin(now / 520) * .018;
+    return { sq: br, lift: 0, arms: 0, hair: -br * 4, spread: 0, blink: !reduced && (now % 3200) < 140 ? 1 : 0 };
+  }
+  (function m3Loop(now) {                        // breathing and blinking while it stands still
+    if (M3.on && !M3.jumping && $('.scene-montage').classList.contains('active')) m3Pose(M3.x, M3.y, m3Idle(now));
+    requestAnimationFrame(m3Loop);
+  })(performance.now());
+  var M2 = makeOru('c2', mOru.parentNode, mOru);
+  var M2J = -1, M2X = 0, M2Y = 0, M2O = 0;
+  (function m2Loop(now) {                        // 2단계: breathing, blinking and looking around between jumps
+    if ($('.scene-montage').classList.contains('active')) {
+      M2.el.style.opacity = M2O;
+      if (M2O > 0) M2.pose(M2X, M2Y, 80 * 360 / 380, M2J >= 0 ? M2.jump(M2J) : M2.idle(now));
+    }
+    requestAnimationFrame(m2Loop);
+  })(performance.now());
   var lastMImg = 2, lastName = '';
   // dusk → evening: the room darkens so the door's light stands out
   var BG = [[0x1C, 0x19, 0x17], [0x33, 0x2A, 0x24], [0x1C, 0x19, 0x17]];
@@ -1229,6 +1560,18 @@
     var src = pos[3] >= 0 ? HOP2[Math.min(HOP2.length - 1, Math.floor(pos[3] * HOP2.length))] : HOP2_REST;
     setSrc(mOru, src);
     mOru.classList.toggle('spr', true);
+    // from 3단계 on (once it has walked onto 3단계's tread), the SVG 3단계 오르미 takes over
+    var use3 = p >= 0.5;
+    if (use3 !== M3.on) {
+      M3.el.classList.remove('pop'); void M3.el.offsetWidth;
+      if (use3 && !reduced) M3.el.classList.add('pop');
+      M3.on = use3;
+    }
+    mOru.style.opacity = 0;                      // the sprite box only carries the position now
+    M2O = use3 ? 0 : fade; M2X = pos[0] + 40; M2Y = pos[1]; M2J = pos[3];
+    M3.el.style.opacity = use3 ? fade : 0;
+    M3.x = pos[0] + 40; M3.y = pos[1]; M3.jumping = pos[3] >= 0;
+    if (use3) m3Pose(M3.x, M3.y, M3.jumping ? m3Jump(pos[3]) : m3Idle(performance.now()));
     lastMImg = img;
     var name = p < 0.5 ? '2단계 둘러보기' : (p < 0.86 ? '3단계 마주하기' : '4단계 도전하기');
     var nameEl = $('#stageName');
@@ -1307,7 +1650,7 @@
     T = target;
     // data-pace on a scene: how much slower its moves play (1 = normal, 2 = twice as slow)
     // data-even on a scene: play its moves at a steady speed (only the very start and end ease), so every jump takes the same time
-    var pace = 1, even = false; scenes.forEach(function (sc, si) { var lo = starts[si], hi = lo + parseFloat(sc.dataset.len); if (Math.max(P, target) > lo && Math.min(P, target) < hi) { pace = Math.max(pace, parseFloat(sc.dataset.pace) || 1); even = even || !!sc.dataset.even; } });
+    var pace = 1, even = false; scenes.forEach(function (sc, si) { var lo = starts[si], hi = lo + parseFloat(sc.dataset.len); if (Math.max(P, target) > lo && Math.min(P, target) < hi && target > lo && target <= hi) { pace = Math.max(pace, parseFloat(sc.dataset.pace) || 1); even = even || !!sc.dataset.even; } });
     tw = { from: P, to: target, t0: performance.now(), cum: cum, even: even, dur: reduced ? 0 : clamp(560 + 340 * cum[TN], 700, 6500) * pace };
     kick();
   }

@@ -2162,7 +2162,7 @@ body.info-page .hscroll .item .shot { display: block; width: 230px; height: auto
   .scene > .copy { margin-top: calc(20.2 * var(--vh, 1vh) - 52px - env(safe-area-inset-top, 0px)); }
   .scene-intro .intro-copy { top: calc(19.8 * var(--vh, 1vh) + 36px); }
   .scene-hook .hook-copy { top: calc(20.2 * var(--vh, 1vh) + 36px) !important; }
-  .scene-step1 .step-shot { top: 360px; left: 500px; width: 280px; }
+  .scene-step1 .step-shot { top: 271px; left: 507px; width: 239px; }   /* 목업 1–9 phone: its top level with the title's second line, foot where it was */
   .scene-step1 .stage-wrap.bleed { top: 298px; }
 }
 

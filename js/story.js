@@ -62,10 +62,10 @@
   var STAGES = [
     { n: 0, r: 14 },
     { n: 1, r: 14 },
-    { n: 1000, r: 2.6, shape: 'school', label: '1,000명 · 한 학교 전교생', legend: '● 1개 = 1명' },
-    { n: 2400, r: 1.9, shape: 'stadium', label: '2.4만 명 · 잠실야구장 가득', legend: '● 1개 = 10명' },
-    { n: 6700, r: 1.35, shape: 'jeju', label: '67만 명 · 제주도 전체 인구', legend: '● 1개 = 100명' },
-    { n: 7170, r: 1.35, shape: 'jeju', spill: true, label: '67만 명 · 제주도 전체 인구', legend: '● 1개 = 100명' },
+    { n: 1000, r: 2.6, shape: 'school' }, //label: '1,000명 · 한 학교 전교생', legend: '● 1개 = 1명'
+    { n: 2400, r: 1.9, shape: 'stadium'}, //, label: '2.4만 명 · 잠실야구장 가득', legend: '● 1개 = 10명'
+    { n: 6700, r: 1.35, shape: 'jeju'}, //, label: '67만 명 · 제주도 전체 인구', legend: '● 1개 = 100명'
+    { n: 7170, r: 1.35, shape: 'jeju', spill: true,}, // label: '67만 명 · 제주도 전체 인구', legend: '● 1개 = 100명' 
     { n: 7170, r: 1.35, shape: 'jeju', spill: true, dim: true },
     { n: 1, r: 1.35, shape: 'jeju', leave: true }            // 점들이 아파트로 모이고, 준호·도희는 1·2층 창으로
   ];
@@ -1455,28 +1455,38 @@
     return Math.min(7, 5 + Math.floor(seg(p, 0.58, 0.78) * 3));
   }
 
+  for (var si = 0; si < 9; si++) (new Image()).src = 'assets/app/step1/shot-' + si + '.png';   // preload the phone screens
   paintStep($('.solid-1'), 0);
   paintStep($('.solid-2'), 1);
   var bTiles = null, lastN = 0;
+  /* the phone's top sits level with the title's second line on every screen (the copy and the stage scale differently),
+     its foot stays where the CSS puts it; it grows to fill the height */
+  var shotKey = '';
+  function fitShot(scene) {
+    var box = $('#stepShot'), h2 = scene.querySelectorAll('.line h2')[2]; if (!box || !h2 || !box.offsetWidth) return;
+    var key = innerWidth + 'x' + innerHeight; if (key === shotKey) return; shotKey = key;
+    box.style.top = ''; box.style.width = '';
+    var ln = h2.closest('.line'), tf = ln.style.transform, tr = ln.style.transition;
+    ln.style.transition = 'none'; ln.style.transform = 'none';          // measure it where it rests, not mid fade-in
+    var r = document.createRange(); r.selectNodeContents(h2);
+    var tops = []; [].forEach.call(r.getClientRects(), function (q) { if (q.width > 2 && tops.indexOf(Math.round(q.top)) < 0) tops.push(Math.round(q.top)); });
+    ln.style.transform = tf; void ln.offsetWidth; ln.style.transition = tr;
+    tops.sort(function (a, b) { return a - b; }); if (tops.length < 2) return;
+    var br = box.getBoundingClientRect(), cs = getComputedStyle(box), sc = br.width / parseFloat(cs.width); if (!sc) return;
+    var d = (tops[1] - br.top) / sc, top0 = parseFloat(cs.top), w0 = parseFloat(cs.width), ar = br.width / br.height;
+    box.style.top = (top0 + d).toFixed(1) + 'px'; box.style.width = Math.max(120, w0 - d * ar).toFixed(1) + 'px';
+  }
   function updateStep1(scene, p) {
     // tiles dissolve one by one into the solid gradient steps
     var n = step1Count(p);
     var resting = p >= 0.42 && p < 0.58;
     var top = p >= 0.8;
     // the verification phone: camera shows the mission being done; a new layer = shutter flash + 인증 완료
-    // the phone beside the stairs: one app screen per layer (assets/app/step1/shot-N.png, N = layers climbed);
-    // a screen that isn't there yet falls back to shot-0
+    // the phone beside the stairs: one app screen per layer (목업 1–9 = assets/app/step1/shot-0 … shot-8;
+    // shot-N = N layers climbed, shot-8 once 오르미 has grown at the top)
     var shot = $('#stepShot img');
-    if (shot) {
-      var want = 'assets/app/step1/shot-' + n + '.png';
-      if (shot.dataset.want !== want) {
-        shot.dataset.want = want;
-        var probe = new Image();
-        probe.onload = function () { if (shot.dataset.want === want) shot.src = want; };
-        probe.onerror = function () { if (shot.dataset.want === want) shot.src = 'assets/app/step1/shot-0.png'; };
-        probe.src = want;
-      }
-    }
+    if (shot) setSrc(shot, 'assets/app/step1/shot-' + (top ? 8 : n) + '.png');
+    fitShot(scene);
     var mp = $('#missionPhone');
     if (mp) {
       var mi = Math.max(0, n - 1);

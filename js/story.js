@@ -764,7 +764,7 @@
   /* the wall, its doors and the falling tiles as dots on a 5px grid (#wallDots, like the 문 밖의 벽 dot mockup).
      While the wall rises it is drawn by coverage on the fixed grid, so its top edge and the shrinking doors grow and
      shrink dot by dot; from the hit on, each tile carries the dots whose centres lie in it as it shakes and falls. */
-  var WDC = $('#wallDots'), WDX = WDC && WDC.getContext('2d'), DP = 5;
+  var WDC = $('#wallDots'), WDX = WDC && WDC.getContext('2d'), WDD = $('#wallDoorDots'), WDX2 = WDD && WDD.getContext('2d'), DP = 5;
   var WD = { glow: [0, 0, 0, 0], dirty: false, key: '', doors: [], fade: 1, wTop: TOP, broken: false, shake: 0 };
   blocks.forEach(function (b) {
     b.cells = [];
@@ -779,6 +779,7 @@
   function wallDotsDraw() {
     var c = WDX; if (!c) return;
     c.setTransform(2, 0, 0, 2, 0, 0); c.clearRect(0, 0, 1600, 540);
+    if (WDX2) { WDX2.setTransform(2, 0, 0, 2, 0, 0); WDX2.clearRect(0, 0, 1600, 540); }
     if (WD.fade <= 0) return;
     c.globalAlpha = WD.fade;
     var wTop = WD.wTop, x, y, k, d;
@@ -803,6 +804,7 @@
     }
     // the doors: white at the top to peach at the foot, by how much of each cell they cover; a soft glow of light dots around
     var ds = WD.doors.filter(function (q) { return q.a > 0; }); if (!ds.length) return;
+    if (WDX2) { c = WDX2; c.globalAlpha = WD.fade; }   // the doors go on their own layer, behind the climbers
     var x0 = 1e9, x1 = -1e9, y0 = 1e9, y1 = -1e9;
     ds.forEach(function (q) { var g = 1 + .5 * q.g, w = q.r[2] - q.r[0], h = q.r[3] - q.r[1]; x0 = Math.min(x0, q.r[0] - w * g); x1 = Math.max(x1, q.r[2] + w * g); y0 = Math.min(y0, q.r[1] - h * g); y1 = Math.max(y1, q.r[3] + h * g); });
     var gx0 = Math.max(DP / 2, Math.floor(x0 / DP) * DP + DP / 2), gy0 = Math.max(DP / 2, Math.floor(y0 / DP) * DP + DP / 2);
@@ -840,6 +842,36 @@
     el.style.background = 'url(' + cv.toDataURL('image/png') + ') 0 0 / ' + W + 'px ' + H + 'px no-repeat';
     el.classList.add('ht');
   }
+
+  /* 계속 오름 · 문이 열린다 · 에필로그: the 청년 지원 프로그램 door in the same dots as the wall's doors — white at the top
+     to peach at the foot on a 5px grid, and a halo of light dots around it that grows with --open */
+  function dotDoors() {
+    $$('.lightdoor').forEach(function (d) {
+      var w = d.offsetWidth, h = d.offsetHeight; if (!w || !h || d.querySelector('.dd-body')) return;
+      var K = 4, mx = Math.ceil(w * 1.1 / DP) * DP, my = Math.ceil(h * .9 / DP) * DP;
+      function mk(W, H, fn) { var cv = document.createElement('canvas'); cv.width = Math.ceil(W * K); cv.height = Math.ceil(H * K); var c = cv.getContext('2d'); c.scale(K, K); fn(c); return 'url(' + cv.toDataURL('image/png') + ') 0 0 / ' + W + 'px ' + H + 'px no-repeat'; }
+      var body = document.createElement('span'), halo = document.createElement('span');
+      body.className = 'dd-body'; halo.className = 'dd-halo';
+      body.style.background = mk(w, h, function (c) {
+        for (var y = DP / 2; y < h; y += DP) for (var x = DP / 2; x < w; x += DP) {
+          var cov = Math.min(1, (w - x + DP / 2) / DP) * Math.min(1, (h - y + DP / 2) / DP), vy = y / h;
+          c.fillStyle = 'rgb(255,' + (246 - 45 * vy | 0) + ',' + (238 - 78 * vy | 0) + ')'; c.beginPath(); c.arc(x, y, DP * .5 * Math.sqrt(cov), 0, 6.2832); c.fill();
+        }
+      });
+      var HW = w + 2 * mx, HH = h + my;
+      halo.style.left = -mx + 'px'; halo.style.top = -my + 'px'; halo.style.width = HW + 'px'; halo.style.height = HH + 'px';
+      halo.style.background = mk(HW, HH, function (c) {
+        var cx = mx + w / 2, cy = my + h / 2;
+        for (var y = DP / 2; y < HH; y += DP) for (var x = DP / 2; x < HW; x += DP) {
+          if (x > mx && x < mx + w && y > my) continue;          // the door itself
+          var gl = Math.min(1, Math.max(0, 1 - Math.hypot((x - cx) / (w * 1.4), (y - cy) / (h * 1.2))) * 1.2); if (gl < .05) continue;
+          c.fillStyle = 'rgba(255,217,184,' + gl.toFixed(3) + ')'; c.beginPath(); c.arc(x, y, DP * .5 * Math.pow(gl, .8), 0, 6.2832); c.fill();
+        }
+      });
+      d.insertBefore(halo, d.firstChild); d.insertBefore(body, halo.nextSibling);
+    });
+  }
+  dotDoors(); window.addEventListener('load', dotDoors);
 
   /* sprite frames: preloaded so swapping src never flickers */
   function frames(prefix, n) { var a = []; for (var i = 1; i <= n; i++) { var im = new Image(); im.src = 'assets/character/sprites/' + prefix + i + '.png'; a.push('assets/character/sprites/' + prefix + i + '.png'); } return a; }

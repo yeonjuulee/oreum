@@ -2237,7 +2237,7 @@ body.info-page .hscroll .item .shot { display: block; width: 230px; height: auto
 
 /* GNB logo: the wordmark as text in Syncopate. The page is laid out at 1440 wide and zoomed to the window,
    so 17.25px here shows as 23px on a 1920-wide screen */
-.topbar .logo { display: block; height: auto; font-family: 'Syncopate', sans-serif; font-weight: 700; line-height: 1; letter-spacing: .02em; color: #fff; text-decoration: none; }
+.topbar .logo { display: block; height: auto; font-family: 'Syncopate', sans-serif; font-weight: 700; line-height: 1; letter-spacing: .02em; color: #ff6a00; text-decoration: none; }
 .service-page .topbar .logo, .topbar.on-light .logo { color: var(--orange, #FF6A00); }
 .topbar .brand > a { text-decoration: none; align-items: center; }
 @media (max-width: 640px) { .topbar .logo { font-size: 15px; height: auto; } }
@@ -2286,3 +2286,8 @@ body.info-page .hscroll .item .shot { display: block; width: 230px; height: auto
 .wall-dots { position: absolute; left: 0; top: 0; width: 1600px; height: 540px; pointer-events: none; }
 .scene-wall .blocks { display: none; }
 .scene-wall .wall-door .wd-open { opacity: 0; }
+
+/* 계속 오름 · 문이 열린다 · 에필로그 doors: dots like the wall's doors (story.js dotDoors) — no frame, no soft glow */
+.lightdoor.arch-door .wd-open { display: none; }
+.lightdoor .dd-body { inset: 0; }
+.lightdoor .dd-halo { opacity: calc(.35 + .65 * var(--open, 0)); }

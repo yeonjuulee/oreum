@@ -1408,7 +1408,8 @@
   var SAY = { n: 0, resting: false, p: 0, x: 0, y: 0 };
   function sayUpdate() {
     var say = $('#oruSay') || (function () { var d = document.createElement('div'); d.className = 'oru-say'; d.id = 'oruSay'; d.innerHTML = '<span></span>'; $('.scene-step1 .stage').appendChild(d); return d; })();
-    var n = SAY.n, sayTxt = SAY.resting || SAY.p >= 0.42 || n === 0 || hopK >= 0 ? '' : ['일상 붕괴형', '씻고, 정리하고, 기상 등', '작은 미션을 수행하며'][n - 1] || '일상 습관을 채우게 됩니다';
+    // one bubble per page, from the first page of 숨고르기: 1 일상 붕괴형 · 2 씻고… · 3 작은 미션… · 4 일상 습관…
+    var n = SAY.n, sayTxt = SAY.resting || SAY.p >= 0.42 || hopK >= 0 ? '' : ['일상 붕괴형', '씻고, 정리하고, 기상 등', '작은 미션을 수행하며', '일상 습관을 채우게 됩니다'][n] || '';
     say.style.left = (SAY.x + 38) + 'px';
     say.style.top = (SAY.y - 74) + 'px';
     if (sayTxt) { var sp = say.firstChild; if (sp.textContent !== sayTxt) { sp.textContent = sayTxt; say.classList.remove('pop'); void say.offsetWidth; say.classList.add('pop'); } }
@@ -1782,14 +1783,14 @@
     scene.classList.toggle('flooded', flood > 0.5);
   }
   function updateEpilogue() {}
-  $('#shareBtn').addEventListener('click', function () {
-    var msg = $('#shareMsg');
+  $$('[data-share]').forEach(function (b) { b.addEventListener('click', function () {
+    var msg = b.closest('.line').querySelector('.share-msg');
     var url = location.href.split('#')[0];
     function fallback() { msg.textContent = '이 주소를 복사해 전해 주세요: ' + url; }
     if (navigator.clipboard && navigator.clipboard.writeText) {
       navigator.clipboard.writeText(url).then(function () { msg.textContent = '링크를 복사했어요. 안부와 함께 전해 주세요.'; }, fallback);
     } else { fallback(); }
-  });
+  }); });
 
   /* ======================================================
      One-screen engine
@@ -1886,7 +1887,7 @@
     ui.classList.toggle('on-light', onLight);
     var mode = onLight ? 'orange' : 'white';
     logoMode = mode;   // (the logo is text now; its colour follows .topbar.on-light in the CSS)
-    bar.style.width = (P / END * 100).toFixed(2) + '%';
+    bar.style.width = Math.min(100, P / beats[beats.length - 1] * 100).toFixed(2) + '%';   // full at the last page, not at the scroll end
     $('#prevBtn').disabled = T <= beats[0] + 1e-4;
     $('#nextBtn').disabled = T >= beats[beats.length - 1] - 1e-4;
   }

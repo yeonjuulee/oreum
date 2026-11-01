@@ -5,7 +5,7 @@
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
   <title>oreum 오름</title>
-  <meta name="description" content="다시 시작해오름. 쉬었음 청년을 위한 사회복귀 서비스 오름의 이야기.">
+  <meta name="description" content="다시 시작해 오름. 쉬었음 청년을 위한 사회복귀 서비스 오름의 이야기.">
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link rel="stylesheet"
@@ -167,7 +167,7 @@
     </svg>
     <header class="topbar" id="topbar">
       <div class="brand"><a href="#" id="homeLink" aria-label="oreum 처음으로"><span class="logo">oreum</span></a><span
-          class="slogan">다시 시작해오름</span></div>
+          class="slogan">다시 시작해 오름</span></div>
       <nav aria-label="주요 메뉴">
         <a href="./" class="nav-story" aria-current="page">INTRO</a>
         <a href="service.html" class="nav-service">SERVICE</a>
@@ -213,7 +213,7 @@
         <canvas id="introStar" aria-hidden="true"></canvas>
         <div class="intro-copy">
           <img class="intro-logo" src="assets/brand/logo-white.png" alt="oreum">
-          <h1 class="intro-title">다시 시작해오름</h1>
+          <h1 class="intro-title">다시 시작해 오름</h1>
           <p class="intro-sub">방 밖으로 나오지 못한 청년들이 다시 세상으로 오르는 이야기</p>
           <button type="button" class="intro-cta" id="introStart">이야기 시작하기 <i aria-hidden="true">→</i></button>
         </div>
@@ -521,7 +521,7 @@
           <div class="lines">
             <div class="line" data-in="0" data-out="0.12">
               <!--              <p class="kicker">고립 은둔 청년의</p>-->
-              <h2>쉬었음 청년의 80.8%는<br>고립/은둔에서 벗어나고 싶어합니다.</h2>
+              <h2>쉬었음 청년의 80.8%는<br>고립·은둔에서 벗어나고 싶어합니다.</h2>
             </div>
             <div class="line" data-in="0.12" data-out="0.26">
               <h2>쉬었음 청년을 위해 정부에서도 <br>지원 프로그램을 늘려주었습니다.</h2>
@@ -1050,15 +1050,15 @@
           <div class="lines">
             <div class="line" data-in="0" data-out="0.18">
               <p class="kicker">외출 장벽형 청년은</p>
-              <h2>여기, 2단계에서 시작해요.</h2>
+              <h2>외출 장벽형인 도희는 <br>2단계부터 시작합니다.</h2>
             </div>
             <div class="line" data-in="0.18" data-out="0.475">
               <p class="kicker">한 층, 또 한 층.</p>
-              <h2>계단이 바뀌어도, 오르는 방법은 같아요.</h2>
+              <h2>단계 별 미션 수행 후 <br>계단을 오르는 방법은 같습니다.</h2>
             </div>
             <div class="line" data-in="0.475" data-out="1.01">
               <p class="kicker">쉬어 가며, 내 속도로</p>
-              <h2>어느새, 그 문 앞까지.</h2>
+              <h2>어느새, 정부 지원 프로그램 문 앞까지.</h2>
             </div>
           </div>
         </div>
@@ -1081,12 +1081,21 @@
 
 
       <!-- S09 : 문이 열린다 -->
-      <section class="scene scene-door" data-scene="door" data-beats="0.3,0.8" data-chapter="문이 열린다" data-len="3.6">
+      <section class="scene scene-door" data-scene="door" data-beats="0.3" data-chapter="문이 열린다" data-len="3.6">
         <div class="copy">
           <div class="lines">
-            <div class="line" data-in="0" data-out="1.01">
+            <div class="line" data-in="0" data-out="0.58">
               <p class="kicker">벽 위에 있던 그 문이, 열립니다</p>
               <h2>오름은 이 문으로 <br>들어갈 수 있도록 돕겠습니다.</h2>
+            </div>
+            <!-- the closing line comes in a beat after the light and the programs, the same as the next scene's -->
+            <div class="line" data-in="0.6" data-out="1.01">
+              <h2>이 문을 열고 나아갈 수 있도록,<br>도전할 수 있도록</h2>
+              <div class="cta-row">
+                <a class="btn btn-primary" href="service.html">오름 알아보기</a>
+                <button type="button" class="btn btn-ghost-light" data-share>이 이야기 전하기</button>
+              </div>
+              <p class="share-msg" role="status"></p>
             </div>
           </div>
         </div>
@@ -1105,20 +1114,16 @@
 
 
       <!-- S10 : 에필로그 -->
-      <section class="scene scene-epilogue" data-scene="epilogue" data-beats="0.25,1" data-chapter="아직 방 안의 누군가"
+      <section class="scene scene-epilogue" data-scene="epilogue" data-beats="0.2" data-chapter="아직 방 안의 누군가"
         data-len="3">
         <div class="copy">
           <div class="lines">
-            <div class="line" data-in="0" data-out="0.45">
-              <p class="kicker">혹시 내 주변에도,</p>
-              <h2>아직 방 안에 있는 누군가가 있지 않나요?</h2>
-            </div>
-            <div class="line" data-in="0.45" data-out="1.01">
+            <div class="line instant" data-in="0" data-out="1.01">
               <!--              <p class="kicker">재촉하지 않아도 괜찮아요</p>-->
               <h2>이 문을 열고 나아갈 수 있도록,<br>도전할 수 있도록</h2>
               <div class="cta-row">
                 <a class="btn btn-primary" href="service.html">오름 알아보기</a>
-                <button type="button" class="btn btn-ghost-light" id="shareBtn">이 이야기 전하기</button>
+                <button type="button" class="btn btn-ghost-light" id="shareBtn" data-share>이 이야기 전하기</button>
               </div>
               <p class="share-msg" id="shareMsg" role="status"></p>
             </div>

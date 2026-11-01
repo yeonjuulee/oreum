@@ -1059,7 +1059,20 @@
     m3T(P.eyes, 'translate(0 149) scale(1 ' + (1 - (o.blink || 0) * .88).toFixed(3) + ') translate(0 -149)');
   }
 
+  /* 문 밖의 벽 · 2: the budget chart's foot sits level with the apartment's ground line (the copy and the stage scale differently) */
+  var budgetKey = '';
+  function fitBudget(scene) {
+    var fig = $('#wallBudget'), stg = scene.querySelector('.stage'); if (!fig || !stg || !fig.offsetWidth) return;
+    var key = innerWidth + 'x' + innerHeight; if (key === budgetKey) return; budgetKey = key;
+    var ln = fig.closest('.line'), tf = ln.style.transform, tr = ln.style.transition;
+    ln.style.transition = 'none'; ln.style.transform = 'none'; fig.style.marginTop = '';
+    var sr = stg.getBoundingClientRect(), ground = sr.top + GROUND * sr.width / 960;
+    var fr = fig.getBoundingClientRect(), sc = fr.width / fig.offsetWidth || 1;
+    fig.style.marginTop = Math.max(8, parseFloat(getComputedStyle(fig).marginTop) + (ground - fr.bottom) / sc).toFixed(1) + 'px';
+    ln.style.transform = tf; void ln.offsetWidth; ln.style.transition = tr;
+  }
   function updateWall(scene, p) {
+    fitBudget(scene);
     var zoom = ease(seg(p, 0.88, 1));            // zoom into 1·2단계: starts at 0.88 for transition to step1
     var cam = $('#wallCam');
     if (zoom > 0) {                              // aim at the step-1 scene's stage as it sits on screen (its layout differs per screen size)

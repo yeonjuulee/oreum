@@ -386,7 +386,8 @@ html.story-root body { background: var(--night); }
   box-shadow: inset -3px 0 0 rgba(255, 106, 0, .85), inset 0 0 0 1px rgba(28, 25, 23, .6);
 }
 .ld-leaf i { position: absolute; right: 12%; top: 52%; width: 9%; min-width: 3px; height: 2%; min-height: 2px; border-radius: 2px; background: var(--sand); }
-.ld-sign { left: 50%; bottom: calc(100% + 10px); transform: translateX(-50%); white-space: nowrap; font: 900 11px/1.4 var(--font-body); color: var(--sand); background: rgba(28, 25, 23, .85); border: 1px solid rgba(255, 233, 217, .45); padding: 3px 10px; border-radius: 999px; }
+/*청년지원프로그램 텍스트 사이즈 조절*/
+.ld-sign { left: 50%; bottom: calc(100% + 10px); transform: translateX(-50%); white-space: nowrap; font: 900 15px/1.4 var(--font-body); color: var(--sand); background: rgba(28, 25, 23, .85); border: 1px solid rgba(255, 233, 217, .45); padding: 8px 12px; border-radius: 999px; }
 .scene-door.flooded .ld-sign { color: var(--navy); background: var(--sand); border-color: transparent; }
 .ld-leaf { transition: background .8s ease; }
 .scene-door.flooded .ld-leaf { background: linear-gradient(90deg, #FFE9D9 0%, #FFE9D9 100%); }
@@ -2363,7 +2364,7 @@ body.svf-page { background: #fff; color: #000; }
 .wb-src { margin-top: 8px; font-size: 11px; line-height: 1.55; color: #7A736E; }
 
 /* ===== 디자인 페이지: the same 1920 canvas as the service page, 9884 tall ===== */
-.svf.dzf { height: 9884px; }
+.svf.dzf { height: 9671px; }
 .dz-t { position: absolute; margin: 0; line-height: 1; white-space: nowrap; }
 .dz-b { position: absolute; }
 .dz-i { position: absolute; display: block; height: auto; }
@@ -2668,7 +2669,7 @@ body.svf-page { background: #fff; color: #000; }
 .pf-fd .tx { left: 102px; top: 83px; }
 
 /* 서비스 소개 · 마무리: title, line, button on the left; the two phones on the right; the page ends 393px earlier */
-.svf:not(.dzf):not(.plf) { height: 18669px; }
+.svf:not(.dzf):not(.plf) { height: 16318px; }
 .sv-close-t { position: absolute; left: 148px; top: 30px; margin: 0; font: 600 64px/1.4 'Pretendard', 'Noto Sans KR', sans-serif; letter-spacing: -0.02em; color: #000; white-space: nowrap; }
 .sv-close-t em { font-style: normal; color: #FF6A00; }
 .sv-close-d { position: absolute; left: 151px; top: 127px; margin: 0; font: 400 25px/1.65 'Pretendard', 'Noto Sans KR', sans-serif; letter-spacing: -0.02em; color: #111; white-space: nowrap; }
@@ -2746,3 +2747,92 @@ body.svf-page { background: #fff; color: #000; }
 /* 아직 방 안의 누군가: its line is already on screen from the door scene, so it does not animate in again */
 .scene-epilogue .line.instant { transition: none; transform: none; }
 .scene-door .btn-ghost-light { color: var(--ink); }
+
+/* 문이 열린다 · 아직 방 안의 누군가: the title like the other story pages (36 / 600, no kicker), each <br> line kept whole */
+@media (min-width: 901px) and (min-aspect-ratio: 4/3) {
+  .scene-door .line .kicker, .scene-epilogue .line .kicker { display: none; }
+  .scene-door .line h2, .scene-epilogue .line h2 { font-size: 36px; font-weight: 600; line-height: 1.4; white-space: nowrap; }
+}
+
+/* 문 밖의 벽 · 2: the budget as a small line chart (the line draws in when the title comes on) */
+.wb-line { display: block; overflow: visible; font-family: 'Syncopate', var(--font-body), sans-serif; }
+.wb-base { stroke: #4A4440; stroke-width: 1; }
+.wb-area { fill: url(#wbFill); opacity: 0; transition: opacity .6s ease .7s; }
+.wb-path { fill: none; stroke: #FF6A00; stroke-width: 2.5; stroke-linecap: round; stroke-linejoin: round; stroke-dasharray: 100; stroke-dashoffset: 100; transition: stroke-dashoffset 1.1s cubic-bezier(.4, 0, .2, 1) .1s; }
+.wb-pt circle { fill: #1A1613; stroke: #BAB9B8; stroke-width: 2; }
+.wb-pt.now circle { fill: #FF6A00; stroke: #FF6A00; }
+.wb-pt text { text-anchor: middle; font-weight: 700; }
+.wb-pt .v { font-size: 13px; fill: #fff; }
+.wb-pt.now .v { fill: #FF6A00; font-size: 14px; }
+.wb-pt .y { font-size: 10.5px; fill: #BAB9B8; }
+.wb-pt { opacity: 0; transition: opacity .4s ease var(--d); }
+.line.on .wb-path { stroke-dashoffset: 0; }
+.line.on .wb-area, .line.on .wb-pt { opacity: 1; }
+@media (prefers-reduced-motion: reduce) { .wb-path, .wb-area, .wb-pt { transition: none; } }
+
+/* 기획: 16:9 한 화면 맞춤 */
+.pf-fit { position: absolute; inset: 0; pointer-events: none; }
+.pf-fit > * { position: absolute; pointer-events: auto; }
+.pf-hb { gap: 14px; }
+.pf-ps span { margin-top: 30px; }
+.pf-ps p { margin-top: 12px !important; }
+.pf-q { height: 530px; }
+.pf-q .o span { height: 54px; }
+.pf-abc h3 { margin-top: 16px !important; }
+.pf-abc ul { position: absolute; left: 400px; top: 50%; transform: translateY(-50%); margin: 0 !important; }
+
+/* 서비스: 16:9 한 화면 맞춤 — 섹션 묶음(.sv-g)은 원래 캔버스 크기 그대로 두고 transform으로만 옮김 */
+.sv-g { position: absolute; left: 0; top: 0; width: 1920px; height: 18669px; pointer-events: none; }
+.sv-g > * { pointer-events: auto; }
+.sq-eb { left: 562px; top: 66px; }
+.sq-t { left: 560px; top: 98px; }
+.sq-d { left: 562px; top: 173px; }
+.sq-phone { top: 70px; }
+.sq-th { top: 312px; }
+
+.step-labels { opacity: 1; transition: none; }
+.step-labels span { opacity: 0; transition: opacity .45s; }
+
+/* 서비스 로드맵 (1920×1080 시안 → 0.88배): 사용자 유형 진단 → 4단계 서비스 → 미션수행 + 리워드 → 기대효과 → 목표 */
+.sv-rm { position: absolute; left: 0; top: 1680px; width: 1920px; height: 690px; transform: translateX(22px) scale(.88); transform-origin: 960px 0; font-family: 'Pretendard', 'Noto Sans KR', sans-serif; letter-spacing: -0.02em; color: #FF6A00; }
+.sv-rm > * { position: absolute; margin: 0; box-sizing: border-box; }
+.sv-rm .rm-h { transform: translateX(-50%); font-size: 15px; font-weight: 500; color: #111; white-space: nowrap; }
+.sv-rm .rm-note { transform: translate(-50%, -50%); font-size: 16px; font-weight: 500; line-height: 1.55; text-align: center; white-space: nowrap; }
+.sv-rm .rm-h-l { height: 1.5px; background: #FF6A00; }
+.sv-rm .rm-v { width: 1.5px; background: #FF6A00; }
+.sv-rm .rm-arr-r::after { content: ""; position: absolute; right: -1px; top: -3.5px; border-left: 7px solid #FF6A00; border-top: 4.25px solid transparent; border-bottom: 4.25px solid transparent; }
+.sv-rm .rm-arr-d::after { content: ""; position: absolute; bottom: -1px; left: -3.5px; border-top: 7px solid #FF6A00; border-left: 4.25px solid transparent; border-right: 4.25px solid transparent; }
+.sv-rm .rm-ty, .sv-rm .rm-fx { width: 172px; height: 172px; border-radius: 50%; display: flex; flex-direction: column; align-items: center; justify-content: center; text-align: center; }
+.sv-rm .rm-ty { background: #FFE6D5; gap: 8px; }
+.sv-rm .rm-ty b { font-size: 23px; font-weight: 700; white-space: nowrap; }
+.sv-rm .rm-ty span { font-size: 16px; color: #333; }
+.sv-rm .rm-st, .sv-rm .rm-mi { width: 138px; height: 138px; border-radius: 50%; background: #fff; display: flex; flex-direction: column; align-items: center; justify-content: center; text-align: center; }
+.sv-rm .rm-st { border: 1.5px solid #FF6A00; gap: 6px; }
+.sv-rm .rm-st span { font-size: 16px; }
+.sv-rm .rm-st b { font-size: 20px; font-weight: 700; }
+.sv-rm .rm-cap { width: 176px; height: 519px; border-radius: 88px; background: #FFE6D5; border-left: 2px solid #FF6A00; }
+.sv-rm .rm-mi { font-size: 16px; font-weight: 600; line-height: 1.45; }
+.sv-rm .rm-fx { background: #FF9650; color: #fff; font-size: 16px; font-weight: 500; line-height: 1.45; }
+.sv-rm .rm-goal { width: 181px; height: 262px; border-radius: 20px 20px 0 0; background: #FF6A00; color: #fff; display: flex; align-items: center; justify-content: center; text-align: center; font-size: 20px; font-weight: 600; line-height: 1.55; }
+
+/* 서비스 TARGET: 페르소나 카드 두 장 + 챕터 버튼 */
+.tg-c { position: absolute; width: 790px; height: 374px; border-radius: 24px; background: #FFF7F2; font-family: 'Pretendard', 'Noto Sans KR', sans-serif; letter-spacing: -0.02em; color: #222; }
+.tg-c > * { position: absolute; }
+.tg-c img { height: auto; display: block; }
+.tg-tag { display: inline-flex; align-items: center; height: 32px; padding: 0 11px; border-radius: 16px; background: #FF6A00; color: #fff; font-size: 14px; font-weight: 600; }
+.tg-nm { margin: 12px 0 0; font-size: 19px; font-weight: 500; }
+.tg-nm small { margin-left: 7px; font-size: 14px; color: #777; font-weight: 400; }
+.tg-b { margin: 14px 0 0; font-size: 17px; line-height: 30px; white-space: nowrap; }
+.tg-ch { margin-top: 20px; display: grid; gap: 8px; }
+.tg-ch div { display: flex; gap: 6px; }
+.tg-ch span { height: 33px; padding: 0 10px; border-radius: 8px; background: #FF6A00; color: #fff; font-size: 15px; display: inline-flex; align-items: center; white-space: nowrap; }
+.tg-ln { position: absolute; width: 1.5px; height: 56px; background: linear-gradient(rgba(255,106,0,0), #FF6A00); }
+.tg-ln::after { content: ""; position: absolute; left: -4.25px; bottom: -8px; width: 10px; height: 10px; border-radius: 50%; background: #FF6A00; }
+.tg-btn { position: absolute; width: 790px; height: 65px; border-radius: 33px; background: #FF6A00; color: #fff !important; text-decoration: none; display: flex; align-items: center; justify-content: center; font: 600 23px/1 'Pretendard', 'Noto Sans KR', sans-serif; letter-spacing: -0.02em; }
+.tg-btn:hover { background: #F05F00; }
+
+/* 디자인 페이지 v2: 섹션 단위 배치 + 스크롤 등장 모션 (js/design.js) */
+.dz-sec { position: absolute; left: 0; width: 1920px; }
+.dz-pill { position: absolute; display: flex; align-items: center; justify-content: center; border-radius: 999px; background: #FF6A00; color: #fff; font: 600 19px/1 'Pretendard', sans-serif; letter-spacing: 0; }
+.dz-reveal .dz-sec { opacity: 0; transform: translateY(56px); transition: opacity .9s ease, transform 1.1s cubic-bezier(.2, .7, .2, 1); }
+.dz-reveal .dz-sec.in { opacity: 1; transform: none; }

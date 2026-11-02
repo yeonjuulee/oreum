@@ -1,0 +1,21 @@
+/* 스토리 챕터 진행바 (js/chapnav.js): 왼쪽 가운데 세로 점 7개 */
+#chapNav { position: fixed; z-index: 45; left: 26px; top: 50%; transform: translateY(-50%); --or: #FF6A00; --dot: 7px; --long: 30px;
+  font-family: 'Pretendard', 'Noto Sans KR', sans-serif; letter-spacing: -0.02em; }
+#chapNav ol { list-style: none; margin: 0; padding: 0; display: flex; flex-direction: column; align-items: center; gap: 9px; }
+#chapNav li { position: relative; }
+#chapNav .cn-i { all: unset; box-sizing: border-box; display: block; padding: 5px; margin: -5px; cursor: pointer; }
+#chapNav .cn-i:focus-visible { outline: 2px solid var(--or); outline-offset: 1px; border-radius: 8px; }
+#chapNav .cn-n, #chapNav .cn-t, #chapNav .cn-c, #chapNav .cn-pg, #chapNav .cn-cur { display: none; }
+#chapNav .cn-bar { position: relative; display: block; overflow: hidden; width: var(--dot); height: var(--dot); border-radius: 99px; background: rgba(160, 150, 142, .45);
+  transition: height .35s cubic-bezier(.3, .9, .3, 1), background .2s; }
+#chapNav.light .cn-bar { background: rgba(28, 25, 23, .2); }
+#chapNav .cn-i:hover .cn-bar { background: rgba(200, 190, 182, .75); }
+#chapNav.light .cn-i:hover .cn-bar { background: rgba(28, 25, 23, .38); }
+#chapNav .cn-i.cur .cn-bar { height: var(--long); }
+#chapNav .cn-bar i { position: absolute; left: 0; right: 0; top: 0; height: calc(var(--f, 0) * 100%); background: var(--or); border-radius: inherit; transition: height .15s linear; }
+#chapNav .cn-i:not(.cur) .cn-bar i { display: none; }   /* 지나온 챕터도 회색 점 */
+/* 이름: 마우스를 올리거나 키보드로 고르면 점 오른쪽에 */
+#chapNav li:hover .cn-t, #chapNav .cn-i:focus-visible .cn-t { display: block; position: absolute; left: calc(100% + 12px); top: 50%; transform: translateY(-50%); padding: 5px 9px; border-radius: 7px;
+  background: #1C1917; color: #F4EDE6; font-size: 12px; font-weight: 600; white-space: nowrap; pointer-events: none; z-index: 1; }
+@media (max-width: 760px) { #chapNav { left: 8px; } }
+@media (prefers-reduced-motion: reduce) { #chapNav * { transition: none !important; } }

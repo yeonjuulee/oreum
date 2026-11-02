@@ -11,6 +11,7 @@
   <link rel="stylesheet"
     href="https://fonts.googleapis.com/css2?family=Syncopate:wght@400;700&family=Noto+Sans+KR:wght@400;500;700;900&display=swap">
   <link rel="stylesheet" href="css/style.css">
+  <link rel="stylesheet" href="css/chapnav.css">
   <script src="js/fit.js" data-mode="story"></script>
 
 </head>
@@ -174,7 +175,6 @@
         <a href="plan.html" class="nav-plan">PLAN</a>
         <a href="design.html" class="nav-design">DESIGN</a>
       </nav>
-      <div class="track" aria-hidden="true"><span id="progressBar"></span></div>
     </header>
 
     <main class="story" id="story" aria-live="polite">
@@ -214,7 +214,7 @@
         <div class="intro-copy">
           <img class="intro-logo" src="assets/brand/logo-white.png" alt="oreum">
           <h1 class="intro-title">다시 시작해 오름</h1>
-          <p class="intro-sub">방 밖으로 나오지 못한 청년들이 다시 세상으로 오르는 이야기</p>
+          <p class="intro-sub">쉬었음 청년들이 다시 세상으로 오르는 이야기</p>
           <button type="button" class="intro-cta" id="introStart">이야기 시작하기 <i aria-hidden="true">→</i></button>
         </div>
       </section>
@@ -266,7 +266,7 @@
               <h2>준호와 도희가 <br>쉬고 있는 집에 찾아가 볼까요?</h2>
             </div>
             <div class="line" data-in="0.3" data-out="0.62">
-              <p class="kicker">유형 1 일상 붕괴형</p>
+              <p class="kicker">유형 1 일상 회복형</p>
               <h2>1층에는 일상생활이 힘든 <br>준호가 삽니다.</h2>
               <p class="desc">밤/낮이 뒤섞인 준호는 <br>기본적인 정리정돈조차 힘겹습니다.</p>
             </div>
@@ -514,23 +514,27 @@
       </section>
 
       <!-- S03–S04 : 벽, 그리고 네 계단 -->
-      <section class="scene scene-wall" data-scene="wall" data-beats="0.1,0.2,0.32,0.478,0.59,0.67,0.88"
-        data-slow="0.39-0.478:2,0.49-0.59:2,0.6-0.67:3,0.67-0.70:5,0.70-0.73:1.7,0.73-0.78:4.2,0.78-0.84:4.2,0.84-0.88:12.6,0.88-0.98:2"
+      <section class="scene scene-wall" data-scene="wall" data-beats="0.1,0.2,0.32,0.478,0.59,0.84,0.88"
+        data-slow="0.39-0.478:2,0.49-0.59:2,0.6-0.67:3,0.67-0.70:2,0.70-0.73:1.7,0.73-0.78:4.2,0.78-0.84:4.2,0.84-0.88:12.6,0.88-0.98:2"
         data-chapter="문 밖의 벽" data-len="10">
         <div class="copy">
           <div class="lines">
             <div class="line" data-in="0" data-out="0.12">
               <!--              <p class="kicker">고립 은둔 청년의</p>-->
-              <h2>쉬었음 청년의 80.8%는<br>고립·은둔에서 벗어나고 싶어합니다.</h2>
+              <h2>쉬었음 청년의 <em>80.8%</em>는<br>고립·은둔에서 벗어나고 싶어합니다.</h2>
             </div>
             <div class="line" data-in="0.12" data-out="0.26">
-              <h2>쉬었음 청년을 위해 정부에서도 <br>지원 프로그램을 늘려주었습니다.</h2>
+              <h2><em>903억</em>(26% 증가) <br>쉬었음 청년을 위한 <br>정부의 27년 예산입니다.</h2>
               <figure class="wall-budget" id="wallBudget">
-                <div class="wb-bars" role="img" aria-label="고용노동부 청년 지원 예산: 2025년 716억, 2026년 758억, 2027년 903억">
-                  <div class="wb-bar" style="--h:57px"><b>716억</b><i></i><span>2025</span></div>
-                  <div class="wb-bar" style="--h:78px"><b>758억</b><i></i><span>2026</span></div>
-                  <div class="wb-bar now" style="--h:150px"><b>903억</b><i></i><span>2027</span></div>
-                </div>
+                <svg class="wb-line" viewBox="0 0 220 132" width="220" height="132" role="img" aria-label="고용노동부 청년 지원 예산: 2025년 716억, 2026년 758억, 2027년 903억">
+                  <defs><linearGradient id="wbFill" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#FF6A00" stop-opacity=".35"/><stop offset="1" stop-color="#FF6A00" stop-opacity="0"/></linearGradient></defs>
+                  <line class="wb-base" x1="10" y1="104" x2="210" y2="104"/>
+                  <path class="wb-area" d="M24,93.8 L110,77.4 L196,20.7 L196,104 L24,104 Z"/>
+                  <polyline class="wb-path" points="24,93.8 110,77.4 196,20.7" pathLength="100"/>
+                  <g class="wb-pt" style="--d:0.15s"><circle cx="24" cy="93.8" r="4"/><text class="v" x="24" y="83.8">716억</text><text class="y" x="24" y="124">2025</text></g>
+                  <g class="wb-pt" style="--d:0.45s"><circle cx="110" cy="77.4" r="4"/><text class="v" x="110" y="67.4">758억</text><text class="y" x="110" y="124">2026</text></g>
+                  <g class="wb-pt now" style="--d:0.75s"><circle cx="196" cy="20.7" r="5"/><text class="v" x="196" y="10.7">903억</text><text class="y" x="196" y="124">2027</text></g>
+                </svg>
                 <figcaption>
                   <p class="wb-cap">고용노동부 청년 지원 예산 <strong>2년 새 26%</strong> 증가</p>
                   <p class="wb-src">출처: 고용노동부 「2026년 고용노동부 청년고용 관련 예산안」, <br>「청년의 도전/성장을 고용노동부가 지원하겠습니다」</p>
@@ -538,7 +542,7 @@
               </figure>
             </div>
             <div class="line" data-in="0.26" data-out="0.38">
-              <h2>하지만 그 모든 지원은 <br>대면으로 진행됩니다.</h2>
+              <h2>하지만 그 모든 지원은 <br>대면 프로그램으로 진행됩니다.</h2>
             </div>
             <div class="line" data-in="0.38" data-out="0.48">
               <h2>대면 지원이 누군가에게는 <br>쉽게 갈 수 있지만,</h2>
@@ -554,10 +558,10 @@
               <!--              </ul>-->
 
             </div>
-            <div class="line" data-in="0.6" data-out="0.73">
+            <div class="line" data-in="0.6" data-out="0.843">
               <h2>이제 <em>오름</em>이 <br>도울 수 있습니다.</h2>
             </div>
-            <div class="line" data-in="0.73" data-out="1.01">
+            <div class="line" data-in="0.843" data-out="1.01">
               <h2>오름은 4단계의 <br>서비스를 제공합니다.</h2>
               <p class="desc">생활 습관부터 사람 만나기까지. 각자 멈춰 선 칸에서 <br>시작해, 지원의 문 앞까지 스스로 올라가요.</p>
             </div>
@@ -632,7 +636,7 @@
           <div class="lines">
             <div class="line" data-in="0" data-out="0.42">
               <p class="kicker">1단계 숨고르기</p>
-              <h2>일상 붕괴형 준호는<br>1단계부터 시작합니다.</h2>
+              <h2>일상 회복형 준호는<br>1단계부터 시작합니다.</h2>
             </div>
             <div class="line" data-in="0.42" data-out="0.58">
               <p class="kicker">쉬어가도 괜찮아요, 처음으로 돌아가지 않아요</p>
@@ -644,7 +648,7 @@
             </div>
             <div class="line" data-in="0.8" data-out="1.01">
               <p class="kicker">처음엔 보이지 않던 얼굴이, 이제 보여요</p>
-              <h2>단계를 마치면서 습관이 쌓이고,<br>오르미가 성장합니다.</h2>
+              <h2>미션을 수행하며<br>오르미가 성장합니다.</h2>
             </div>
           </div>
           <div class="step-shot" id="stepShot"><img src="assets/app/step1/shot-0.png" alt="오름 앱 미션 인증 화면: 창문 열고 환기">
@@ -1045,7 +1049,7 @@
 
       <!-- S08 : 계속 오름 -->
       <section class="scene scene-montage" data-scene="montage" data-beats="0.06,0.47,0.72,0.8" data-even="1"
-        data-slow="0-0.06:3,0.17-0.72:4,0.87-1:2" data-pace="2.4" data-chapter="계속 오름" data-len="6.4">
+        data-slow="0-0.06:3,0.17-0.72:4,0.87-1:2" data-pace="1.6" data-chapter="계속 오름" data-len="6.4">
         <div class="copy">
           <div class="lines">
             <div class="line" data-in="0" data-out="0.18">
@@ -1081,7 +1085,7 @@
 
 
       <!-- S09 : 문이 열린다 -->
-      <section class="scene scene-door" data-scene="door" data-beats="0.3" data-chapter="문이 열린다" data-len="3.6">
+      <section class="scene scene-door" data-scene="door" data-beats="0.3,0.9" data-chapter="문이 열린다" data-len="3.6">
         <div class="copy">
           <div class="lines">
             <div class="line" data-in="0" data-out="0.58">
@@ -1090,7 +1094,7 @@
             </div>
             <!-- the closing line comes in a beat after the light and the programs, the same as the next scene's -->
             <div class="line" data-in="0.6" data-out="1.01">
-              <h2>이 문을 열고 나아갈 수 있도록,<br>도전할 수 있도록</h2>
+              <h2>이 문을 열고 나아가<br>다시 시작할 수 있도록<br>오름이 함께하겠습니다.</h2>
               <div class="cta-row">
                 <a class="btn btn-primary" href="service.html">오름 알아보기</a>
                 <button type="button" class="btn btn-ghost-light" data-share>이 이야기 전하기</button>
@@ -1113,36 +1117,6 @@
       </section>
 
 
-      <!-- S10 : 에필로그 -->
-      <section class="scene scene-epilogue" data-scene="epilogue" data-beats="0.2" data-chapter="아직 방 안의 누군가"
-        data-len="3">
-        <div class="copy">
-          <div class="lines">
-            <div class="line instant" data-in="0" data-out="1.01">
-              <!--              <p class="kicker">재촉하지 않아도 괜찮아요</p>-->
-              <h2>이 문을 열고 나아갈 수 있도록,<br>도전할 수 있도록</h2>
-              <div class="cta-row">
-                <a class="btn btn-primary" href="service.html">오름 알아보기</a>
-                <button type="button" class="btn btn-ghost-light" id="shareBtn" data-share>이 이야기 전하기</button>
-              </div>
-              <p class="share-msg" id="shareMsg" role="status"></p>
-            </div>
-          </div>
-        </div>
-        <div class="stage-wrap bleed">
-          <div class="stage">
-            <!-- the door scene's picture, kept as it was when the light filled the room -->
-            <div class="big-door lightdoor arch-door" style="--open:1" aria-label="청년 지원 프로그램 문"><span
-                class="wd-open"></span><span class="ld-sign">청년 지원 프로그램</span></div>
-            <div class="programs">
-              <div class="program on">청년도전지원사업</div>
-              <div class="program on">청년미래센터</div>
-              <div class="program on">일자리 첫걸음 보장센터</div>
-            </div>
-          </div>
-        </div>
-      </section>
-
       <div class="story-ui" id="storyUi">
         <span class="chapter" id="chapter">쉬었음 71.7만</span>
         <div class="ui-btns">
@@ -1156,6 +1130,7 @@
   <script src="js/dots.js"></script>
   <script src="js/intro.js"></script>
   <script src="js/story.js"></script>
+  <script src="js/chapnav.js"></script>
   <!-- review tool: jump between scenes. Delete this one line (and js/devnav.js) to remove it; nothing else depends on it -->
   <script src="js/devnav.js"></script>
 

@@ -1086,7 +1086,9 @@
     cam.style.transform = 'translate(' + (ZOOM.tx * zoom).toFixed(1) + 'px,' + (ZOOM.ty * zoom).toFixed(1) + 'px) scale(' + lerp(1, ZOOM.s, zoom).toFixed(4) + ')';
     var fadeOut = 1 - seg(zoom, 0, 0.5);
     $$('.corner, .terrace, .t-door, .apt', scene).forEach(function (el) { el.style.opacity = fadeOut; });
-    $('#stepLabels').style.opacity = (p > 0.82 ? 1 : 0) * fadeOut;
+    // page 6: each step's label comes up right after that step turns to its colour (steps lit 0.81 … 0.834); page 7 only has the hops
+    $('#stepLabels').style.opacity = fadeOut;
+    $$('#stepLabels span').forEach(function (el, s2) { el.style.opacity = p > 0.815 + s2 * 0.008 ? 1 : 0; });
 
     // "정부에서도 …": only the four doors, standing on the ground. "하지만 … 대면": the wall grows up under them and lifts them
     // 벽과 문이 "누군가에게는 쉽게 올라갈 수 있는 높이지만,"에 맞춰 최종 높이까지 일치하여 도달하도록 타이밍 조정
@@ -1096,7 +1098,7 @@
     blocksEl.style.clipPath = rise < 1 ? 'polygon(-600px -600px, 3600px -600px, 3600px ' + GROUND + 'px, -600px ' + GROUND + 'px)' : '';
     var built = blocks.length;
     var hit = seg(p, 0.77, 0.805);              // impact: shake + crack
-    var fallT = seg(p, 0.78, 0.845);            // non-stair tiles fall
+    var fallT = seg(p, 0.78, 0.835);            // non-stair tiles fall (all down before page 6 rests at 0.84)
     var shake = (p >= 0.77 && p < 0.805) ? Math.sin(p * 2200) * 7 * (1 - hit) : 0;
 
     blocks.forEach(function (b, i) {
@@ -1408,8 +1410,11 @@
   var SAY = { n: 0, resting: false, p: 0, x: 0, y: 0 };
   function sayUpdate() {
     var say = $('#oruSay') || (function () { var d = document.createElement('div'); d.className = 'oru-say'; d.id = 'oruSay'; d.innerHTML = '<span></span>'; $('.scene-step1 .stage').appendChild(d); return d; })();
-    // one bubble per page, from the first page of 숨고르기: 1 일상 붕괴형 · 2 씻고… · 3 작은 미션… · 4 일상 습관…
-    var n = SAY.n, sayTxt = SAY.resting || SAY.p >= 0.42 || hopK >= 0 ? '' : ['일상 붕괴형', '씻고, 정리하고, 기상 등', '작은 미션을 수행하며', '일상 습관을 채우게 됩니다'][n] || '';
+    // one bubble per page, from the first page of 숨고르기: 1 일상 회복형 · 2 씻고… · 3 작은 미션… · 4 일상 습관…
+    var n = SAY.n, sayTxt = SAY.resting || SAY.p >= 0.42 || hopK >= 0 ? '' : ['일상 회복형', '씻고, 정리하고, 기상 등', '작은 미션을 수행하며', '일상 습관을 채우게 됩니다'][n] || '';
+    // only once he has come down onto his spot (the .8s move of #stepOru) — no bubble while he is still in the air
+    var ocs = getComputedStyle(stepOru);
+    if (Math.abs((parseFloat(ocs.left) || 0) - SAY.x) > 2 || Math.abs((parseFloat(ocs.top) || 0) - SAY.y) > 2) sayTxt = '';
     say.style.left = (SAY.x + 38) + 'px';
     say.style.top = (SAY.y - 74) + 'px';
     if (sayTxt) { var sp = say.firstChild; if (sp.textContent !== sayTxt) { sp.textContent = sayTxt; say.classList.remove('pop'); void say.offsetWidth; say.classList.add('pop'); } }
@@ -1441,7 +1446,11 @@
   // the hop plays in time with the 0.8s move between layers (CSS transition on left/top)
   function stopHop() { if (hopRaf) cancelAnimationFrame(hopRaf); hopRaf = 0; hopK = -1; }
   /* a jump onto the next layer: squash on the spot (frames 1–3), spring up along an arc (4–5), land (6–7) */
-  var HOP_MS = 900, HOP_H = 34;                 // jump length (ms) and height (stage px)
+  /* 숨고르기 layer-to-layer jump speed: STEP1_HOP_MS is how long one jump takes (ms). Smaller = faster.
+     1050 (the 1단계 oreumi's own jump) ÷ 1.3 = 808 → 1.3× faster. */
+  // 1단계 점프 속도 조절
+  var STEP1_HOP_MS = 700;
+  var HOP_MS = 900, HOP_H = 34;                 // (old sprite jump, unused) length (ms) and height (stage px)
   function jumpPos(a, b, k) {
     var m = clamp((k - .3) / .5), e = m * m * (3 - 2 * m);
     return [lerp(a[0], b[0], e), lerp(a[1], b[1], e) - HOP_H * Math.sin(Math.PI * m)];
@@ -1451,7 +1460,7 @@
     var t0 = performance.now();
     stepOru.style.transition = 'none';
     (function tick(now) {
-      var k = (now - t0) / S1A.cfg.jt;
+      var k = (now - t0) / STEP1_HOP_MS;
       if (k >= 1 || lastStage1Img !== 1) {
         hopRaf = 0; hopK = -1; stepOru.style.left = to[0] + 'px'; stepOru.style.top = to[1] + 'px'; stepOru.style.transition = '';
         if (lastStage1Img === 1) setSrc(stepOru, 'assets/character/oreumi1.png'); return;
@@ -1801,7 +1810,7 @@
   scenes.forEach(function (s) { starts.push(total); total += parseFloat(s.dataset.len); });
   var END = total - 0.0001;
   var P = 0, T = 0, active = -1;
-  var topbar = $('#topbar'), ui = $('#storyUi'), bar = $('#progressBar'), chapter = $('#chapter');
+  var topbar = $('#topbar'), ui = $('#storyUi'), chapter = $('#chapter'), renderHooks = [];
   var logo = $('.topbar .logo'), logoMode = 'white';
   var hint = $('#hint');
 
@@ -1887,7 +1896,7 @@
     ui.classList.toggle('on-light', onLight);
     var mode = onLight ? 'orange' : 'white';
     logoMode = mode;   // (the logo is text now; its colour follows .topbar.on-light in the CSS)
-    bar.style.width = Math.min(100, P / beats[beats.length - 1] * 100).toFixed(2) + '%';   // full at the last page, not at the scroll end
+    for (var h = 0; h < renderHooks.length; h++) renderHooks[h](P, T);   // the chapter progress nav (js/chapnav.js)
     $('#prevBtn').disabled = T <= beats[0] + 1e-4;
     $('#nextBtn').disabled = T >= beats[beats.length - 1] - 1e-4;
   }
@@ -1950,7 +1959,17 @@
   $('#homeLink').addEventListener('click', function (e) { e.preventDefault(); tweenTo(0); });
 
   // jump straight to a point of the story (used by the review tool js/devnav.js; nothing else calls it)
-  window.OreumStory = { seek: function (x) { tw = null; T = P = clamp(x, 0, END); render(); }, now: function () { return T; } };
+  window.OreumStory = { seek: function (x) { tw = null; T = P = clamp(x, 0, END); render(); }, now: function () { return T; },
+    // for the chapter nav: each scene's place in the story and its pages (beats, local 0–1)
+    chapters: scenes.map(function (s, i) { return { name: s.dataset.chapter, start: starts[i], len: parseFloat(s.dataset.len), beats: (s.dataset.beats || '0').split(',').map(parseFloat) }; }),
+    onRender: function (f) { renderHooks.push(f); f(P, T); },
+    // a chapter jump: the story fades out, lands on that chapter's first page, fades back in
+    go: function (x) {
+      var st = $('#story'); hint.classList.add('off');
+      if (reduced) { tw = null; T = P = clamp(x, 0, END); render(); return; }
+      st.style.transition = 'opacity .22s'; st.style.opacity = 0;
+      setTimeout(function () { tw = null; T = P = clamp(x, 0, END); render(); st.style.opacity = 1; }, 230);
+    } };
   window.addEventListener('resize', function () { fitStages(); sizeHook(); });
   if (document.fonts && document.fonts.ready) document.fonts.ready.then(fitStages);
   fitStages();

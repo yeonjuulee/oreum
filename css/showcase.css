@@ -1,0 +1,263 @@
+/* SERVICE · DESIGN pages (Figma "웹 최종 수정": 서비스 소개_수정본 / 디자인 소개페이지).
+   Each page is drawn on a 1920 px canvas in Figma coordinates and scaled to the window by js/service.js (--svz).
+   A .sx is one section box (used for the scroll reveal); its .og child puts the page coordinates back,
+   so every element inside keeps the left/top it has in Figma.
+   Class names are prefixed or spelled out where css/style.css already uses the short ones. */
+.shx { position: relative; width: 1920px; zoom: var(--svz, 1); overflow: clip; color: #000; font-family: 'Pretendard', 'Noto Sans KR', sans-serif; letter-spacing: -0.02em; line-height: 1.65; -webkit-font-smoothing: antialiased; }
+.shx *, .shx ::before, .shx ::after { box-sizing: border-box; margin: 0; padding: 0; }
+.shx img { display: block; max-width: none; }
+.shx a { color: inherit; text-decoration: none; }
+.shx button { font: inherit; color: inherit; letter-spacing: inherit; background: none; border: 0; cursor: pointer; }
+.shx .a { position: absolute; }
+.shx .tx { position: absolute; white-space: nowrap; }
+.shx .sx { position: absolute; left: 0; width: 1920px; }
+.shx .og { position: absolute; left: 0; width: 1920px; height: 0; }
+.shx .c { text-align: center; }
+.shx .ra { text-align: right; }
+.shx .md { font-weight: 500; }
+.shx .sb { font-weight: 600; }
+.shx .or { color: #ff6a00; }
+.shx .wh { color: #fff; }
+.shx .ls0 { letter-spacing: 0; }
+.shx .eb { font-size: 20px; color: rgba(0, 0, 0, .3); text-transform: uppercase; }
+.shx .eb.wh { color: rgba(255, 255, 255, .7); }
+.shx .h40 { font-size: 40px; font-weight: 600; line-height: 1.4; }
+.shx .h48 { font-size: 48px; font-weight: 600; line-height: 1.4; }
+.shx .p20 { font-size: 20px; }
+.shx .p24 { font-size: 24px; }
+.shx .cov { object-fit: cover; }
+.shx :focus-visible { outline: 3px solid #111; outline-offset: 3px; }
+
+/* call to action */
+.shx .cta { position: absolute; display: flex; align-items: center; justify-content: center; width: 293px; height: 49px; border-radius: 40px; background: #ff6a00; color: #fff; font-size: 20px; font-weight: 600; line-height: 1.3; white-space: nowrap; transition: translate .25s ease, box-shadow .25s ease; }
+.shx .cta i { font-style: normal; display: inline-block; margin-left: .3em; transition: translate .25s ease; }
+.shx .cta:hover { translate: 0 -3px; box-shadow: 0 12px 26px rgba(255, 106, 0, .32); }
+.shx .cta:hover i { translate: 5px 0; }
+
+/* scroll reveal (js/showcase.js): every .rvl in a section rises in when the section reaches the screen, one after another */
+.rv-on .shx .rvl { opacity: 0; transform: translateY(44px); transition: opacity .8s ease, transform 1s cubic-bezier(.2, .7, .2, 1); transition-delay: var(--d, 0s); }
+.rv-on .shx .rvl.fade { transform: none; }
+.rv-on .shx .rvl.pop { transform: scale(.6); transition-timing-function: ease, cubic-bezier(.3, 1.5, .5, 1); }
+.rv-on .shx .shown .rvl { opacity: 1; transform: none; }
+
+/* gentle idle motion: uses the separate translate property, so it never fights the reveal transform */
+@keyframes shFloat { 0%, 100% { translate: 0 0; } 50% { translate: 0 -16px; } }
+@keyframes shBob { 0%, 100% { translate: 0 0; rotate: 0deg; } 50% { translate: 0 -10px; rotate: 2deg; } }
+.shx .fl { animation: shFloat 6s ease-in-out infinite; }
+.shx .fl.alt { animation-duration: 7s; animation-delay: -3s; }
+.shx .bob { animation: shBob 4.2s ease-in-out infinite; }
+.shx .bob.alt { animation-duration: 5s; animation-delay: -2s; }
+@keyframes shDrop { 0%, 100% { translate: 0 0; } 50% { translate: 0 8px; } }
+.shx .drop { animation: shDrop 1.8s ease-in-out infinite; }
+
+/* footer */
+.shx .ft { position: absolute; left: 0; width: 1920px; background: #ff6a00; color: #fff; overflow: clip; }
+.shx .ft .tx { line-height: 1; font-size: 24px; font-weight: 600; letter-spacing: -0.48px; }
+.shx .ft .lg { font-family: 'Syncopate', sans-serif; font-weight: 700; font-size: 48px; letter-spacing: -1.92px; }
+.shx .ft .sl { font-weight: 500; }
+.shx .ft .cp { font-size: 20px; font-weight: 400; line-height: 1.65; letter-spacing: -0.4px; }
+.shx .sv-name { transition: opacity .2s; }
+
+/* phone screens that change (js/service.js .sv-rot) */
+.shx .pscr { position: absolute; overflow: hidden; background: #fff; }
+.shx .pscr img { position: absolute; inset: 0; width: 100%; height: 100%; }
+
+@media (prefers-reduced-motion: reduce) {
+  .shx .fl, .shx .bob, .shx .drop, .shx .gpill { animation: none; }
+}
+
+/* ============ DESIGN ============ */
+/* keyword rows: the row under the pointer lights up */
+.shx .kw { position: absolute; left: 150px; width: 1620px; }
+.shx .kw .tx { transition: color .35s ease, translate .5s cubic-bezier(.2, .7, .2, 1); }
+.shx .kw .wd { font-family: 'Syncopate', sans-serif; font-weight: 700; font-size: 110px; line-height: 1; letter-spacing: 0; }
+.shx .kw .no { font-size: 20px; font-weight: 500; line-height: 1; color: rgba(0, 0, 0, .7); }
+.shx .kw .klb { font-size: 20px; color: rgba(0, 0, 0, .3); }
+.shx .kw:hover .wd { color: #ff6a00; translate: 14px 0; }
+.shx .kw:hover .klb, .shx .kw:hover .no { color: #ff6a00; }
+.shx .kw-ln { position: absolute; left: 150px; width: 1620px; height: 1px; background: rgba(0, 0, 0, .1); }
+
+/* colour bars */
+.shx .swb { position: absolute; left: 150px; width: 1620px; height: 67px; }
+.shx .swb b { position: absolute; left: 45px; top: 21px; font-size: 20px; font-weight: 500; line-height: 1.28; letter-spacing: -0.4px; color: #fff; }
+.shx .swb.lt b { color: rgba(0, 0, 0, .3); }
+/* COLOR: the bars stack; one bar at a time is tall (#FF6A00 by default, or the one under the pointer) */
+.shx .swc { position: absolute; left: 150px; top: 1589px; width: 1620px; display: flex; flex-direction: column; }
+.shx .swc .swb { position: relative; left: 0; width: 100%; height: 67px; flex: none; transition: height .5s cubic-bezier(.3, .9, .3, 1); }
+.shx .swc .swb b { top: auto; bottom: 20px; }
+.shx .swc .swb.on { height: 193px; }
+.shx .swc:hover .swb.on { height: 67px; }
+.shx .swc:hover .swb:hover { height: 193px; }
+@media (prefers-reduced-motion: reduce) { .shx .swc .swb { transition: none; } }
+
+/* type specimens, logo cards */
+.shx .tcard { position: absolute; border-radius: 30px; background: #fafafa; }
+.shx .kpill { position: absolute; display: flex; align-items: center; justify-content: center; width: 77px; height: 36px; border-radius: 35px; background: #ff6a00; color: #fff; font-size: 20px; font-weight: 500; line-height: 1; letter-spacing: -0.4px; }
+.shx .lcard { position: absolute; border-radius: 30px; overflow: hidden; }
+.shx .tilt { transition: transform .4s ease; transform-style: preserve-3d; }
+
+/* evolution line draws in */
+.shx .evo-ln { transform-origin: 0 50%; }
+.rv-on .shx .evo-ln { transform: scaleX(0); transition: transform 1.6s cubic-bezier(.4, 0, .2, 1) .2s; }
+.rv-on .shx .shown .evo-ln { transform: none; }
+
+/* ============ SERVICE ============ */
+/* roadmap */
+.shx .rm-step { position: absolute; width: 139px; height: 139px; border: 1.5px solid #ff6a00; border-radius: 50%; }
+.shx .rm-ln { position: absolute; left: 0; top: 0; overflow: visible; pointer-events: none; }
+
+/* target */
+.shx .tgc { position: absolute; border-radius: 20px; background: #fff7f1; }
+.shx .ttag { position: absolute; padding: 6px 10px; border-radius: 47px; background: #ff6a00; color: #fff; font-size: 15px; font-weight: 600; line-height: 1.32; letter-spacing: -0.3px; white-space: nowrap; }
+.shx .chip { position: absolute; display: flex; align-items: center; justify-content: center; height: 34.3px; padding: 0 15px; border-radius: 10px; background: #ff6a00; color: #fff; font-size: 15.4px; font-weight: 500; line-height: normal; letter-spacing: 0; white-space: nowrap; }
+.shx .tbtn { position: absolute; display: flex; align-items: center; justify-content: center; height: 65px; border-radius: 47px; background: #ff6a00; color: #fff; font-size: 24px; font-weight: 600; letter-spacing: -0.48px; }
+
+/* survey: the phone on the left runs the app's self-check screens (Figma 디자인 › 화면 탈바꿈 › 자가진단),
+   drawn at the app's 402 × 874 size and scaled into the Figma phone */
+.shx .sqs { left: 161.4px; top: 343.56px; width: 286.807px; height: 620.602px; border-radius: 42px; overflow: hidden; background: #fff; }
+.shx .sqa { position: absolute; left: 0; top: 0; width: 402px; height: 874px; transform: scale(.71345); transform-origin: 0 0; color: #000; letter-spacing: 0; }
+.shx .sqa [hidden] { display: none !important; }
+.shx .sqa .scn { position: absolute; inset: 0; background: #fff; }
+.shx .sqa .bar { position: absolute; left: 0; top: 0; width: 402px; height: 62px; }
+.shx .sqa .bar b { position: absolute; left: 24px; top: 22.5px; width: 100px; text-align: center; font: 600 17px/22px -apple-system, 'SF Pro Text', 'Pretendard', sans-serif; }
+.shx .sqa .bar span { position: absolute; left: 289px; top: 22px; display: flex; align-items: center; gap: 7px; height: 22px; }
+.shx .sqa .isl { position: absolute; left: 50%; top: 11px; width: 125px; height: 37px; border-radius: 19px; background: #000; translate: -50% 0; }
+.shx .sqa .prog { position: absolute; left: 27px; top: 96px; width: 346px; height: 6px; border-radius: 3px; background: #f7f8f9; overflow: hidden; }
+.shx .sqa .prog i { display: block; height: 100%; width: 92px; border-radius: 3px; background: #ff6a00; transition: width .35s ease; }
+.shx .sqa fieldset { position: absolute; inset: 0; border: 0; min-width: 0; }
+.shx .sqa legend { position: absolute; left: 30px; top: 131px; width: 340px; font-size: 20px; font-weight: 600; line-height: 1.4; letter-spacing: -0.4px; }
+.shx .sqa .hp { position: absolute; left: 30px; top: 197px; font-size: 13px; font-weight: 500; line-height: 1.4; letter-spacing: -0.13px; color: rgba(0, 0, 0, .5); white-space: nowrap; }
+.shx .sqa label { position: absolute; left: 30px; width: 342px; height: 56px; display: flex; align-items: center; gap: 20px; padding: 0 22px; border-radius: 10px; background: #f7f8f9; font-size: 16px; font-weight: 500; line-height: 1.4; letter-spacing: -0.32px; cursor: pointer; transition: background .2s, color .2s; }
+.shx .sqa label input { position: absolute; opacity: 0; pointer-events: none; }
+.shx .sqa label i { flex: none; width: 23px; height: 22.3px; background: url("../assets/v2/service/sq/check-off.svg") center / 100% 100% no-repeat; }
+.shx .sqa fieldset:has(input:checked) label { color: rgba(0, 0, 0, .5); }
+.shx .sqa label:has(input:checked) { background: #fffaf7; color: #000 !important; }
+.shx .sqa label:has(input:checked) i { background-image: url("../assets/v2/service/sq/check-on.svg"); }
+.shx .sqa label:has(input:focus-visible) { outline: 2px solid #111; outline-offset: 2px; }
+.shx .sqa .nav button, .shx .sqa .btn { position: absolute; top: 766px; width: 161px; height: 56px; border-radius: 10px; color: #fff; font-size: 14px; font-weight: 600; line-height: 1.3; letter-spacing: -0.28px; }
+.shx .sqa .prev { left: 30px; background: rgba(66, 66, 67, .2); }
+.shx .sqa .next { left: 211px; background: #ff6a00; transition: opacity .2s; }
+.shx .sqa .next:disabled, .shx .sqa .prev:disabled { opacity: .45; cursor: default; }
+.shx .sqa .go:focus-visible, .shx .sqa .again:focus-visible { outline: 2px solid #111; outline-offset: 2px; }
+.shx .sqa .ring { position: absolute; inset: 0; transform-origin: 201px 411px; animation: sqSpin 1.4s linear infinite; }
+@keyframes sqSpin { to { transform: rotate(1turn); } }
+.shx .sqa .ld { position: absolute; left: 0; top: 535px; width: 402px; text-align: center; font-size: 20px; font-weight: 600; line-height: 1.4; letter-spacing: -0.4px; }
+.shx .sqa .rfull { position: absolute; left: 0; top: 0; width: 402px; height: 874px; display: block; }
+.shx .sqa .sqres:not([hidden]) ~ .bar { visibility: hidden; }   /* the result screen has its own status bar */
+.shx .sqa .go { position: absolute; left: 30px; top: 719px; width: 342px; height: 56px; display: grid; place-items: center; border-radius: 10px; background: transparent; color: transparent; font-size: 14px; font-weight: 600; letter-spacing: -0.28px; }
+.shx .sqa .again { position: absolute; left: 30px; top: 788px; width: 342px; height: 56px; color: transparent; font-size: 14px; font-weight: 600; letter-spacing: -0.28px; }
+/* the five screen thumbnails: the one on the phone stays clear, the others fade back */
+.shx .sqt { position: absolute; top: 470px; height: 507px; border-radius: 25px; overflow: hidden; transition: opacity .35s ease, translate .3s ease; }
+.shx .sqt img { width: 100%; height: 100%; object-fit: cover; }
+.shx .sqt:disabled { cursor: default; }
+.shx .sq-live.run .sqt { opacity: .4; }
+.shx .sq-live.run .sqt.cur { opacity: 1; }
+.shx .sq-live.run .sqt:not(:disabled):not(.cur):hover { opacity: .7; }
+
+/* chapter cards: compacted so the section fits one 16:9 screen (Figma: sprite 131 tall at 19, pill 166, title 207,
+   text 266, list 329 with 50 px rows 13 apart); the type sizes stay the Figma ones */
+.shx .chc { position: absolute; width: 383px; border-radius: 20px; background: #fff7f1; }
+.shx .chc .spr { position: absolute; top: 16px; overflow: hidden; }
+.shx .chc .spr img { position: absolute; height: 164.37%; top: -27.59%; }
+.shx .chc .np { position: absolute; top: 132px; display: flex; align-items: center; justify-content: center; width: 77px; height: 34px; border-radius: 36px; background: #ff6a00; color: #fff; font-size: 18px; font-weight: 500; }
+.shx .chc .nm { position: absolute; top: 170px; font-size: 36px; font-weight: 600; white-space: nowrap; }
+.shx .chc .ds { position: absolute; top: 229px; font-size: 20px; color: rgba(0, 0, 0, .5); white-space: nowrap; }
+.shx .chc ul { position: absolute; top: 283px; list-style: none; }
+.shx .chc li { display: flex; align-items: center; width: 339px; height: 44px; margin-bottom: 13px; padding-left: 24px; border-radius: 10px; background: #ffe9d9; font-size: 20px; font-weight: 500; }
+
+/* main callouts */
+.shx .call-ln { transform-origin: 100% 50%; }
+.shx .call-ln.rt { transform-origin: 0 50%; }
+.rv-on .shx .call-ln { transform: scaleX(0); transition: transform .8s ease .9s; }
+.rv-on .shx .shown .call-ln { transform: none; }
+
+/* mission screens */
+.shx .ms { position: absolute; width: 327px; height: 711px; border-radius: 35px; border: 3px solid #c3c2c2; overflow: hidden; }
+.shx .ms img { width: 100%; height: 100%; object-fit: cover; }
+.shx .stp { position: absolute; display: flex; align-items: center; gap: 9px; font-size: 20px; font-weight: 500; white-space: nowrap; }
+.shx .stp i { display: grid; place-items: center; width: 32px; height: 32px; border-radius: 50%; background: #ff6a00; color: #fff; font-style: normal; }
+
+/* character growth badges */
+.shx .bdg { position: absolute; display: flex; align-items: center; justify-content: center; height: 36.8px; padding: 0 16px; border: 1.6px solid #ff6a00; border-radius: 8px; background: #ff6a00; color: #fff; font-size: 18px; font-weight: 600; line-height: 1.4; white-space: nowrap; }
+
+/* screens on orange */
+.shx .scr2 { position: absolute; border-radius: 35px; overflow: hidden; transition: translate .35s ease, box-shadow .35s; }
+.shx .scr2:hover { translate: 0 -10px; box-shadow: 0 26px 50px rgba(120, 40, 0, .3); }
+.shx .lift { transition: translate .3s ease, box-shadow .3s ease; }
+.shx .lift:hover { translate: 0 -8px; box-shadow: 0 18px 36px rgba(0, 0, 0, .08); }
+.shx .scr2 img { width: 100%; height: 100%; object-fit: cover; }
+
+/* goal: the four stairs build up and the door opens */
+.shx .gl { position: absolute; left: 151px; top: 16491px; width: 1620px; height: 941px; border-radius: 30px; overflow: clip; }
+.shx .stair { position: absolute; border-top-left-radius: 30px; transform-origin: 50% 100%; }
+.rv-on .shx .gl .stair { transform: scaleY(0); transition: transform .9s cubic-bezier(.2, .7, .2, 1); transition-delay: var(--d, 0s); }
+.rv-on .shx .shown .gl .stair { transform: none; }
+.shx .door { position: absolute; left: 1113px; top: 125px; width: 235px; height: 341px; perspective: 900px; cursor: pointer; }
+.shx .door .lf { position: absolute; inset: 0; border: 5px solid #ff6a00; border-bottom: 0; border-radius: 20px 20px 0 0; background: #fff; transform-origin: 0 50%; transition: transform .9s cubic-bezier(.3, .7, .2, 1); }
+.shx .door .lf::after { content: ""; position: absolute; right: 22px; top: 170px; width: 14px; height: 14px; border-radius: 50%; background: #ff6a00; }
+.shx .door .in-l { position: absolute; inset: 0; border-radius: 20px 20px 0 0; background: linear-gradient(#fff6ee, #ffd9bd); }
+.shx .door.open .lf, .shx .door:hover .lf { transform: rotateY(-62deg); }
+.shx .glow { position: absolute; left: 1113px; top: 466px; width: 235px; height: 300px; background: linear-gradient(rgba(255, 255, 255, .3), rgba(255, 255, 255, 0)); }
+.shx .door.open ~ .glow, .shx .door:hover ~ .glow { background: linear-gradient(rgba(255, 255, 255, .55), rgba(255, 255, 255, 0)); }
+.shx .gpill { position: absolute; left: 1123px; top: 48px; padding: 10px 26px; border: 2px solid #ff6a00; border-radius: 40px; background: #ff6a00; color: #fff; font-size: 22px; font-weight: 600; line-height: normal; letter-spacing: -0.44px; white-space: nowrap; }
+@keyframes shPulse { 0%, 100% { box-shadow: 0 0 0 0 rgba(255, 106, 0, .35); } 50% { box-shadow: 0 0 0 12px rgba(255, 106, 0, 0); } }
+.shx .gpill { animation: shPulse 2.4s ease-in-out infinite; }
+.shx .goru { position: absolute; left: 810px; top: 247px; width: 218px; height: 237px; }
+
+/* "나에게 맞는 오름 시작점 찾기" → #survey: stop where the SURVEY label shows just under the top bar */
+#survey { scroll-margin-top: 50px; }
+
+/* GOAL: the stairs no longer grow one by one; the section rises in as one group */
+.rv-on .shx .gl .stair { transform: none; transition: none; }
+.shx .ms.sm { width: 313px; height: 674px; border-radius: 33px; }   /* MISSION: 0.94 of the phone frame */
+
+/* LOGO: the wordmark construction video plays once when the section shows and stays on its last frame.
+   No controls; the still wordmark shows only if the video can't load (.lgv-off). */
+.shx .lgv { object-fit: cover; background: transparent; pointer-events: none; border-radius: 0; }
+.shx .lgv::-webkit-media-controls, .shx .lgv::-webkit-media-controls-enclosure { display: none !important; }
+.shx .lgw { visibility: hidden; }
+.shx .lgv-off .lgw { visibility: visible; }
+.shx .lgv-off .lgv { display: none; }
+
+/* CUSTOMIZE (js/showcase.js): the right phone's home screen changes every 2 s and the left phone's 꾸미기 sheet
+   follows it; picking a background there shows that screen (악세사리 · 소품 are shown but not clickable).
+   Inside the left sheet, .czin is the app's 402px-wide layout. */
+.shx .czc { border-radius: 40px; overflow: hidden; }
+.shx .czsn { overflow: hidden; background: #fff; }
+.shx .czin { position: absolute; left: 0; top: 0; width: 402px; transform-origin: 0 0; color: #111; letter-spacing: -0.02em; }
+.shx .czin [hidden] { display: none !important; }
+.shx .czsc { position: absolute; left: 0; top: 0; width: 402px; height: 874px; opacity: 0; transition: opacity .45s ease; }
+.shx .czsc.on { opacity: 1; }
+.shx .czr > .czsc { width: 100%; height: 100%; }   /* the right phone shows whole app screens (402 × 874 at 2×) */
+.shx .czr > .isl { position: absolute; left: 50%; top: 9px; width: 99px; height: 29px; border-radius: 15px; background: #000; translate: -50% 0; z-index: 3; }
+.shx .czr > .hi { position: absolute; left: 50%; bottom: 8.5px; width: 141px; height: 3.5px; border-radius: 2px; background: #ccc; translate: -50% 0; z-index: 3; }
+.shx .czp { position: absolute; height: 36px; width: auto; opacity: 0; transform: translate(-50%, -50%) scale(.5); transition: opacity .25s, transform .4s cubic-bezier(.3, 1.6, .5, 1), left .45s, top .45s; filter: drop-shadow(0 2px 3px rgba(0, 0, 0, .25)); }
+.shx .czp[data-prop="ticket"] { height: 26px; }
+.shx .czp.on { opacity: 1; transform: translate(-50%, -50%) scale(1); }
+.shx .czin .isl { position: absolute; left: 50%; top: 11px; width: 125px; height: 37px; border-radius: 19px; background: #000; translate: -50% 0; z-index: 3; }
+.shx .czs { position: absolute; left: 0; right: 0; bottom: 0; background: #fff; border-radius: 22px 22px 0 0; z-index: 2; }
+.shx .czs .hd { position: absolute; left: 149px; top: 12px; width: 105px; height: 5px; border-radius: 3px; background: #ccc; }
+.shx .czs .tt { position: absolute; left: 25px; top: 40px; font-size: 18px; font-weight: 700; line-height: 1.3; }
+.shx .czs .x { position: absolute; left: 353px; top: 43px; width: 19px; height: 19px; }
+.shx .czbs { position: absolute; left: 27px; top: 78px; display: flex; gap: 9px; }
+.shx .czb { height: 38px; padding: 0 15px; border-radius: 19px; background: #f3f3f3; color: #222; font: 600 13px/38px 'Pretendard', sans-serif; letter-spacing: -0.26px; white-space: nowrap; transition: background .2s, color .2s; }
+.shx .czb.on { background: #111; color: #fff; }
+.shx button.czb:not(.on):hover { background: #e6e6e6; }
+.shx .czg { position: absolute; left: 27px; top: 134px; width: 348px; display: grid; grid-template-columns: repeat(3, 106px); column-gap: 15px; row-gap: 9px; }
+.shx .czt { position: relative; display: block; width: 106px; height: 107px; border-radius: 9px; background: #fff; box-shadow: 0 1px 6px rgba(0, 0, 0, .08); overflow: hidden; text-align: center; transition: box-shadow .2s, transform .2s; }
+.shx .czt::after { content: ''; position: absolute; inset: 0; border-radius: inherit; border: 1.5px solid transparent; transition: border-color .2s; pointer-events: none; }
+.shx .czt.on::after { border-color: #ff6a00; }
+.shx .czt .im { position: absolute; left: 0; top: 0; width: 106px; height: 86px; display: grid; place-items: center; overflow: hidden; }
+.shx [data-pane="bg"] .czt .im img { width: 100%; height: 100%; object-fit: cover; }
+.shx [data-pane="prop"] .czt .im img { max-width: 58px; max-height: 58px; }
+.shx [data-pane="prop"] .czt[data-prop="none"] .im img { max-width: 40px; opacity: .75; }
+.shx [data-pane="prop"] .czt[data-prop="ticket"] .im img { max-width: 74px; }
+.shx .czt em { position: absolute; left: 0; right: 0; bottom: 4px; font: 500 11px/14px 'Pretendard', sans-serif; font-style: normal; color: #222; letter-spacing: -0.22px; }
+.shx .czt.on em { color: #ff6a00; font-weight: 600; }
+.shx button.czt:hover { transform: translateY(-2px); box-shadow: 0 4px 12px rgba(0, 0, 0, .12); }
+.shx button.czt:focus-visible, .shx button.czb:focus-visible { outline: 2px solid #111; outline-offset: 2px; }
+.shx .czempty { height: 223px; display: grid; place-items: center; }
+.shx .czempty p { font-size: 14px; color: rgba(0, 0, 0, .45); }
+.shx .czs .sv { position: absolute; left: 27px; right: 27px; bottom: 43px; height: 60px; border-radius: 10px; background: #ff6a00; color: #fff; display: grid; place-items: center; font-size: 14px; font-weight: 600; letter-spacing: -0.28px; }
+.shx .czr .czs .sv { bottom: 43px; }
+@media (prefers-reduced-motion: reduce) { .shx .czsc, .shx .czp, .shx .czt, .shx .czb { transition: none; } }

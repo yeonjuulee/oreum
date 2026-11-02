@@ -31,7 +31,7 @@
 
 /* SURVEY: answer the app's four questions on the phone; the screen thumbnails follow (the current one washed orange).
    일반군: 외출 4회 이상, 또는 3개월 미만·3~6개월(6개월 미만), 또는 어려움 없음.  A 일상 회복형: 외출 0~1회 + 대화 0~1회.
-   B 외출 장벽형: 외출 2~3회 + 대화 2회 이상.  그 밖에는 외출 응답으로: 0~1회 → A, 2~3회 → B. */
+   B 외출 준비형: 외출 2~3회 + 대화 2회 이상.  그 밖에는 외출 응답으로: 0~1회 → A, 2~3회 → B. */
 (function () {
   'use strict';
   var form = document.getElementById('sqForm'); if (!form) return;
@@ -48,7 +48,7 @@
   }
   var R = {
     A: { img: 'assets/service/survey-result-a.webp', pill: '챕터 1 · 숨 고르기', h: '지금은,<br>생활 리듬부터 다시 세울 때예요', sub: '거창한 목표 대신 하루에 하나씩,<br>집 안에서 할 수 있는 행동부터 시작해요', type: 'A 일상 회복형 · 첫 추천 서비스', rec: '<em>1-1</em>기본 자기관리', go: '숨 고르기 시작하기', href: '#sv-steps' },
-    B: { img: 'assets/design/pose-run.webp', pill: '챕터 2 · 둘러보기', h: '지금은,<br>집 밖으로 한 걸음 내디딜 때예요', sub: '일상은 이어지고 있으니 1단계는 건너뛰고,<br>집 앞에서 할 수 있는 작은 외출부터 시작해요', type: 'B 외출 장벽형 · 첫 추천 서비스', rec: '<em>2-1</em>집 밖 접촉', go: '둘러보기 시작하기', href: '#sv-steps' },
+    B: { img: 'assets/design/pose-run.webp', pill: '챕터 2 · 둘러보기', h: '지금은,<br>집 밖으로 한 걸음 내디딜 때예요', sub: '일상은 이어지고 있으니 1단계는 건너뛰고,<br>집 앞에서 할 수 있는 작은 외출부터 시작해요', type: 'B 외출 준비형 · 첫 추천 서비스', rec: '<em>2-1</em>집 밖 접촉', go: '둘러보기 시작하기', href: '#sv-steps' },
     G: { img: 'assets/design/pose-cheek.webp', pill: '일반군', g: 1, h: '지금은 오름보다<br>지원 프로그램이 더 잘 맞아요', sub: 'A·B 유형에 해당하지 않아 일반군으로 분류돼요.<br>지역 청년센터의 지원 프로그램을 바로 이용해 보세요', type: '첫 추천 서비스', rec: '서비스 기준 미해당' }
   };
   function mark(k) { thumbs.forEach(function (t, i) { t.classList.toggle('on', i === k); t.disabled = !reachable(i); }); }

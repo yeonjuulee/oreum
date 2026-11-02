@@ -605,6 +605,48 @@
     requestAnimationFrame(pxLoop);
   }
   requestAnimationFrame(pxLoop);
+  /* 두 개의 방 → 1층 방: the camera dives into the window, but the dots keep their size. While #apt is zoomed, a canvas
+     redraws the apartment every frame on the same fixed 6px dot grid, sampling the dot picture (APT) under the camera, so
+     the picture grows and more, not bigger, dots fill the screen. */
+  var aptEl = $('#apt'), aptZoom = document.createElement('canvas');
+  aptZoom.className = 'apt-zoom'; aptZoom.width = 1920; aptZoom.height = 1080; aptZoom.setAttribute('aria-hidden', 'true');
+  aptEl.parentNode.insertBefore(aptZoom, aptEl.nextSibling);
+  var zCtx = aptZoom.getContext('2d'), ZSRC = document.createElement('canvas'), ZS = document.createElement('canvas'), zsCtx, ZR = 1;
+  ZSRC.width = ZS.width = 160; ZSRC.height = ZS.height = 90; zsCtx = ZS.getContext('2d', { willReadFrequently: true });
+  (function () {                                // one pixel per dot: its colour, and its size as alpha
+    APT.forEach(function (q) { if (q.rf > ZR) ZR = q.rf; });
+    var g = ZSRC.getContext('2d'), im = g.createImageData(160, 90), d = im.data;
+    APT.forEach(function (q) {
+      var i = Math.round((q.x - 3) / 6), j = Math.round((q.y - 3) / 6); if (i < 0 || j < 0 || i >= 160 || j >= 90) return;
+      var k = (j * 160 + i) * 4, c = q.c || '#ffffff';
+      d[k] = parseInt(c.slice(1, 3), 16); d[k + 1] = parseInt(c.slice(3, 5), 16); d[k + 2] = parseInt(c.slice(5, 7), 16);
+      d[k + 3] = Math.round(255 * Math.min(1, (q.rf != null ? q.rf : .5) / ZR));
+    });
+    g.putImageData(im, 0, 0);
+  })();
+  var Z0 = { tx: CAM[0].tx, ty: CAM[0].ty }, zKey = '';
+  function drawZoom(z, tx, ty) {
+    var key = z.toFixed(4) + ',' + tx.toFixed(2) + ',' + ty.toFixed(2); if (key === zKey) return; zKey = key;
+    zsCtx.setTransform(1, 0, 0, 1, 0, 0); zsCtx.clearRect(0, 0, 160, 90); zsCtx.imageSmoothingEnabled = true;
+    zsCtx.setTransform(z, 0, 0, z, (tx - Z0.tx) / 6, (ty - Z0.ty) / 6); zsCtx.drawImage(ZSRC, 0, 0);
+    var d = zsCtx.getImageData(0, 0, 160, 90).data, R = OD.AS * .54 * ZR;
+    zCtx.setTransform(2, 0, 0, 2, 0, 0); zCtx.clearRect(0, 0, 960, 540);
+    for (var j = 0; j < 90; j++) for (var i = 0; i < 160; i++) {
+      var k = (j * 160 + i) * 4, a = d[k + 3]; if (a < 6) continue;
+      zCtx.fillStyle = 'rgb(' + d[k] + ',' + d[k + 1] + ',' + d[k + 2] + ')';
+      zCtx.beginPath(); zCtx.arc(3 + 6 * i + Z0.tx, 3 + 6 * j + Z0.ty, R * a / 255, 0, 6.2832); zCtx.fill();
+    }
+  }
+  (function zoomLoop() {
+    if ($('.scene-building').classList.contains('active')) {
+      var cs = getComputedStyle(aptEl), m = /matrix\(([^)]+)\)/.exec(cs.transform), v = m ? m[1].split(',').map(parseFloat) : [1, 0, 0, 1, 0, 0];
+      var on = v[0] > 1.002 && !reduced;
+      if (on) drawZoom(v[0], v[4], v[5]);
+      aptZoom.style.opacity = on ? cs.opacity : 0;
+      aptArt.style.visibility = on ? 'hidden' : '';
+    }
+    requestAnimationFrame(zoomLoop);
+  })();
   function updatePrelude(p) {
     buildingP = p;
     // the dots the hook gathered ARE the apartment picture now: no mosaic transition, the dot art is there from the start
@@ -1435,6 +1477,15 @@
     requestAnimationFrame(s1Loop);
   })(performance.now());
   // the grown oreumi in 숨고르기 is drawn at the same on-screen size as in 계속 오름 (the stages are scaled differently)
+  /* the jump between 숨고르기 and 계속 오름, t 0–1: 기본 → 도약 (살짝 앉음) → 점프 (위로 뜸, 앞으로) → 착지 (살짝 앉음) → 기본.
+     It only moves while airborne (the same split as the SVG oreumi's jump(): crouch to .3, fly to .8, land to 1);
+     k is the pose time for jump() / the hop sprite frames. One jump each way. */
+  var HOP_LIFT = 28;                             // jump height in 계속 오름 stage px
+  function hopShape(t) {
+    t = clamp(t); if (t >= 1) return { u: 1, lift: 0, k: -1 };
+    var fly = seg(t, .3, .8);
+    return { u: fly * fly * (3 - 2 * fly), lift: Math.sin(Math.PI * fly), k: t };
+  }
   function lv2Width() {
     var a = $('.scene-step1 .stage').getBoundingClientRect().width, b = $('.scene-montage .stage').getBoundingClientRect().width;
     var mw = 80;                                 // .m-oru.spr width (계속 오름's sprite size)
@@ -1473,7 +1524,7 @@
 
   function step1Count(p) {
     if (p < 0.06) return 0;
-    if (p < 0.42) return Math.min(4, 1 + Math.floor(seg(p, 0.06, 0.42) * 4));
+    if (p < 0.42) return Math.min(4, 1 + Math.floor(seg(p, 0.06, 0.34) * 4));   // the 4th layer comes right after page 4, so one scroll gives the hop, the phone screen and then the rest
     if (p < 0.58) return 4;
     return Math.min(7, 5 + Math.floor(seg(p, 0.58, 0.78) * 3));
   }
@@ -1560,12 +1611,12 @@
     var exitT = seg(p, 0.965, 1);
     if (exitT > 0 && want === 2) {
       var br = parseFloat(scene.querySelector('.stage').style.getPropertyValue('--br')) || 0;
-      var hops = 4, hp = exitT * hops, f = hp - Math.floor(hp);
-      var ex = lerp(S1.riser + 16, 960 + br + 12, exitT), ey = y - 26 * Math.sin(Math.PI * f) * (exitT < 1 ? 1 : 0);
+      var hs = hopShape(exitT * .8), sw = lv2Width() / 80;            // 도약 → 점프: it flies off the right edge (lands in the next scene), same size on screen as 계속 오름's
+      var ex = lerp(S1.riser + 16, lerp(S1.riser + 16, 960 + br + 12, .55), hs.u), ey = y - HOP_LIFT * sw * hs.lift, f = hs.k;
       stepOru.style.transition = 'none';
       stepOru.style.left = ex.toFixed(1) + 'px'; stepOru.style.top = ey.toFixed(1) + 'px';
       stepOru.classList.remove('evolve');
-      exitF = exitT < 1 ? f : -1;
+      exitF = exitT < 1 && f >= 0 ? f : -1;
       lastSpot = 'exit';
     } else if (lastSpot === 'exit') {
       exitF = -1;
@@ -1736,9 +1787,9 @@
     });
 
     var pos = climbAt(p);
-    if (pRaw < 0.06) {                           // arriving from 숨고르기: three little hops in from the left edge
-      var et = pRaw / 0.06, hp2 = et * 3, f2 = hp2 - Math.floor(hp2);
-      pos = [lerp(-110, 30, et), 430 - 24 * Math.sin(Math.PI * f2), 1, et < 1 ? f2 : -1];
+    if (pRaw < 0.06) {                           // arriving from 숨고르기: still in the air from the left edge → 착지 (살짝 앉음) → 기본, in from the left edge
+      var hs2 = hopShape(.3 + .7 * pRaw / 0.06);
+      pos = [lerp(-120, 30, hs2.u), 430 - HOP_LIFT * hs2.lift, 1, pRaw < 0.06 ? hs2.k : -1];
     }
     mOru.style.left = pos[0].toFixed(1) + 'px';
     mOru.style.top = pos[1].toFixed(1) + 'px';
@@ -1787,9 +1838,9 @@
   // the door swings open in the dark, then its light floods the room and the programs appear
   function updateDoor(scene, p) {
     $('#bigDoor').style.setProperty('--open', (0.35 + 0.65 * ease(seg(p, 0.05, 0.4))).toFixed(3));
-    var flood = ease(seg(p, 0.42, 0.7));
-    scene.style.setProperty('--flood', flood.toFixed(3));
-    scene.classList.toggle('flooded', flood > 0.5);
+    // the background stays page 1's dark tone through both pages (no light flood any more)
+    scene.style.setProperty('--flood', 0);
+    scene.classList.remove('flooded');
   }
   function updateEpilogue() {}
   $$('[data-share]').forEach(function (b) { b.addEventListener('click', function () {
@@ -1890,7 +1941,7 @@
     if (window.OreumIntro && scene.dataset.scene !== 'intro') window.OreumIntro.p = 1;   // the start screen's star has become the hook's dot
     handlers[scene.dataset.scene](scene, p);
 
-    var onLight = (scene.dataset.scene === 'door' && p > 0.56) || scene.dataset.scene === 'epilogue';
+    var onLight = scene.dataset.scene === 'epilogue';
     topbar.classList.toggle('on-light', onLight);
     topbar.classList.toggle('on-intro', scene.dataset.scene === 'intro');
     ui.classList.toggle('on-light', onLight);

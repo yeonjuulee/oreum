@@ -47,16 +47,48 @@
     });
     return list;
   }
+  // show a tab group's first panel (and its height) for a moment; returns the function that puts the open tab back
+  function firstTab(s) {
+    if (!s.classList.contains('pf-tabsec')) return function () {};
+    var panels = [].slice.call(s.querySelectorAll('[data-panel]')), first = s.querySelector('[role="tab"]');
+    var was = panels.map(function (p) { return p.hidden; }), h = s.style.height;
+    panels.forEach(function (p, i) { p.hidden = i !== 0; });
+    if (first && first.dataset.h) s.style.height = first.dataset.h + 'px';
+    return function () { panels.forEach(function (p, i) { p.hidden = was[i]; }); s.style.height = h; };
+  }
+  var tabKey = '', tabCache = new Map();
+  function forget() { tabKey = ''; }
+  window.addEventListener('resize', forget);
+  window.addEventListener('load', function () { forget(); setTimeout(stops, 300); });   // measure once up front
+  if (document.fonts && document.fonts.ready) document.fonts.ready.then(forget);
   function stops() {
     var y = window.scrollY, under = bar ? bar.getBoundingClientRect().bottom : 0, room = window.innerHeight - under;
     var max = document.documentElement.scrollHeight - window.innerHeight, out = { at: [], free: [] };
     var gap = Math.max(16, room * 0.03);   // what is kept clear under the top bar and above the window's bottom edge
-    var all = [], list = secs.map(function (s) {
+    var all = [], key = window.innerWidth + 'x' + window.innerHeight + '@' + (window.devicePixelRatio || 1);
+    if (key !== tabKey) { tabKey = key; tabCache = new Map(); }
+    var list = secs.map(function (s) {
       var r = s.getBoundingClientRect(), t = getComputedStyle(s).transform;
       // the reveal (js/design.js) slides a section up from 56px below; measure where it rests, not where it is now
       var lift = t && t !== 'none' ? new DOMMatrix(t).m42 * (r.height / s.offsetHeight) : 0;
-      var bl = blocks(s, r.height, 0, []).map(function (p) { return [p[0] + y - lift, p[1] + y - lift]; });
-      if (!bl.length) bl = [[r.top + y - lift, r.bottom + y - lift]];
+      var top = r.top + y - lift, bl;
+      if (s.classList.contains('pf-tabsec')) {
+        // a tab group is always measured with its first tab open, so picking another tab never moves its stop:
+        // the title, the text and the tabs stay where the first tab put them. The swap costs a layout, so it is done
+        // once per window size and kept (relative to the section's top) instead of on every step
+        var rel = tabCache.get(s);
+        if (!rel) {
+          var undo = firstTab(s), rr = s.getBoundingClientRect();
+          rel = blocks(s, rr.height, 0, []).map(function (p) { return [p[0] - rr.top, p[1] - rr.top]; });
+          if (!rel.length) rel = [[0, rr.height]];
+          undo();
+          tabCache.set(s, rel);
+        }
+        bl = rel.map(function (p) { return [p[0] + top, p[1] + top]; });
+      } else {
+        bl = blocks(s, r.height, 0, []).map(function (p) { return [p[0] + y - lift, p[1] + y - lift]; });
+        if (!bl.length) bl = [[top, r.bottom + y - lift]];
+      }
       all = all.concat(bl);
       return bl;
     });
@@ -136,6 +168,11 @@
     if (busy) { if (Math.abs(window.scrollY - goal) < 1) settle(); return; }
     clearTimeout(idle); idle = setTimeout(snap, 200);
   }, { passive: true });
-  window.addEventListener('pointerdown', function () { down = true; });
-  window.addEventListener('pointerup', function () { down = false; clearTimeout(idle); idle = setTimeout(snap, 200); });
+  // a press-and-release that scrolled nothing (a click on a tab, say) leaves the page where it is
+  var pressY = 0;
+  window.addEventListener('pointerdown', function () { down = true; pressY = window.scrollY; });
+  window.addEventListener('pointerup', function () {
+    down = false; clearTimeout(idle);
+    if (Math.abs(window.scrollY - pressY) > 1) idle = setTimeout(snap, 200);
+  });
 })();
